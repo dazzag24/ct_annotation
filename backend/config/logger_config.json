@@ -1,0 +1,37 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "brief": {
+            "format": "%(asctime)s %(levelname)s: %(message)s",
+            "datefmt": "%H:%M:%S"
+        },
+        "verbose": {
+            "format": "%(asctime)s %(name)s %(levelname)s: %(message)s"
+        }
+    },
+    "handlers": {
+        "stdout_handler": {
+            "class": "logging.StreamHandler",
+            "stream" : "ext://sys.stdout",
+            "level": "INFO",
+            "formatter": "brief"
+        },
+        "file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "demo.log",
+            "encoding": "utf-8",
+            "maxBytes": 1048576,
+            "backupCount": 3,
+            "level": "DEBUG",
+            "formatter": "verbose"
+        }
+    },
+    "loggers": {
+        "server": {
+            "handlers": ["stdout_handler", "file_handler"],
+            "propagate": true,
+            "level": "DEBUG"
+        }
+    }
+}

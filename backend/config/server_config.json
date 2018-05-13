@@ -1,0 +1,5 @@
+{
+    "ct_path": "\\notebooks\\r_kh\\radio_exp\\blosce\\*",
+    "model_path": "\\notebooks\\r_kh\\radio_exp\\e_6_3c_a_t_0\\",
+    "logger_config_path": ".\\backend\\config\\logger_config.json"
+}
