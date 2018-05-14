@@ -1,3 +1,3 @@
-[submodule "lung_cancer"]
-	path = lung_cancer
+[submodule "backend/api/lung_cancer"]
+	path = backend/api/lung_cancer
 	url = https://github.com/analysiscenter/lung_cancer.git
