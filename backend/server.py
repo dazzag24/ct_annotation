@@ -38,7 +38,8 @@ def get_configs():
         "ct_path",
         "model_path",
         "logger_config_path",
-    }
+        "only_selected"}
+
     server_config = get_server_config(args.config, REQUIRED_KEYS)
     logger_config_path = server_config.pop("logger_config_path")
     logger_config = get_logger_config(logger_config_path)
