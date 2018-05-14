@@ -5,6 +5,7 @@ import pandas as pd
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(1, os.path.join(CURRENT_PATH, "lung_cancer"))
 from radio import CTImagesMaskedBatch as CTIMB
 from radio.dataset import FilesIndex, Pipeline, Dataset, V, B
 from radio.dataset.models.tf import TfModel
