@@ -2,14 +2,16 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+import glob
+import tensorflow as tf
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(1, os.path.join(CURRENT_PATH, "lung_cancer"))
 from radio import CTImagesMaskedBatch as CTIMB
-from radio.dataset import FilesIndex, Pipeline, Dataset, V, B
-from radio.dataset.models.tf import TfModel
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+from radio.dataset import FilesIndex, Pipeline, Dataset, V, B, F
+from radio.dataset.models.tf import TFModel
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 # item demonstration
 RENDER_SHAPE = (32, 64, 64)
@@ -18,7 +20,7 @@ RENDER_SHAPE = (32, 64, 64)
 SHAPE = (256, 384, 384)
 SPACING = (1.7, 1., 1.)
 
-RENDER_SPACING = np.array(USPACING_SHAPE) / np.array(RENDER_SHAPE) * np.array(SPACING)
+RENDER_SPACING = np.array(SHAPE) / np.array(RENDER_SHAPE) * np.array(SPACING)
 
 # xip parameters
 XIP_PARAMS = dict(mode='max', depth=6, stride=2, channels=3)
@@ -76,16 +78,16 @@ class CtController:
         # inference pipeline
         config = dict(load=dict(path=model_path),
                       session=dict(config=tf.ConfigProto(allow_soft_placement=True,
-                                                         gpu_options=tf.GPUOptions(visible_device_list='-1'))))
+                                                         gpu_options=tf.GPUOptions(visible_device_list='0'))))
         self.ppl_predict_scan = (Pipeline()
-                                 .init_model('static', TfModel, 'xipnet', config)
+                                 .init_model('static', TFModel, 'xipnet', config)
                                  .load(fmt='blosc') # if scans in blosc alraedy have same spacings
                                  #.unify_spacing(shape=SHAPE, spacing=SPACING, padding=0) # assume the scans are normalized
                                  .init_variables(['predictions', 'nodules_true', 'nodules_predicted'])
                                  .fetch_nodules_from_mask()
                                  .update_variable('nodules_true', B('nodules'))
                                  .predict_model('xipnet', save_to=V('predictions'),
-                                                feed_dict=dict(images=C(CTIMB.xip_component,
+                                                feed_dict=dict(images=F(CTIMB.xip_component,
                                                                         component='images', **XIP_PARAMS)))
                                  .call(CTIMB.unxip_predictions, predictions=V('predictions'), squeeze=True, **XIP_PARAMS,
                                        component='masks')
@@ -112,8 +114,8 @@ class CtController:
         # perform inference
         print('START PREDICTING')
         item_ds = self.build_item_ds(data)
-        predict = (self.ppl_render_scan >> item_ds)
-        _ = (item_ds >> predict).next_batch()
+        predict = item_ds >> self.ppl_predict_scan
+        _ = predict.next_batch()
 
         # nodules in pixel coords
         nodules_true = get_pixel_coords(predict.get_variable('nodules_true'))
