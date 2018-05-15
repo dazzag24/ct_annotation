@@ -11,7 +11,7 @@ sys.path.insert(1, os.path.join(CURRENT_PATH, "lung_cancer"))
 from radio import CTImagesMaskedBatch as CTIMB
 from radio.dataset import FilesIndex, Pipeline, Dataset, V, B, F
 from radio.dataset.models.tf import TFModel
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 
 # item demonstration
 RENDER_SHAPE = (32, 64, 64)
@@ -77,8 +77,10 @@ class CtController:
 
         # inference pipeline
         config = dict(load=dict(path=model_path),
+                      build=False,
                       session=dict(config=tf.ConfigProto(allow_soft_placement=True,
                                                          gpu_options=tf.GPUOptions(visible_device_list='0'))))
+
         self.ppl_predict_scan = (Pipeline()
                                  .init_model('static', TFModel, 'xipnet', config)
                                  .load(fmt='blosc') # if scans in blosc alraedy have same spacings
@@ -108,11 +110,12 @@ class CtController:
         item_ds = self.build_item_ds(data)
         bch = (item_ds >> self.ppl_render_scan).next_batch()
         item_data = dict(image=bch.images.tolist())
+        print("batch:", bch.images.shape)
         return dict(data={**item_data, **data}, meta=meta)
 
     def get_inference(self, data, meta):
         # perform inference
-        print('START PREDICTING')
+        print('Predicting...')
         item_ds = self.build_item_ds(data)
         predict = item_ds >> self.ppl_predict_scan
         _ = predict.next_batch()
@@ -123,6 +126,6 @@ class CtController:
         item_data = dict(nodules_true=nodules_true.tolist(), nodules_predicted=nodules_predicted.tolist())
 
         # update and fetch data dict
-        print('DONE PREDICTING')
+        print('Finished predicting')
         res = dict(data={**item_data, **data}, meta=meta)
         return res
