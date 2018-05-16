@@ -2,7 +2,9 @@ import React from 'react'
 import { Component } from 'react'
 import { Grid, Row, Col, Button, ListGroup, ListGroupItem } from 'react-bootstrap'
 import { ReactBootstrapSlider } from 'react-bootstrap-slider'
-import Toggle from 'react-bootstrap-toggle'
+import Slider from 'rc-slider'
+import 'rc-slider/assets/index.css';
+import Toggle from 'react-toggle'
 import { Icon } from 'react-fa'
 import { inject, observer } from 'mobx-react'
 import { Layer, Stage, Image, Ellipse } from 'react-konva'
@@ -13,11 +15,11 @@ import { Layer, Stage, Image, Ellipse } from 'react-konva'
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = {currentSlice: 0, maskOn: true, nodulesOn: true}
+        this.state = {currentSlice: 0, predictOn: true, nodulesOn: true}
     }
 
-    onSliceChange(event) {
-        this.setState({currentSlice: event.target.value})
+    onSliceChange(value) {
+        this.setState({currentSlice: 31-value})
     }
 
     handleInference() {
@@ -40,72 +42,87 @@ export default class CTItemPage extends Component {
         return canvas2
     }
 
-    handleMaskToggle() {
-        this.setState({maskOn: !this.state.maskOn})
+    handlePredictToggle() {
+        this.setState({predictOn: !this.state.predictOn})
     }
 
     handleNodulesToggle() {
         this.setState({nodulesOn: !this.state.nodulesOn})
     }
 
+    renderNodules(nodules, color, resizeFactor) {
+        let self = this
+        nodules = nodules.map(function(nodule, ix){
+            if ((self.state.currentSlice > nodule[0] - nodule[3] / 2) & (self.state.currentSlice < nodule[0] + nodule[3] / 2)) {
+                const radius_y = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[4]
+                const radius_x = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[5]
+                return <Ellipse key={ix} x={nodule[2] * resizeFactor}
+                                         y={nodule[1] * resizeFactor}
+                                         radius={{x: radius_x * resizeFactor, y: radius_y * resizeFactor}}
+                                         fill={color} opacity={0.4} />
+            } else
+                return null
+        })
+        return nodules
+    }
+
     renderImageViewer(item) {
         const self = this
-        const resizeFactor = 8
+        const resizeFactor = 4
 
         const imageData = this.props.ct_store.getImageSlice(item.id, this.state.currentSlice)
         const scan_image = this.drawImage(imageData, resizeFactor)
-        let mask_image
-        if (item.mask){
-            const maskData = this.props.ct_store.getMaskSlice(item.id, this.state.currentSlice)
-            mask_image = this.drawImage(maskData, resizeFactor)
-        }
-
         const slider_style = { height: scan_image.height }
 
-        let nodules
+        let nodules, nodules_predict
         if (item.nodules){
-            nodules = item.nodules.map(function(nodule, ix){
-                if ((self.state.currentSlice > nodule[0] - nodule[3] / 2) & (self.state.currentSlice < nodule[0] + nodule[3] / 2)) {
-                    const radius_y = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[4]
-                    const radius_x = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[5]
-                    return <Ellipse key={ix} x={nodule[2] * resizeFactor}
-                                             y={nodule[1] * resizeFactor}
-                                             radius={{x: radius_x * resizeFactor, y: radius_y * resizeFactor}}
-                                             fill='green' opacity={0.5} />
-                } else
-                    return null
-            })
+          nodules = this.renderNodules(item.nodules, "red", resizeFactor)
+        }
+        if (item.nodules_predict){
+          nodules_predict = this.renderNodules(item.nodules_predict, "green", resizeFactor)
         }
 
         return (
             <div className="image-viewer">
                 <div className="image-viewer-with-toggles">
-                    <Toggle active={this.state.maskOn} onClick={this.handleMaskToggle.bind(this)} disabled={!item.mask}
-                            onstyle="danger" on={<span className="on">mask</span>} off={<span className="off">mask</span>} />
-                    <Toggle active={this.state.nodulesOn} onClick={this.handleNodulesToggle.bind(this)} disabled={!item.nodules}
-                            onstyle="success" on={<span className="on">nodules</span>} off={<span className="off">nodules</span>} />
+                    <label className="toggle nodules">
+                        <Toggle className="nodules"
+                                defaultChecked={this.state.nodulesOn}
+                                onChange={this.handleNodulesToggle.bind(this)}
+                                disabled={!item.nodules} />
+                        <span>Nodules</span>
+                    </label>
+                    <label className="toggle predict">
+                        <Toggle className="predict"
+                                defaultChecked={this.state.predictOn}
+                                onChange={this.handlePredictToggle.bind(this)}
+                                disabled={!item.nodules_predict} />
+                        <span>Predict</span>
+                    </label>
+
                     <Stage width={scan_image.width} height={scan_image.height}>
                         <Layer><Image image={scan_image} /></Layer>
-                        { this.state.maskOn & (item.mask !== null) ? <Layer><Image image={mask_image} /></Layer> : null}
-                        { this.state.nodulesOn & (item.nodules !== null) ? <Layer>{nodules}</Layer> : null}
+                        { this.state.nodulesOn & (nodules !== null) ? <Layer>{nodules}</Layer> : null}
+                        { this.state.predictOn & (nodules_predict !== null) ?  <Layer>{nodules_predict}</Layer> : null}
                     </Stage>
                 </div>
                 <div style={slider_style}>
-                    <ReactBootstrapSlider value={this.state.currentSlice} change={this.onSliceChange.bind(this)} min={0} max={31} orientation="vertical" />
+                    <Slider className="slider" value={31-this.state.currentSlice} min={0} max={31} vertical={true}
+                            onChange={this.onSliceChange.bind(this)} />
                 </div>
             </div>
         )
     }
 
-    handleNoduleClick(item, nodule_no) {
-        this.setState({currentSlice: item.nodules[nodule_no][0]})
+    handleNoduleClick(nodules, nodule_no) {
+        this.setState({currentSlice: nodules[nodule_no][0]})
     }
 
-    renderNodulesList(item) {
+    renderNodulesList(nodules) {
         return (
             <ListGroup>
-                { item.nodules.map( (nodule, ix) =>
-                   <ListGroupItem key={ix} onClick={this.handleNoduleClick.bind(this, item, ix)}>Nodule [{nodule.join(', ')}]</ListGroupItem>)}
+                { nodules.map( (nodule, ix) =>
+                   <ListGroupItem key={ix} onClick={this.handleNoduleClick.bind(this, nodules, ix)}>Nodule [{nodule.slice(0, 4).join(', ')}]</ListGroupItem>)}
             </ListGroup>
         )
     }
@@ -119,7 +136,7 @@ export default class CTItemPage extends Component {
     renderPage(item) {
         return (
             <Row>
-            <Col xs={12} sm={8} lg={7} >
+            <Col xs={12} sm={8} lg={6} >
                 { (item.image) ?
                   this.renderImageViewer(item)
                   :
@@ -127,13 +144,20 @@ export default class CTItemPage extends Component {
                 }
             </Col>
             { item.nodules ?
-                <Col xs={12} sm={4} className="nodules">
-                    <h3>Confirmed nodules</h3>
-                    { this.renderNodulesList(item) }
+                <Col xs={12} sm={2} className="nodules">
+                    <h3>Nodules</h3>
+                    { this.renderNodulesList(item.nodules) }
                 </Col>
               : null
             }
-            { item.mask ? null :
+            { item.nodules_predict ?
+                <Col xs={12} sm={2} className="nodules">
+                    <h3>Predict</h3>
+                    { this.renderNodulesList(item.nodules_predict) }
+                </Col>
+              : null
+            }
+            { item.nodules_predict ? null :
                 <Button bsStyle="success" className="get-inference" onClick={this.handleInference.bind(this)}>
                     { item.waitingInference ?
                         <Icon name="spinner" spin />

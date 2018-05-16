@@ -111,26 +111,35 @@ body {
 	display: flex;
 }
 
-.page.item .image-viewer .btn.toggle {
+.page.item .image-viewer label.toggle {
 	margin: 0.2rem 0.5rem;
 }
-
-.page.item .image-viewer div.btn.toggle:nth-child(1) {
-	margin-left: 0;
+.page.item .image-viewer label.toggle span {
+	margin-left: 0.1rem;
 }
 
-.page.item .image-viewer .btn.toggle .off {
-	text-decoration: line-through;
+.nodules.react-toggle--checked .react-toggle-track {
+  background-color: #990000;
 }
+label.nodules {
+  color: #990000;
+}
+.predict.react-toggle--checked .react-toggle-track {
+  background-color: #009900;
+}
+label.predict {
+  color: #009900;
+}
+
 
 .page.item .image-viewer .image-viewer-with-slider {
 	display: flex;
 }
 
 .page.item .image-viewer .slider {
-	height: 97%;
+	height: 98%;
 	margin-left: 0.2rem;
-	margin-top: 2.5rem;
+	margin-top: 1.6rem;
 }
 
 .page.item .image-viewer .slider .slider-track {

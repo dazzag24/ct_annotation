@@ -45,7 +45,7 @@ export default class CT_Store {
     onGotInference(data, meta){
         let item = this.items.get(data.id)
         item.nodules = data.nodules_true
-        item.nodules_predicted = data.nodules_predicted
+        item.nodules_predict = data.nodules_predicted
         item.waitingInference = false
     }
 
