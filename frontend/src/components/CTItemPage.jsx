@@ -107,7 +107,7 @@ export default class CTItemPage extends Component {
                     </Stage>
                 </div>
                 <div style={slider_style}>
-                    <Slider className="slider" value={63-this.state.currentSlice} min={0} max={31} vertical={true}
+                    <Slider className="slider" value={63-this.state.currentSlice} min={0} max={63} vertical={true}
                             onChange={this.onSliceChange.bind(this)} />
                 </div>
             </div>
