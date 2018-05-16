@@ -25,12 +25,12 @@ RENDER_SPACING = np.array(SHAPE) / np.array(RENDER_SHAPE) * np.array(SPACING)
 # xip parameters
 XIP_PARAMS = dict(mode='max', depth=6, stride=2, channels=3)
 
-def get_pixel_coords(nodules):
+def get_pixel_coords(nodules, factor=1):
     """ Get nodules info in pixel coords from nodules recarray.
     """
     coords = (nodules.nodule_center - nodules.origin) / nodules.spacing
     diams = np.ceil(nodules.nodule_size / nodules.spacing)
-    nodules = np.rint(np.hstack([coords, diams])).astype(np.int)
+    nodules = np.rint(np.hstack([coords, diams]) * factor).astype(np.int)
     return nodules
 
 def get_selected_lunaixs():
@@ -118,11 +118,12 @@ class CtController:
         print('Predicting...')
         item_ds = self.build_item_ds(data)
         predict = item_ds >> self.ppl_predict_scan
-        _ = predict.next_batch()
+        batch = predict.next_batch()
 
         # nodules in pixel coords
-        nodules_true = get_pixel_coords(predict.get_variable('nodules_true'))
-        nodules_predicted = get_pixel_coords(predict.get_variable('nodules_predicted'))
+        f = np.tile(RENDER_SHAPE, 2) / np.tile(batch.get(0, 'images').shape, 2)
+        nodules_true = get_pixel_coords(predict.get_variable('nodules_true'), f)
+        nodules_predicted = get_pixel_coords(predict.get_variable('nodules_predicted'), f)
         item_data = dict(nodules_true=nodules_true.tolist(), nodules_predicted=nodules_predicted.tolist())
 
         # update and fetch data dict
