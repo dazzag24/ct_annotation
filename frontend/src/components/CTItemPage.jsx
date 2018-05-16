@@ -19,7 +19,7 @@ export default class CTItemPage extends Component {
     }
 
     onSliceChange(value) {
-        this.setState({currentSlice: 31-value})
+        this.setState({currentSlice: 63-value})
     }
 
     handleInference() {
@@ -52,7 +52,7 @@ export default class CTItemPage extends Component {
 
     renderNodules(nodules, color, resizeFactor) {
         let self = this
-        nodules = nodules.map(function(nodule, ix){
+        let nodules_shown = nodules.map(function(nodule, ix){
             if ((self.state.currentSlice > nodule[0] - nodule[3] / 2) & (self.state.currentSlice < nodule[0] + nodule[3] / 2)) {
                 const radius_y = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[4]
                 const radius_x = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[5]
@@ -63,7 +63,7 @@ export default class CTItemPage extends Component {
             } else
                 return null
         })
-        return nodules
+        return nodules_shown
     }
 
     renderImageViewer(item) {
@@ -76,10 +76,10 @@ export default class CTItemPage extends Component {
 
         let nodules, nodules_predict
         if (item.nodules){
-          nodules = this.renderNodules(item.nodules, "red", resizeFactor)
+            nodules = this.renderNodules(item.nodules, "red", resizeFactor)
         }
         if (item.nodules_predict){
-          nodules_predict = this.renderNodules(item.nodules_predict, "green", resizeFactor)
+            nodules_predict = this.renderNodules(item.nodules_predict, "green", resizeFactor)
         }
 
         return (
@@ -107,7 +107,7 @@ export default class CTItemPage extends Component {
                     </Stage>
                 </div>
                 <div style={slider_style}>
-                    <Slider className="slider" value={31-this.state.currentSlice} min={0} max={31} vertical={true}
+                    <Slider className="slider" value={63-this.state.currentSlice} min={0} max={31} vertical={true}
                             onChange={this.onSliceChange.bind(this)} />
                 </div>
             </div>
@@ -122,7 +122,7 @@ export default class CTItemPage extends Component {
         return (
             <ListGroup>
                 { nodules.map( (nodule, ix) =>
-                   <ListGroupItem key={ix} onClick={this.handleNoduleClick.bind(this, nodules, ix)}>Nodule [{nodule.slice(0, 4).join(', ')}]</ListGroupItem>)}
+                   <ListGroupItem key={ix} onClick={this.handleNoduleClick.bind(this, nodules, ix)}>[{nodule.slice(0, 4).join(', ')}]</ListGroupItem>)}
             </ListGroup>
         )
     }
