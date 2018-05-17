@@ -5,62 +5,12 @@ body {
     line-height: 1;
     font-family: 'Roboto', sans-serif;
     font-size: 4vmin;
+    font-weight: 300;
 }
 
-.main-menu {
-	margin: 0;
-	padding-top: 0;
-	background: #337ab7;
-	font-size: 0.75rem;
-	border: 0;
-	min-height: 2rem;
-	padding-left: 0.3rem;
-	border-radius: 0;
-
-}
-.main-menu .container {
-	margin-left: 0;
-	padding: 0;
-}
-
-.main-menu a {
-	display: block;
-	float: left;
-	height: 2rem;
-	padding: 0.5rem 0.75rem;
-	margin: 0;
-	color: #ffffff;
-	text-decoration: none;
-	font-family: 'Roboto Condensed', sans-serif;
-	font-weight: 300;
-}
-.main-menu a:hover {
-	text-decoration: none;
-	color: #337ab7;
-	background: #eeeeee;
-}
-.main-menu a .fa {
-	margin-right: 0.2rem;
-}
-
-.main-menu a.selected {
-	background: #ffffff;
-	color: #337ab7;
-	font-weight: 700;
-}
 
 .page {
 	padding-top: 0.5rem;
-}
-
-.page.main {
-	padding-top: 1rem;
-}
-.page.main .row {
-    text-align: center;
-}
-.page.main .fa.big {
-    font-size: 10rem;
 }
 
 .page.item {
@@ -104,6 +54,7 @@ body {
 .page.item h2 {
 	font-size: 1rem;
 	margin-top: 0.5rem;
+  margin-left: 0.6rem;
 }
 
 .page.item .image-viewer {
@@ -174,8 +125,14 @@ label.predict {
 	font-size: 3rem;
 }
 
+.page.ct.item .nodules {
+    text-align: center;
+}
+
 .page.ct.item .nodules h3 {
-	margin-top: 0.2rem;
+  font-size: 1rem;
+  font-weight: 300;
+  margin-top: 0.2rem;
 }
 
 .page.ct.item .nodules .list-group {
@@ -191,67 +148,4 @@ label.predict {
 
 .page.ct.item .nodules .list-group-item:hover {
 	background: #eeeeee;
-}
-
-.page.ecg.item .heart {
-	text-align: center;
-	margin-top: -2rem;
-	margin-right: 15px;
-	font-size: 0.75rem;
-	font-weight: 100;
-}
-
-.page.ecg.item .heart h3 {
-	font-size: 0.75rem;
-	font-weight: 100;
-}
-
-.page.ecg.item #plot .xtitle {
-	font-family: "Roboto Condensed", sans-serif;
-	font-size: 0.3rem;
-	font-weight: 100;
-}
-
-.page.ecg.item .heart-rate {
-	color: #dd3333;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
-}
-
-.page.ecg.item .heart-rate .fa {
-	font-size: 2rem;
-	margin-right: 0.2rem;
-}
-
-.page.ecg.item .heart-rate .fa + span {
-	font-size: 1rem;
-}
-
-.CircularProgressbar {
-  /*
-   * This fixes an issue where the CircularProgressbar svg has
-   * 0 width inside a "display: flex" container, and thus not visible.
-   *
-   * If you're not using "display: flex", you can remove this style.
-   */
-  width: 75%;
-}
-
-.CircularProgressbar .CircularProgressbar-path {
-  stroke: #3e98c7;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.5s ease 0s;
-}
-
-.CircularProgressbar .CircularProgressbar-trail {
-  stroke: #d6d6d6;
-}
-
-.CircularProgressbar .CircularProgressbar-text {
-  fill: #3e98c7;
-  font-size: 0.9rem;
-  dominant-baseline: middle;
-  text-anchor: middle;
 }

@@ -82,7 +82,6 @@ export default class CT_Store {
         const end = (slice_no + 1) * imageLen
         const slice = image.slice(start, end)
         const bitmapImage = new Uint8ClampedArray(imageLen * 4)
-        console.log(shape[2], shape[1], slice_no, bitmapImage.length)
 
         let colorCoef
         switch (color){
@@ -106,7 +105,6 @@ export default class CT_Store {
                     bitmapImage[pos + 3] = 255
             }
         }
-        console.log(bitmapImage.length, shape[2], shape[1])
         return new ImageData(bitmapImage, shape[2], shape[1])
     }
 
