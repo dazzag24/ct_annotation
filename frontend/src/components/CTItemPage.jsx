@@ -1,7 +1,6 @@
 import React from 'react'
 import { Component } from 'react'
 import { Grid, Row, Col, Button, ListGroup, ListGroupItem } from 'react-bootstrap'
-import { ReactBootstrapSlider } from 'react-bootstrap-slider'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css';
 import Toggle from 'react-toggle'
@@ -18,8 +17,8 @@ export default class CTItemPage extends Component {
         this.state = {currentSlice: 0, predictOn: true, nodulesOn: true}
     }
 
-    onSliceChange(value) {
-        this.setState({currentSlice: 63-value})
+    onSliceChange(num_slices, value) {
+        this.setState({currentSlice: num_slices - value - 1})
     }
 
     handleInference() {
@@ -68,7 +67,7 @@ export default class CTItemPage extends Component {
 
     renderImageViewer(item) {
         const self = this
-        const resizeFactor = 4
+        const resizeFactor = 256 / item.shape[0]
 
         const imageData = this.props.ct_store.getImageSlice(item.id, this.state.currentSlice)
         const scan_image = this.drawImage(imageData, resizeFactor)
@@ -107,8 +106,8 @@ export default class CTItemPage extends Component {
                     </Stage>
                 </div>
                 <div style={slider_style}>
-                    <Slider className="slider" value={63-this.state.currentSlice} min={0} max={63} vertical={true}
-                            onChange={this.onSliceChange.bind(this)} />
+                    <Slider className="slider" value={item.shape[0]-this.state.currentSlice-1} min={0} max={item.shape[0]-1} vertical={true}
+                            onChange={this.onSliceChange.bind(this, item.shape[0])} />
                 </div>
             </div>
         )

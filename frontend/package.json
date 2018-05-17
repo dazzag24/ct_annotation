@@ -15,15 +15,16 @@
     "konva": "^2.0.3",
     "mobx": "^4.2.1",
     "mobx-react": "^5.1.2",
+    "pako": "^1.0.6",
     "path": "^0.12.7",
+    "rc-slider": "^8.6.1",
     "react": "^16.3.2",
     "react-bootstrap": "^0.32.1",
-    "react-bootstrap-slider": "^2.1.5",
-    "react-bootstrap-toggle": "^2.3.1",
     "react-dom": "^16.3.2",
     "react-fa": "^5.0.0",
     "react-konva": "^1.7.2",
     "react-router-dom": "^4.2.2",
+    "react-toggle": "^4.0.2",
     "socket.io-client": "^2.1.0"
   },
   "devDependencies": {

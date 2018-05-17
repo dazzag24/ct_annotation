@@ -1,10 +1,11 @@
 import { observable, autorun, computed, action, extendObservable } from 'mobx'
+import pako from 'pako'
 
 import { API_Events } from './const'
 
 
 const item_template = {
-    id: null, name: null, image:null, nodules_true:null,  nodules_predicted:null,
+    id: null, name: null, image:null, shape:null, nodules_true:null,  nodules_predicted:null,
     waitingData: false, waitingInference: false
 }
 
@@ -37,7 +38,8 @@ export default class CT_Store {
     @action
     onGotItemData(data, meta){
       let item = this.items.get(data.id)
-      item.image = data.image
+      item.image = pako.inflate(data.image)
+      item.shape = data.shape
       item.waitingData = false
     }
 
@@ -74,9 +76,13 @@ export default class CT_Store {
         return item
     }
 
-    makeImage(imageData, color='grey', alpha=1){
-        const sourceImage = imageData.peek()
-        const bitmapImage = new Uint8ClampedArray(sourceImage.length * sourceImage[0].length * 4)
+    makeImage(image, shape, slice_no, color='grey', alpha=1){
+        const imageLen = shape[1] * shape[2]
+        const start = slice_no * imageLen
+        const end = (slice_no + 1) * imageLen
+        const slice = image.slice(start, end)
+        const bitmapImage = new Uint8ClampedArray(imageLen * 4)
+        console.log(shape[2], shape[1], slice_no, bitmapImage.length)
 
         let colorCoef
         switch (color){
@@ -87,24 +93,26 @@ export default class CT_Store {
             default: colorCoef = color
         }
 
-        for(let i=0; i< sourceImage.length; i++){
-            for(let j=0; j< sourceImage[i].length; j++){
-                const pos = i*sourceImage[i].length*4 + j*4
-                bitmapImage[pos + 0] = sourceImage[i][j] * colorCoef[0]
-                bitmapImage[pos + 1] = sourceImage[i][j] * colorCoef[1]
-                bitmapImage[pos + 2] = sourceImage[i][j] * colorCoef[2]
+        for(let i=0; i < shape[1]; i++){
+            for(let j=0; j < shape[2]; j++){
+                const pos = i*shape[1]*4 + j*4
+                const from = i*shape[1] + j
+                bitmapImage[pos + 0] = slice[from] * colorCoef[0]
+                bitmapImage[pos + 1] = slice[from] * colorCoef[1]
+                bitmapImage[pos + 2] = slice[from] * colorCoef[2]
                 if(alpha < 1)
-                    bitmapImage[pos + 3] = (sourceImage[i][j] > 0) ? Math.ceil(alpha * 255) : 0
+                    bitmapImage[pos + 3] = (slice[from] > 0) ? Math.ceil(alpha * 255) : 0
                 else
                     bitmapImage[pos + 3] = 255
             }
         }
-        return new ImageData(bitmapImage, sourceImage[0].length, sourceImage.length)
+        console.log(bitmapImage.length, shape[2], shape[1])
+        return new ImageData(bitmapImage, shape[2], shape[1])
     }
 
     getImageSlice(id, slice_no) {
-        const image = this.items.get(id).image[slice_no]
-        return this.makeImage(image, 'grey', 1)
+        const item = this.items.get(id)
+        return this.makeImage(item.image, item.shape, slice_no, 'grey', 1)
     }
 
 }

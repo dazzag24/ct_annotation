@@ -1,5 +1,8 @@
 import os
 import sys
+import gzip
+from time import time
+
 import numpy as np
 import pandas as pd
 import glob
@@ -14,7 +17,7 @@ from radio.dataset.models.tf import TFModel
 
 
 # item demonstration
-RENDER_SHAPE = (32, 64, 64)
+RENDER_SHAPE = (128, 256, 256)
 
 # inference
 SHAPE = (256, 384, 384)
@@ -108,9 +111,9 @@ class CtController:
 
     def get_item_data(self, data, meta):
         item_ds = self.build_item_ds(data)
-        bch = (item_ds >> self.ppl_render_scan).next_batch()
-        item_data = dict(image=bch.images.tolist())
-        print("batch:", bch.images.shape)
+        batch = (item_ds >> self.ppl_render_scan).next_batch()
+        image = gzip.compress(batch.images.astype(np.uint8))
+        item_data = dict(image=image, shape=batch.images.shape)
         return dict(data={**item_data, **data}, meta=meta)
 
     def get_inference(self, data, meta):
@@ -124,6 +127,7 @@ class CtController:
         f = np.tile(RENDER_SHAPE, 2) / np.tile(batch.get(0, 'images').shape, 2)
         nodules_true = get_pixel_coords(predict.get_variable('nodules_true'), f)
         nodules_predicted = get_pixel_coords(predict.get_variable('nodules_predicted'), f)
+
         item_data = dict(nodules_true=nodules_true.tolist(), nodules_predicted=nodules_predicted.tolist())
 
         # update and fetch data dict
