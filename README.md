@@ -1,1 +1,1 @@
-# ct_demo
+# 3D CT Annotation tool
