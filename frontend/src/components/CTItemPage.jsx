@@ -14,7 +14,7 @@ import { Layer, Stage, Image, Ellipse } from 'react-konva'
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = {currentSlice: 0, predictOn: true, nodulesOn: true}
+        this.state = {currentSlice: 0, nodulesOn: true}
     }
 
     onSliceChange(num_slices, value) {
@@ -39,10 +39,6 @@ export default class CTItemPage extends Component {
         const ctx2 = canvas2.getContext('2d');
         ctx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height)
         return canvas2
-    }
-
-    handlePredictToggle() {
-        this.setState({predictOn: !this.state.predictOn})
     }
 
     handleNodulesToggle() {
@@ -73,36 +69,17 @@ export default class CTItemPage extends Component {
         const scan_image = this.drawImage(imageData, resizeFactor)
         const slider_style = { height: scan_image.height }
 
-        let nodules, nodules_predict
+        let nodules
         if (item.nodules){
             nodules = this.renderNodules(item.nodules, "red", resizeFactor)
-        }
-        if (item.nodules_predict){
-            nodules_predict = this.renderNodules(item.nodules_predict, "green", resizeFactor)
         }
 
         return (
             <div className="image-viewer">
                 <div className="image-viewer-with-toggles">
-                    <label className="toggle nodules">
-                        <Toggle className="nodules"
-                                defaultChecked={this.state.nodulesOn}
-                                onChange={this.handleNodulesToggle.bind(this)}
-                                disabled={!item.nodules} />
-                        <span>Nodules</span>
-                    </label>
-                    <label className="toggle predict">
-                        <Toggle className="predict"
-                                defaultChecked={this.state.predictOn}
-                                onChange={this.handlePredictToggle.bind(this)}
-                                disabled={!item.nodules_predict} />
-                        <span>Predict</span>
-                    </label>
-
                     <Stage width={scan_image.width} height={scan_image.height}>
                         <Layer><Image image={scan_image} /></Layer>
                         { this.state.nodulesOn & (nodules !== null) ? <Layer>{nodules}</Layer> : null}
-                        { this.state.predictOn & (nodules_predict !== null) ?  <Layer>{nodules_predict}</Layer> : null}
                     </Stage>
                 </div>
                 <div style={slider_style}>
@@ -148,22 +125,6 @@ export default class CTItemPage extends Component {
                     { this.renderNodulesList(item.nodules) }
                 </Col>
               : null
-            }
-            { item.nodules_predict ?
-                <Col xs={12} sm={2} className="nodules">
-                    <h3>Predict</h3>
-                    { this.renderNodulesList(item.nodules_predict) }
-                </Col>
-              : null
-            }
-            { item.nodules_predict ? null :
-                <Button bsStyle="success" className="get-inference" onClick={this.handleInference.bind(this)}>
-                    { item.waitingInference ?
-                        <Icon name="spinner" spin />
-                      :
-                        <span><Icon name="check-circle-o" /><span>Click to predict</span></span>
-                    }
-                </Button>
             }
             </Row>
         )
