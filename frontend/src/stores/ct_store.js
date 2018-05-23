@@ -76,12 +76,18 @@ export default class CT_Store {
         return item
     }
 
-    makeImage(image, shape, slice_no, color='grey', alpha=1){
-        const imageLen = shape[1] * shape[2]
-        const start = slice_no * imageLen
-        const end = (slice_no + 1) * imageLen
-        const slice = image.slice(start, end)
-        const bitmapImage = new Uint8ClampedArray(imageLen * 4)
+    makeImage(image, shape, slice_no, projection=0, color='grey', alpha=1){
+        let axes
+        switch (projection){
+            case 0 : axes = [0, 1, 2]; break;
+            case 1 : axes = [1, 0, 2]; break;
+            case 2 : axes = [2, 0, 1]; break;
+        }
+        const width = shape[axes[2]]
+        const height = shape[axes[1]]
+        const bitmapImage = new Uint8ClampedArray(height * width * 4)
+
+        //console.log(shape[0], shape[1], shape[2], axes, width, height)
 
         let colorCoef
         switch (color){
@@ -92,25 +98,31 @@ export default class CT_Store {
             default: colorCoef = color
         }
 
-        for(let i=0; i < shape[1]; i++){
-            for(let j=0; j < shape[2]; j++){
-                const pos = i*shape[1]*4 + j*4
-                const from = i*shape[1] + j
-                bitmapImage[pos + 0] = slice[from] * colorCoef[0]
-                bitmapImage[pos + 1] = slice[from] * colorCoef[1]
-                bitmapImage[pos + 2] = slice[from] * colorCoef[2]
+        for(let i=0; i < height; i++){
+            for(let j=0; j < width; j++){
+                const pos = (i * width + j) * 4
+                let from
+                switch (projection){
+                    case 0 : from = slice_no * shape[1] * shape[2] + i * shape[1] + j; break;
+                    case 1 : from = i * shape[1] * shape[2] + slice_no * shape[1] + j; break;
+                    case 2 : from = i * shape[1] * shape[2] + j * shape[1] + slice_no; break;
+                }
+                //console.log(slice_no, i, j, pos, from)
+                bitmapImage[pos + 0] = image[from] * colorCoef[0]
+                bitmapImage[pos + 1] = image[from] * colorCoef[1]
+                bitmapImage[pos + 2] = image[from] * colorCoef[2]
                 if(alpha < 1)
-                    bitmapImage[pos + 3] = (slice[from] > 0) ? Math.ceil(alpha * 255) : 0
+                    bitmapImage[pos + 3] = (image[from] > 0) ? Math.ceil(alpha * 255) : 0
                 else
                     bitmapImage[pos + 3] = 255
             }
         }
-        return new ImageData(bitmapImage, shape[2], shape[1])
+        return new ImageData(bitmapImage, width, height)
     }
 
-    getImageSlice(id, slice_no) {
+    getImageSlice(id, slice_no, projection=0) {
         const item = this.items.get(id)
-        return this.makeImage(item.image, item.shape, slice_no, 'grey', 1)
+        return this.makeImage(item.image, item.shape, slice_no, projection, 'grey', 1)
     }
 
 }

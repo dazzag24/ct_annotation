@@ -8,38 +8,25 @@ import { Icon } from 'react-fa'
 import { inject, observer } from 'mobx-react'
 import { Layer, Stage, Image, Ellipse } from 'react-konva'
 
+import CTSliceViewer from './CTSliceViewer.jsx'
+
 
 @inject("ct_store")
 @observer
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = {currentSlice: 0, nodulesOn: true}
+        this.state = {slice: 0, nodulesOn: true}
     }
 
-    onSliceChange(num_slices, value) {
-        this.setState({currentSlice: num_slices - value - 1})
+    onSliceChange(slice) {
+        this.setState({slice: slice})
     }
 
     handleInference() {
         this.props.ct_store.getInference(this.props.match.params.id)
     }
 
-
-    drawImage(image, resizeFactor) {
-        const canvas = document.createElement('canvas')
-        canvas.width = image.width
-        canvas.height = image.height
-        const ctx = canvas.getContext('2d')
-        ctx.putImageData(image, 0, 0)
-
-        const canvas2 = document.createElement('canvas')
-        canvas2.width = canvas.width * resizeFactor
-        canvas2.height = canvas.height * resizeFactor
-        const ctx2 = canvas2.getContext('2d');
-        ctx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height)
-        return canvas2
-    }
 
     handleNodulesToggle() {
         this.setState({nodulesOn: !this.state.nodulesOn})
@@ -61,31 +48,24 @@ export default class CTItemPage extends Component {
         return nodules_shown
     }
 
-    renderImageViewer(item) {
-        const self = this
-        const resizeFactor = 256 / item.shape[0]
-
-        const imageData = this.props.ct_store.getImageSlice(item.id, this.state.currentSlice)
-        const scan_image = this.drawImage(imageData, resizeFactor)
-        const slider_style = { height: scan_image.height }
-
-        let nodules
-        if (item.nodules){
-            nodules = this.renderNodules(item.nodules, "red", resizeFactor)
-        }
+    renderImageViewer(item, projection) {
+        const resizeFactor = 2
+        const maxSlice = item.shape[projection]
+        const image = this.props.ct_store.getImageSlice(item.id, this.state.slice, projection)
 
         return (
-            <div className="image-viewer">
-                <div className="image-viewer-with-toggles">
-                    <Stage width={scan_image.width} height={scan_image.height}>
-                        <Layer><Image image={scan_image} /></Layer>
-                        { this.state.nodulesOn & (nodules !== null) ? <Layer>{nodules}</Layer> : null}
-                    </Stage>
-                </div>
-                <div style={slider_style}>
-                    <Slider className="slider" value={item.shape[0]-this.state.currentSlice-1} min={0} max={item.shape[0]-1} vertical={true}
-                            onChange={this.onSliceChange.bind(this, item.shape[0])} />
-                </div>
+            <CTSliceViewer slice={this.state.slice} maxSlice={maxSlice - 1} vertical={true} reverse={true}
+                           factor={resizeFactor} image={image}
+                           onSliceChange={this.onSliceChange.bind(this)} />
+        )
+    }
+
+    renderAllImageViewers(item) {
+        return (
+            <div>
+                {this.renderImageViewer(item, 0)}
+                {this.renderImageViewer(item, 1)}
+                {this.renderImageViewer(item, 2)}
             </div>
         )
     }
@@ -114,7 +94,7 @@ export default class CTItemPage extends Component {
             <Row>
             <Col xs={12} sm={8} lg={6} >
                 { (item.image) ?
-                  this.renderImageViewer(item)
+                  this.renderAllImageViewers(item)
                   :
                   this.renderImageLoading()
                 }

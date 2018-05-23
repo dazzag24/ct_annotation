@@ -83,24 +83,14 @@ label.predict {
 }
 
 
-.page.item .image-viewer .image-viewer-with-slider {
+.page.item .slice-viewer {
 	display: flex;
 }
 
-.page.item .image-viewer .slider {
+.page.item .slice-viewer .slider {
 	height: 98%;
 	margin-left: 0.2rem;
-	margin-top: 1.6rem;
-}
-
-.page.item .image-viewer .slider .slider-track {
-	width: 0.5rem;
-}
-
-.page.item .image-viewer .slider .slider-handle {
-	width: 0.8rem;
-	height: 0.8rem;
-	margin-left: 0.04rem;
+	margin-top: 0.2rem;
 }
 
 .page.item button.get-inference {
