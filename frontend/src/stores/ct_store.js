@@ -76,18 +76,36 @@ export default class CT_Store {
         return item
     }
 
-    makeImage(image, shape, slice_no, projection=0, color='grey', alpha=1){
-        let axes
-        switch (projection){
-            case 0 : axes = [0, 1, 2]; break;
-            case 1 : axes = [1, 0, 2]; break;
-            case 2 : axes = [2, 0, 1]; break;
-        }
-        const width = shape[axes[2]]
-        const height = shape[axes[1]]
-        const bitmapImage = new Uint8ClampedArray(height * width * 4)
+    getPixel(image, shape, coord, axes, depth=1) {
+        const from = coord[axes[0]] * shape[1] * shape[2] + coord[axes[1]] * shape[2] + coord[axes[2]]
+        let pixel = image[from]
 
-        //console.log(shape[0], shape[1], shape[2], axes, width, height)
+        if(depth > 1){
+            let arr = new Array(depth)
+            let _from
+            for(let i=0; i<depth; i++){
+                if(axes[3] == 0){
+                    _from = from + i * shape[2] * shape[1]
+                } else if(axes[3] == 1){
+                    _from = from + i * shape[2]
+                } else {
+                    _from = from + i
+                }
+                arr[i] = image[_from]
+            }
+            pixel = Math.max.apply(null, arr)
+        }
+        return pixel
+    }
+
+    makeImage(image, shape, slice_no, projection=0, depth=1, color='grey', alpha=1){
+        let axes, width, height
+        switch (projection){
+            case 0 : axes = [2, 1, 0, 0]; width = shape[2]; height = shape[1]; break;
+            case 1 : axes = [1, 2, 0, 1]; width = shape[1]; height = shape[0]; break;
+            case 2 : axes = [1, 0, 2, 2]; width = shape[2]; height = shape[0]; break;
+        }
+        const bitmapImage = new Uint8ClampedArray(height * width * 4)
 
         let colorCoef
         switch (color){
@@ -100,19 +118,15 @@ export default class CT_Store {
 
         for(let i=0; i < height; i++){
             for(let j=0; j < width; j++){
+                const coord = [j, i, slice_no]
+                const pixel = this.getPixel(image, shape, coord, axes, depth)
                 const pos = (i * width + j) * 4
-                let from
-                switch (projection){
-                    case 0 : from = slice_no * shape[1] * shape[2] + i * shape[1] + j; break;
-                    case 1 : from = i * shape[1] * shape[2] + slice_no * shape[1] + j; break;
-                    case 2 : from = i * shape[1] * shape[2] + j * shape[1] + slice_no; break;
-                }
-                //console.log(slice_no, i, j, pos, from)
-                bitmapImage[pos + 0] = image[from] * colorCoef[0]
-                bitmapImage[pos + 1] = image[from] * colorCoef[1]
-                bitmapImage[pos + 2] = image[from] * colorCoef[2]
+
+                bitmapImage[pos + 0] = pixel * colorCoef[0]
+                bitmapImage[pos + 1] = pixel * colorCoef[1]
+                bitmapImage[pos + 2] = pixel * colorCoef[2]
                 if(alpha < 1)
-                    bitmapImage[pos + 3] = (image[from] > 0) ? Math.ceil(alpha * 255) : 0
+                    bitmapImage[pos + 3] = (pixel > 0) ? Math.ceil(alpha * 255) : 0
                 else
                     bitmapImage[pos + 3] = 255
             }
@@ -120,9 +134,9 @@ export default class CT_Store {
         return new ImageData(bitmapImage, width, height)
     }
 
-    getImageSlice(id, slice_no, projection=0) {
+    getImageSlice(id, slice_no, projection=0, depth=3) {
         const item = this.items.get(id)
-        return this.makeImage(item.image, item.shape, slice_no, projection, 'grey', 1)
+        return this.makeImage(item.image, item.shape, slice_no, projection, depth, 'grey', 1)
     }
 
 }
