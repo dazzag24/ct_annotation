@@ -6,13 +6,22 @@ import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css';
 import Toggle from 'react-toggle'
 import { Icon } from 'react-fa'
-import { Layer, Stage, Image, Ellipse } from 'react-konva'
+import { Layer, Stage, Image, Ellipse, Line, Rect } from 'react-konva'
 
 
 export default class CTSliceViewer extends Component {
     constructor(props) {
         super(props)
-        this.state = {slice: this.props.slice, rotation: this.props.rotation, flip: this.props.flip}
+        this.state = {slice: this.props.slice,
+                      rotation: this.props.rotation,
+                      flip: this.props.flip,
+                      x: 0,
+                      y: 0,
+                      width: 0,
+                      height: 0,
+                      color: "green",
+                      down: false
+                     }
     }
 
     componentWillReceiveProps(nextProps){
@@ -68,6 +77,36 @@ export default class CTSliceViewer extends Component {
         return canvas2
     }
 
+    onMouseMove(event) {
+        if (this.state.down) {
+            let currentTargetRect = event.target.getBoundingClientRect()
+            this.setState({
+                width: event.clientX - this.state.x - currentTargetRect.left,
+                height: event.clientY - this.state.y - currentTargetRect.top
+            });
+        }
+    }
+
+    onMouseDown(event) {
+        let currentTargetRect = event.target.getBoundingClientRect()
+        this.setState({
+            x: event.clientX - currentTargetRect.left,
+            y: event.clientY - currentTargetRect.top,
+            height: 0,
+            width: 0,
+            down: true
+        });
+    };
+
+    onMouseUp(event) {
+        let currentTargetRect = event.target.getBoundingClientRect()
+        this.setState({
+            down: false,
+            width: event.clientX - this.state.x - currentTargetRect.left,
+            height: event.clientY - this.state.y - currentTargetRect.top
+        });
+    };
+
     render(item) {
         const viewImage = this.drawImage(this.props.image)
         const sliderPos = this.getSliderPos(this.state.slice)
@@ -98,9 +137,21 @@ export default class CTSliceViewer extends Component {
 
         return (
             <div className="slice-viewer">
-                <div className={image_class}>
+                <div id='block' onMouseDown={this.onMouseDown.bind(this)}
+                                      onMouseUp={this.onMouseUp.bind(this)}
+                                      onMouseMove={this.onMouseMove.bind(this)}>
                     <Stage width={viewImage.width} height={viewImage.height}>
-                        <Layer><Image image={viewImage} /></Layer>
+                        <Layer><Image image={viewImage} className={image_class}/></Layer>
+                        <Layer><Rect
+                            x={this.state.x}
+                            y={this.state.y}
+                            width={this.state.width}
+                            height={this.state.height}
+                            shadowBlur={5}
+                            fill={this.state.color}
+                            opacity={0.3}
+                          />
+                    </Layer>
                     </Stage>
                 </div>
                 <div style={slider_style}>

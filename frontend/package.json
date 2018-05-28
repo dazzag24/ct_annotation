@@ -10,7 +10,10 @@
     "el": "webpack -d && electron ."
   },
   "dependencies": {
+    "@synapsestudios/react-drop-n-crop": "^0.2.0",
     "empty-module": "^0.0.2",
+    "gl-react": "^3.15.0",
+    "gl-react-native": "^3.15.0",
     "jquery": "^3.3.1",
     "konva": "^2.0.3",
     "mobx": "^4.2.1",
@@ -20,10 +23,14 @@
     "rc-slider": "^8.6.1",
     "react": "^16.3.2",
     "react-bootstrap": "^0.32.1",
+    "react-crop": "^4.0.2",
     "react-dom": "^16.3.2",
     "react-fa": "^5.0.0",
+    "react-image-crop": "^4.0.1",
     "react-konva": "^1.7.2",
+    "react-native-image-cropper": "^0.4.5",
     "react-router-dom": "^4.2.2",
+    "react-svg-pan-zoom": "^2.16.1",
     "react-toggle": "^4.0.2",
     "socket.io-client": "^2.1.0"
   },

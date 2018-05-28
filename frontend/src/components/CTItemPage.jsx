@@ -25,6 +25,10 @@ export default class CTItemPage extends Component {
         this.setState({slice: a})
     }
 
+    onCrop(image, x, y, width, height) {
+        this.setState
+    }
+
     handleInference() {
         this.props.ct_store.getInference(this.props.match.params.id)
     }
@@ -70,10 +74,10 @@ export default class CTItemPage extends Component {
                     {this.renderImageViewer(item, 0, 0, false)}
                 </div>
                 <div className='rt'>
-                    {this.renderImageViewer(item, 2, 90, false)}
+                    {this.renderImageViewer(item, 2, 0, false)}
                 </div>
                 <div className='rb'>
-                    {this.renderImageViewer(item, 1, 180, false)}
+                    {this.renderImageViewer(item, 1, 0, false)}
                 </div>
             </div>
         )
