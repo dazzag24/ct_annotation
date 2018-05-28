@@ -139,3 +139,46 @@ label.predict {
 .page.ct.item .nodules .list-group-item:hover {
 	background: #eeeeee;
 }
+
+.lt {
+    position: absolute;
+    height: 600px;
+    width: 600px;
+}
+
+.rt {
+    position: absolute;
+    height: 600px;
+    width: 600px;
+    left: 610px;
+}
+
+.rb {
+    position: absolute;
+    height: 600px;
+    width: 600px;
+    top: 610px;
+}
+
+.rotation90 {
+    transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+}
+
+.rotation180 {
+    transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+}
+
+.rotation270 {
+    transform: rotate(270deg);
+    -webkit-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+}
+
+.flip {
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+}

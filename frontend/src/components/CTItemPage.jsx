@@ -16,11 +16,13 @@ import CTSliceViewer from './CTSliceViewer.jsx'
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = {slice: 0, nodulesOn: true}
+        this.state = {slice: [0, 0, 0], nodulesOn: true}
     }
 
-    onSliceChange(slice) {
-        this.setState({slice: slice})
+    onSliceChange(slice, projection) {
+        let a = this.state.slice
+        a[projection] = slice
+        this.setState({slice: a})
     }
 
     handleInference() {
@@ -48,24 +50,31 @@ export default class CTItemPage extends Component {
         return nodules_shown
     }
 
-    renderImageViewer(item, projection) {
+    renderImageViewer(item, projection, rotation, flip) {
         const resizeFactor = 2
         const maxSlice = item.shape[projection]
-        const image = this.props.ct_store.getImageSlice(item.id, this.state.slice, projection)
+        const image = this.props.ct_store.getImageSlice(item.id, this.state.slice[projection], projection)
+        const spacing = item.spacing
 
         return (
-            <CTSliceViewer slice={this.state.slice} maxSlice={maxSlice - 1} vertical={true} reverse={true}
-                           factor={resizeFactor} image={image}
-                           onSliceChange={this.onSliceChange.bind(this)} />
+            <CTSliceViewer slice={this.state.slice[projection]} maxSlice={maxSlice - 1} vertical={true} reverse={true}
+                           factor={resizeFactor} image={image} projection={projection} spacing={spacing} rotation={rotation}
+                           flip={flip} onSliceChange={this.onSliceChange.bind(this)} />
         )
     }
 
     renderAllImageViewers(item) {
         return (
             <div>
-                {this.renderImageViewer(item, 0)}
-                {this.renderImageViewer(item, 1)}
-                {this.renderImageViewer(item, 2)}
+                <div className='lt'>
+                    {this.renderImageViewer(item, 0, 0, false)}
+                </div>
+                <div className='rt'>
+                    {this.renderImageViewer(item, 2, 90, false)}
+                </div>
+                <div className='rb'>
+                    {this.renderImageViewer(item, 1, 180, false)}
+                </div>
             </div>
         )
     }

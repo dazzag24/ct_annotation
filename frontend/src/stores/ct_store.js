@@ -5,7 +5,7 @@ import { API_Events } from './const'
 
 
 const item_template = {
-    id: null, name: null, image:null, shape:null, nodules_true:null,  nodules_predicted:null,
+    id: null, name: null, image:null, shape:null, spacing:null, nodules_true:null,  nodules_predicted:null,
     waitingData: false, waitingInference: false
 }
 
@@ -40,6 +40,7 @@ export default class CT_Store {
       let item = this.items.get(data.id)
       item.image = pako.inflate(data.image)
       item.shape = data.shape
+      item.spacing = data.spacing
       item.waitingData = false
     }
 
