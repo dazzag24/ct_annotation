@@ -58,7 +58,24 @@ export default class CTSliceViewer extends Component {
                 var aspectRatio = [this.props.spacing[1], this.props.spacing[0]]
                 break
         }
+        aspectRatio[0] = aspectRatio[0]
+        aspectRatio[1] = aspectRatio[1]
         return aspectRatio
+    }
+
+    getShape() {
+        switch (this.props.projection) {
+            case 0:
+                var shape = [this.props.shape[2], this.props.shape[1]]
+                break
+            case 1:
+                var shape = [this.props.shape[2], this.props.shape[0]]
+                break
+            case 2:
+                var shape = [this.props.shape[1], this.props.shape[0]]
+                break
+        }
+        return shape        
     }
 
     drawImage(image) {
@@ -66,46 +83,57 @@ export default class CTSliceViewer extends Component {
         canvas.width = image.width
         canvas.height = image.height
         const ctx = canvas.getContext('2d')
-        const spacing = this.getSpacing()
+        const spacing = this.props.spacing
         ctx.putImageData(image, 0, 0)
 
         const canvas2 = document.createElement('canvas')
-        canvas2.width = canvas.width * this.props.factor * spacing[0]
-        canvas2.height = canvas.height * this.props.factor * spacing[1]
+        const shape = this.props.shape
+        canvas2.width = shape[0] * this.props.factor * spacing[0] //canvas.width * this.props.factor * spacing[0]
+        canvas2.height = shape[1] * this.props.factor * spacing[1] //canvas.height * this.props.factor * spacing[1]
         const ctx2 = canvas2.getContext('2d');
         ctx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height)
+
         return canvas2
     }
 
+    getFactors() {
+        const spacing = this.props.spacing
+        return [this.props.factor * this.props.zoom * spacing[0], this.props.factor * this.props.zoom * spacing[1]]
+    }
+
     onMouseMove(event) {
-        if (this.state.down) {
-            let currentTargetRect = event.target.getBoundingClientRect()
-            this.setState({
-                width: event.clientX - this.state.x - currentTargetRect.left,
-                height: event.clientY - this.state.y - currentTargetRect.top
-            });
-        }
+        let factors = this.getFactors()
+        let currentTargetRect = event.target.getBoundingClientRect()
+        let x = (event.clientX - currentTargetRect.left) / factors[0]
+        let y = (event.clientY - currentTargetRect.top) / factors[1]
+        this.props.onMouseMove(event, x, y, this.props.projection)
     }
 
     onMouseDown(event) {
+        let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
-        this.setState({
-            x: event.clientX - currentTargetRect.left,
-            y: event.clientY - currentTargetRect.top,
-            height: 0,
-            width: 0,
-            down: true
-        });
+        let x = (event.clientX - currentTargetRect.left) / factors[0]
+        let y = (event.clientY - currentTargetRect.top) / factors[1]
+        this.props.onMouseDown(event, x, y, this.props.projection)
     };
 
     onMouseUp(event) {
+        let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
-        this.setState({
-            down: false,
-            width: event.clientX - this.state.x - currentTargetRect.left,
-            height: event.clientY - this.state.y - currentTargetRect.top
-        });
+        let x = (event.clientX - currentTargetRect.left) / factors[0]
+        let y = (event.clientY - currentTargetRect.top) / factors[1]
+        this.props.onMouseUp(event, x, y, this.props.projection)
     };
+
+    onWheel(event) {
+        let factors = this.getFactors()
+        let currentTargetRect = event.target.getBoundingClientRect()
+        let x = (event.clientX - currentTargetRect.left) / factors[0]
+        let y = (event.clientY - currentTargetRect.top) / factors[1]
+        this.props.onZoom(event, x, y, this.props.projection)
+        event.stopPropagation()
+        event.preventDefault()
+    }
 
     render(item) {
         const viewImage = this.drawImage(this.props.image)
@@ -138,6 +166,7 @@ export default class CTSliceViewer extends Component {
         return (
             <div className="slice-viewer">
                 <div className={image_class} 
+                     onWheel={this.onWheel.bind(this)}
                      onMouseDown={this.onMouseDown.bind(this)}
                      onMouseUp={this.onMouseUp.bind(this)}
                      onMouseMove={this.onMouseMove.bind(this)}>

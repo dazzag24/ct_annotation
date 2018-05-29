@@ -19,11 +19,14 @@ export default class CTItemPage extends Component {
         this.state = {
             slice: [0, 0, 0],
             nodulesOn: true,
-            crops: [
-                [null, null, null, null],
-                [null, null, null, null],
-                [null, null, null, null]
-            ]
+            center: [
+                [null, null],
+                [null, null],
+                [null, null]
+            ],
+            zoom: [1, 1, 1],
+            down: false,
+            start: [0, 0]
         }
     }
 
@@ -33,8 +36,88 @@ export default class CTItemPage extends Component {
         this.setState({slice: a})
     }
 
-    onCrop(image, x, y, width, height) {
-        this.setState
+    onZoom(event, x, y, projection) {
+        let center = this.state.center
+        let zoom = this.state.zoom
+
+        let delta = event.deltaY || event.detail || event.wheelDelta
+
+
+        zoom[projection] = Math.max(1, zoom[projection] - delta / 1000)
+        let id = this.props.match.params.id
+        //center[projection][0] = this.props.ct_store.get(id).coordinates[projection][0] + x
+        //center[projection][1] = this.props.ct_store.get(id).coordinates[projection][1] + y
+
+        this.setState({center: center,  zoom: zoom})
+    }
+
+    onMouseDown(event, x, y, projection) {
+        let id = this.props.match.params.id
+        this.setState({down: true, start: [x, y]})
+    }
+
+    onMouseUp(event, x, y, projection) {
+        this.setState({down: false})
+    }
+
+    onMouseMove(event, x, y, projection) {
+        if (this.state.down) {
+            let center = this.state.center
+            let id = this.props.match.params.id
+            let corner = this.props.ct_store.getCorner(id, projection)
+            let shape = this.props.ct_store.get(id).shape
+
+            let a = center[projection][0] - x + this.state.start[0]
+            let b = center[projection][1] - y + this.state.start[1]
+
+            let start = this.state.start
+
+            let newCoords = this.canBeCenter(id, event, a, b, projection)
+            
+            if (newCoords[0] != a) {
+                start[0] = x
+            }
+
+            if (newCoords[1] != b) {
+                start[1] = y
+            }
+
+            console.log('start', this.state.start)
+            console.log('xy', x, y)
+            console.log(x + corner[0], y + corner[1], a, b, newCoords)
+
+            center[projection][0] = newCoords[0]
+            center[projection][1] = newCoords[1]
+            this.setState({center: center, start: start});
+        }
+    }
+
+    canBeCenter(id, event, x, y, projection) {
+        let shape = this.props.ct_store.getShape(id, projection)
+        let zoom = this.state.zoom[projection]
+
+        let left = Math.ceil(shape[0] - shape[0] / zoom / 2)
+        let right = Math.ceil(shape[0] / zoom / 2)
+        let bottom = Math.ceil(shape[1] - shape[1] / zoom / 2)
+        let top = Math.ceil(shape[1] / zoom / 2)
+
+        if (x > left) {
+            x = left
+        } else {
+            if (x < right) {
+                x = right
+            }
+        }
+
+        if (y < top) {
+            y = top
+        } else {
+            if (y > bottom) {
+                y = bottom
+            }
+        }
+
+        return [x, y]
     }
 
     handleInference() {
@@ -65,13 +148,20 @@ export default class CTItemPage extends Component {
     renderImageViewer(item, projection, rotation, flip) {
         const resizeFactor = 2
         const maxSlice = item.shape[projection]
-        const image = this.props.ct_store.getImageCrop(item.id, this.state.slice[projection], this.state.crops[projection],  projection)
-        const spacing = item.spacing
+        const image = this.props.ct_store.getImageCrop(item.id, this.state.slice[projection], this.state.center[projection],  this.state.zoom[projection], projection)
+        const spacing = this.props.ct_store.getSpacing(item.id, projection)
+        const shape = this.props.ct_store.getShape(item.id, projection)
 
         return (
             <CTSliceViewer slice={this.state.slice[projection]} maxSlice={maxSlice - 1} vertical={true} reverse={true}
-                           factor={resizeFactor} image={image} projection={projection} spacing={spacing} rotation={rotation}
-                           flip={flip} onSliceChange={this.onSliceChange.bind(this)} />
+                           factor={resizeFactor} image={image} projection={projection} spacing={spacing} zoom={this.state.zoom[projection]}
+                           rotation={rotation} flip={flip} shape={shape}
+                           onSliceChange={this.onSliceChange.bind(this)} 
+                           onZoom={this.onZoom.bind(this)}
+                           onMouseDown={this.onMouseDown.bind(this)}
+                           onMouseUp={this.onMouseUp.bind(this)}
+                           onMouseMove={this.onMouseMove.bind(this)}
+                           />
         )
     }
 
@@ -82,10 +172,10 @@ export default class CTItemPage extends Component {
                     {this.renderImageViewer(item, 0, 0, false)}
                 </div>
                 <div className='rt'>
-                    {this.renderImageViewer(item, 2, 90, false)}
+                    {this.renderImageViewer(item, 2, 0, false)}
                 </div>
                 <div className='rb'>
-                    {this.renderImageViewer(item, 1, 180, false)}
+                    {this.renderImageViewer(item, 1, 0, false)}
                 </div>
             </div>
         )
