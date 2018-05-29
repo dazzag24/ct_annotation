@@ -137,11 +137,12 @@ export default class CTSliceViewer extends Component {
 
         return (
             <div className="slice-viewer">
-                <div id='block' onMouseDown={this.onMouseDown.bind(this)}
-                                      onMouseUp={this.onMouseUp.bind(this)}
-                                      onMouseMove={this.onMouseMove.bind(this)}>
+                <div className={image_class} 
+                     onMouseDown={this.onMouseDown.bind(this)}
+                     onMouseUp={this.onMouseUp.bind(this)}
+                     onMouseMove={this.onMouseMove.bind(this)}>
                     <Stage width={viewImage.width} height={viewImage.height}>
-                        <Layer><Image image={viewImage} className={image_class}/></Layer>
+                        <Layer><Image image={viewImage}/></Layer>
                         <Layer><Rect
                             x={this.state.x}
                             y={this.state.y}

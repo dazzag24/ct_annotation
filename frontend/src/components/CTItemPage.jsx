@@ -16,7 +16,15 @@ import CTSliceViewer from './CTSliceViewer.jsx'
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = {slice: [0, 0, 0], nodulesOn: true}
+        this.state = {
+            slice: [0, 0, 0],
+            nodulesOn: true,
+            crops: [
+                [null, null, null, null],
+                [null, null, null, null],
+                [null, null, null, null]
+            ]
+        }
     }
 
     onSliceChange(slice, projection) {
@@ -57,7 +65,7 @@ export default class CTItemPage extends Component {
     renderImageViewer(item, projection, rotation, flip) {
         const resizeFactor = 2
         const maxSlice = item.shape[projection]
-        const image = this.props.ct_store.getImageSlice(item.id, this.state.slice[projection], projection)
+        const image = this.props.ct_store.getImageCrop(item.id, this.state.slice[projection], this.state.crops[projection],  projection)
         const spacing = item.spacing
 
         return (
@@ -74,10 +82,10 @@ export default class CTItemPage extends Component {
                     {this.renderImageViewer(item, 0, 0, false)}
                 </div>
                 <div className='rt'>
-                    {this.renderImageViewer(item, 2, 0, false)}
+                    {this.renderImageViewer(item, 2, 90, false)}
                 </div>
                 <div className='rb'>
-                    {this.renderImageViewer(item, 1, 0, false)}
+                    {this.renderImageViewer(item, 1, 180, false)}
                 </div>
             </div>
         )
