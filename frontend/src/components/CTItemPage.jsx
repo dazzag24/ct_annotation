@@ -60,34 +60,41 @@ export default class CTItemPage extends Component {
         this.setState({down: false})
     }
 
-    onMouseMove(event, x, y, projection) {
+    onMouseMove(event, x, y, factor, projection) {
         if (this.state.down) {
             let center = this.state.center
             let id = this.props.match.params.id
             let corner = this.props.ct_store.getCorner(id, projection)
-            let shape = this.props.ct_store.get(id).shape
+            let shape = this.props.ct_store.getShape(id, projection)
 
-            let a = center[projection][0] - x + this.state.start[0]
-            let b = center[projection][1] - y + this.state.start[1]
+            console.log(shape)
+
+            if (center[projection][0] == null) {
+                center[projection][0] = Math.ceil(shape[0] / 2)
+                center[projection][1] = Math.ceil(shape[1] / 2)
+            }
+
+            console.log('center before:', center[projection])
+
+            let a = center[projection][0] - (x - this.state.start[0]) / factor[0]
+            let b = center[projection][1] - (y - this.state.start[1]) / factor[1]
 
             let start = this.state.start
 
-            let newCoords = this.canBeCenter(id, event, a, b, projection)
-            
-            if (newCoords[0] != a) {
-                start[0] = x
-            }
+            console.log('move:', x - this.state.start[0], y - this.state.start[1])
 
-            if (newCoords[1] != b) {
-                start[1] = y
-            }
+            let newCoords = this.canBeCenter(id, event, a, b, projection)
+
+            start[0] = x
+            start[1] = y
 
             console.log('start', this.state.start)
             console.log('xy', x, y)
-            console.log(x + corner[0], y + corner[1], a, b, newCoords)
+            console.log(x, y, a, b, newCoords)
 
             center[projection][0] = newCoords[0]
             center[projection][1] = newCoords[1]
+            console.log('center after:', center[projection])
             this.setState({center: center, start: start});
         }
     }
@@ -145,7 +152,7 @@ export default class CTItemPage extends Component {
         return nodules_shown
     }
 
-    renderImageViewer(item, projection, rotation, flip) {
+    renderImageViewer(item, projection) {
         const resizeFactor = 2
         const maxSlice = item.shape[projection]
         const image = this.props.ct_store.getImageCrop(item.id, this.state.slice[projection], this.state.center[projection],  this.state.zoom[projection], projection)
@@ -155,7 +162,7 @@ export default class CTItemPage extends Component {
         return (
             <CTSliceViewer slice={this.state.slice[projection]} maxSlice={maxSlice - 1} vertical={true} reverse={true}
                            factor={resizeFactor} image={image} projection={projection} spacing={spacing} zoom={this.state.zoom[projection]}
-                           rotation={rotation} flip={flip} shape={shape}
+                           shape={shape}
                            onSliceChange={this.onSliceChange.bind(this)} 
                            onZoom={this.onZoom.bind(this)}
                            onMouseDown={this.onMouseDown.bind(this)}
@@ -169,13 +176,13 @@ export default class CTItemPage extends Component {
         return (
             <div>
                 <div className='lt'>
-                    {this.renderImageViewer(item, 0, 0, false)}
+                    {this.renderImageViewer(item, 0)}
                 </div>
                 <div className='rt'>
-                    {this.renderImageViewer(item, 2, 0, false)}
+                    {this.renderImageViewer(item, 2)}
                 </div>
                 <div className='rb'>
-                    {this.renderImageViewer(item, 1, 0, false)}
+                    {this.renderImageViewer(item, 1)}
                 </div>
             </div>
         )

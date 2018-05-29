@@ -104,32 +104,32 @@ export default class CTSliceViewer extends Component {
     onMouseMove(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
-        let x = (event.clientX - currentTargetRect.left) / factors[0]
-        let y = (event.clientY - currentTargetRect.top) / factors[1]
-        this.props.onMouseMove(event, x, y, this.props.projection)
+        let x = (event.clientX - currentTargetRect.left)
+        let y = (event.clientY - currentTargetRect.top)
+        this.props.onMouseMove(event, x, y, factors, this.props.projection)
     }
 
     onMouseDown(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
-        let x = (event.clientX - currentTargetRect.left) / factors[0]
-        let y = (event.clientY - currentTargetRect.top) / factors[1]
-        this.props.onMouseDown(event, x, y, this.props.projection)
+        let x = (event.clientX - currentTargetRect.left)
+        let y = (event.clientY - currentTargetRect.top)
+        this.props.onMouseDown(event, x, y, factors, this.props.projection)
     };
 
     onMouseUp(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
-        let x = (event.clientX - currentTargetRect.left) / factors[0]
-        let y = (event.clientY - currentTargetRect.top) / factors[1]
-        this.props.onMouseUp(event, x, y, this.props.projection)
+        let x = (event.clientX - currentTargetRect.left)
+        let y = (event.clientY - currentTargetRect.top)
+        this.props.onMouseUp(event, x, y, factors, this.props.projection)
     };
 
     onWheel(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
-        let x = (event.clientX - currentTargetRect.left) / factors[0]
-        let y = (event.clientY - currentTargetRect.top) / factors[1]
+        let x = (event.clientX - currentTargetRect.left)
+        let y = (event.clientY - currentTargetRect.top)
         this.props.onZoom(event, x, y, this.props.projection)
         event.stopPropagation()
         event.preventDefault()
@@ -140,32 +140,9 @@ export default class CTSliceViewer extends Component {
         const sliderPos = this.getSliderPos(this.state.slice)
         var slider_style = { height: viewImage.height }
 
-        if (this.state.rotation == 90 || this.state.rotation == 270) {
-            slider_style = { height: viewImage.width }
-        }
-        
-
-        var image_class = 'image'
-
-        switch (this.state.rotation) {
-            case 90:
-                image_class += ' rotation90'
-                break
-            case 180:
-                image_class += ' rotation180'
-                break
-            case 270:
-                image_class += ' rotation270'
-                break
-        }
-
-        if (this.state.flip) {
-            image_class += ' flip'
-        }
-
         return (
             <div className="slice-viewer">
-                <div className={image_class} 
+                <div className="image" 
                      onWheel={this.onWheel.bind(this)}
                      onMouseDown={this.onMouseDown.bind(this)}
                      onMouseUp={this.onMouseUp.bind(this)}
@@ -184,7 +161,7 @@ export default class CTSliceViewer extends Component {
                     </Layer>
                     </Stage>
                 </div>
-                <div style={slider_style}>
+                <div height={viewImage.height}>
                     <Slider className="slider" vertical={this.props.vertical}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}
                             onChange={this.onSliderChange.bind(this)} />
