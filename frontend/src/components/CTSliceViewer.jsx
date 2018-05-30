@@ -237,6 +237,8 @@ export default class CTSliceViewer extends Component {
         let slice = this.getSlices()
         let style = {backgroundColor: color[2]}
 
+        console.log(this.props.projection, this.props.minSlice, this.props.maxSlice)
+
         return (
             <div className="slice-viewer">
                 <div className="image"
