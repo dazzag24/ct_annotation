@@ -6,7 +6,7 @@ import { API_Events } from './const'
 
 const item_template = {
     id: null, name: null, image:null, shape:null, spacing:null, nodules_true:null,  nodules_predicted:null,
-    waitingData: false, waitingInference: false, zoom: [1, 1, 1], coordinates: [[0, 0], [0, 0], [0, 0]]
+    waitingData: false, waitingInference: false, coordinates: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
 }
 
 
@@ -52,9 +52,9 @@ export default class CT_Store {
         item.waitingInference = false
     }
 
-    updateCrop(id, zoom, coordinates, projection) {
-        const item = this.items.get(id)
-        item.zoom[projection] = zoom
+    @action
+    updateCoordinates(id, coordinates, projection) {
+        let item = this.items.get(id)
         item.coordinates[projection] = coordinates
     }
 
@@ -87,17 +87,17 @@ export default class CT_Store {
         const spacing = this.items.get(id).spacing
         switch (projection) {
             case 0:
-                var spacing_2d = [spacing[2], spacing[1]]
+                var spacing_2d = [spacing[2], spacing[1], spacing[0]]
                 break
             case 1:
-                var spacing_2d = [spacing[2], spacing[0]]
+                var spacing_2d = [spacing[2], spacing[0], spacing[1]]
                 break
             case 2:
-                var spacing_2d = [spacing[1], spacing[0]]
+                var spacing_2d = [spacing[1], spacing[0], spacing[2]]
                 break
         }
-        spacing_2d[0] = spacing_2d[0]
-        spacing_2d[1] = spacing_2d[1]
+        //spacing_2d[0] = spacing_2d[0]
+        //spacing_2d[1] = spacing_2d[1]
         return spacing_2d
     }
 
@@ -120,6 +120,7 @@ export default class CT_Store {
         }
         return shape_2d        
     }
+
     getPixel(image, shape, coord, axes, depth=1) {
         const from = coord[axes[0]] * shape[1] * shape[2] + coord[axes[1]] * shape[2] + coord[axes[2]]
         let pixel = image[from]
@@ -142,22 +143,14 @@ export default class CT_Store {
         return pixel
     }
 
-    makeCrop(id, image, shape, slice_no, centerX, centerY, zoom, projection=0, depth=1, color='grey', alpha=1) {
+    makeImage(id, image, shape, slice_no, projection=0, depth=1, color='grey', alpha=1) {
         let axes, width, height
         switch (projection){
             case 0 : axes = [2, 1, 0, 0]; width = shape[2]; height = shape[1]; break;
             case 1 : axes = [1, 2, 0, 1]; width = shape[1]; height = shape[0]; break;
             case 2 : axes = [1, 0, 2, 2]; width = shape[2]; height = shape[0]; break;
         }
-
-        let coordinates = this.cropCoordinates(centerX, centerY, zoom, width, height)
-        let x0 = coordinates[0]
-        let y0 = coordinates[1]
-        let crop_width = coordinates[2]
-        let crop_height = coordinates[3]
-
-        this.updateCrop(id, zoom, [x0, y0], projection)
-        const bitmapImage = new Uint8ClampedArray(crop_height * crop_width * 4)        
+        const bitmapImage = new Uint8ClampedArray(height * width * 4)        
 
         let colorCoef
         switch (color){
@@ -168,12 +161,19 @@ export default class CT_Store {
             default: colorCoef = color
         }
 
-        for(let i=0; i < crop_height; i++){
-            for(let j=0; j < crop_width; j++){
-                const coord = [j+x0, i+y0, slice_no]
-                const pixel = this.getPixel(image, shape, coord, axes, depth)
-                const pos = (i * crop_width + j) * 4
+        if (projection == 0) {
+            slice_no = shape[0] - slice_no
+        }
 
+        for(let i=0; i < height; i++){
+            for(let j=0; j < width; j++){
+                const coord = [j, i, slice_no]
+                const pixel = this.getPixel(image, shape, coord, axes, depth)
+                if (projection == 0) {
+                    var pos = (i * width + j) * 4
+                } else {
+                    var pos = height * width * 4 - (i * width + j) * 4
+                }
                 bitmapImage[pos + 0] = pixel * colorCoef[0]
                 bitmapImage[pos + 1] = pixel * colorCoef[1]
                 bitmapImage[pos + 2] = pixel * colorCoef[2]
@@ -183,7 +183,7 @@ export default class CT_Store {
                     bitmapImage[pos + 3] = 255
             }
         }
-        return new ImageData(bitmapImage, crop_width, crop_height)
+        return new ImageData(bitmapImage, width, height)
     }
 
     cropCoordinates(centerX, centerY, zoom, width, height) {
@@ -240,17 +240,9 @@ export default class CT_Store {
         return [Math.ceil(x0), Math.ceil(y0), Math.ceil(crop_width), Math.ceil(crop_height)]
     }
 
-
-    getImageCrop(id, slice_no, center, zoom, projection=0, depth=3) {
-        const item = this.items.get(id)
-        let centerX = center[0] 
-        let centerY = center[1]
-        return this.makeCrop(id, item.image, item.shape, slice_no, centerX, centerY, zoom, projection, depth, 'grey', 1)
-    }
-
     getImageSlice(id, slice_no, projection=0, depth=3) {
         const item = this.items.get(id)
-        return this.makeImage(item.image, item.shape, slice_no, projection, depth, 'grey', 1)
+        return this.makeImage(id, item.image, item.shape, slice_no, projection, depth, 'grey', 1)
     }
 
 }

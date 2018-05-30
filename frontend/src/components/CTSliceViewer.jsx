@@ -7,15 +7,16 @@ import 'rc-slider/assets/index.css';
 import Toggle from 'react-toggle'
 import { Icon } from 'react-fa'
 import { Layer, Stage, Image, Ellipse, Line, Rect } from 'react-konva'
+import { inject, observer } from 'mobx-react'
+import ImageWithOpacity from './opacity.jsx'
 
 
+@inject("ct_store")
+@observer
 export default class CTSliceViewer extends Component {
     constructor(props) {
         super(props)
-        this.state = {slice: this.props.slice,
-                      rotation: this.props.rotation,
-                      flip: this.props.flip,
-                      x: 0,
+        this.state = {x: 0,
                       y: 0,
                       width: 0,
                       height: 0,
@@ -78,18 +79,59 @@ export default class CTSliceViewer extends Component {
         return shape        
     }
 
-    drawImage(image) {
-        const canvas = document.createElement('canvas')
-        canvas.width = image.width
-        canvas.height = image.height
-        const ctx = canvas.getContext('2d')
+    getLines(coordinates, width, height) {
+        const spacing = this.props.ct_store.get(this.props.id).spacing
+        let coordinates_yz = coordinates[2]
+        let coordinates_xz = coordinates[1]
+        let coordinates_xy = coordinates[0]
+        
+        let coordinates_yz_0 = coordinates_yz[0] //* spacing[1]
+        let coordinates_yz_1 = coordinates_yz[1] //* spacing[0]
+        let coordinates_yz_2 = coordinates_yz[2] //* spacing[1]
+        let coordinates_yz_3 = coordinates_yz[3] //* spacing[0]
+
+        let coordinates_xz_0 = coordinates_xz[0] //* spacing[2]
+        let coordinates_xz_1 = coordinates_xz[1] //* spacing[0]
+        let coordinates_xz_2 = coordinates_xz[2] //* spacing[2]
+        let coordinates_xz_3 = coordinates_xz[3] //* spacing[0]
+        
+        let coordinates_xy_0 = coordinates_xy[0] //* spacing[2]
+        let coordinates_xy_1 = coordinates_xy[1] //* spacing[1]
+        let coordinates_xy_2 = coordinates_xy[2] //* spacing[2]
+        let coordinates_xy_3 = coordinates_xy[3] //* spacing[1]
+
+
+        switch (this.props.projection) {
+            case 0:
+                var lines = [height - coordinates_yz_0 -  coordinates_yz_2, width - coordinates_xz_0 - coordinates_xz_2, coordinates_yz_2, coordinates_xz_2]
+                break
+            case 2:
+                var lines = [coordinates_xz_1, width - coordinates_xy_1 - coordinates_xy_3, coordinates_xz_3, coordinates_xy_3]
+                break
+            case 1:
+                var lines = [ coordinates_yz_1, width - coordinates_xy_2 - coordinates_xy_0, coordinates_yz_3, coordinates_xy_2]
+                break
+        }
+        return lines
+    }
+
+    drawImage(image, item, projection) {
+        //const item = this.props.ct_store.get(this.props.match.params.id)
+        const coordinates = item.coordinates
         const spacing = this.props.spacing
-        ctx.putImageData(image, 0, 0)
+        // const lines = this.getLines(coordinates, image.width, image.height)
+
+        const canvas = document.createElement('canvas')
+        canvas.width = image.width / this.props.zoom
+        canvas.height = image.height / this.props.zoom
+
+        const ctx = canvas.getContext('2d')
+        ctx.putImageData(image, -this.props.shift[0], -this.props.shift[1])
 
         const canvas2 = document.createElement('canvas')
         const shape = this.props.shape
-        canvas2.width = shape[0] * this.props.factor * spacing[0] //canvas.width * this.props.factor * spacing[0]
-        canvas2.height = shape[1] * this.props.factor * spacing[1] //canvas.height * this.props.factor * spacing[1]
+        canvas2.width = shape[0] * this.props.factor * spacing[0]
+        canvas2.height = shape[1] * this.props.factor * spacing[1]
         const ctx2 = canvas2.getContext('2d');
         ctx2.drawImage(canvas, 0, 0, canvas2.width, canvas2.height)
 
@@ -101,28 +143,34 @@ export default class CTSliceViewer extends Component {
         return [this.props.factor * this.props.zoom * spacing[0], this.props.factor * this.props.zoom * spacing[1]]
     }
 
-    onMouseMove(event) {
+    onPointerMove(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
         let x = (event.clientX - currentTargetRect.left)
         let y = (event.clientY - currentTargetRect.top)
-        this.props.onMouseMove(event, x, y, factors, this.props.projection)
+        this.props.onPointerMove(event, x, y, factors, this.props.projection)
+        event.stopPropagation()
+        event.preventDefault()
     }
 
-    onMouseDown(event) {
+    onPointerDown(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
         let x = (event.clientX - currentTargetRect.left)
         let y = (event.clientY - currentTargetRect.top)
-        this.props.onMouseDown(event, x, y, factors, this.props.projection)
+        this.props.onPointerDown(event, x, y, factors, this.props.projection)
+        event.stopPropagation()
+        event.preventDefault()
     };
 
-    onMouseUp(event) {
+    onPointerUp(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
         let x = (event.clientX - currentTargetRect.left)
         let y = (event.clientY - currentTargetRect.top)
-        this.props.onMouseUp(event, x, y, factors, this.props.projection)
+        this.props.onPointerUp(event, x, y, factors, this.props.projection)
+        event.stopPropagation()
+        event.preventDefault()
     };
 
     onWheel(event) {
@@ -135,31 +183,83 @@ export default class CTSliceViewer extends Component {
         event.preventDefault()
     }
 
+
+    getSlices() {
+        let slices = this.props.slice
+        var x, y
+        let shift = this.props.shift
+        let shape = this.props.shape
+        switch (this.props.projection) {
+            case 0:
+                x = this.props.slice[2]
+                y = this.props.slice[1]
+                break
+            case 1:
+                x = shape[0] - this.props.slice[2]
+                y = this.props.slice[0]
+                break
+            case 2:
+                x = shape[0] - this.props.slice[1]
+                y = this.props.slice[0]
+                break
+        }
+        return [(x - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom,
+                (y - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom]
+    }
+
+    getColor() {
+        let colors = ['red', 'red', 'red']
+        switch (this.props.projection) {
+            case 0:
+                colors[0] = 'green'
+                colors[1] = 'blue'
+                break
+            case 1:
+                colors[0] = 'green'
+                colors[2] = 'blue'
+                break
+            case 2:
+                colors[0] = 'blue'
+                colors[2] = 'green'
+                break
+        }
+        return colors
+    }
+
     render(item) {
-        const viewImage = this.drawImage(this.props.image)
-        const sliderPos = this.getSliderPos(this.state.slice)
+        const ct_item = this.props.ct_store.get(this.props.id)
+        const image = this.props.image
+        const viewImage = this.drawImage(image, ct_item, this.props.projection)
+        const sliderPos = this.getSliderPos(this.props.slice[this.props.projection])
         var slider_style = { height: viewImage.height }
+        const coordinates = ct_item.coordinates
+        const lines = this.getLines(coordinates, image.width, image.height)
+
+        const shape = this.props.shape
+
+        let y1 = (lines[0] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
+        let height1 = lines[2] * this.props.factor * this.props.spacing[1] * this.props.zoom
+
+        let x2 = (lines[1]- this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
+        let width2 = lines[3] * this.props.factor * this.props.spacing[0] * this.props.zoom
+
+        let slice = this.getSlices()
 
         return (
             <div className="slice-viewer">
-                <div className="image" 
+                <div className="image"
                      onWheel={this.onWheel.bind(this)}
-                     onMouseDown={this.onMouseDown.bind(this)}
-                     onMouseUp={this.onMouseUp.bind(this)}
-                     onMouseMove={this.onMouseMove.bind(this)}>
-                    <Stage width={viewImage.width} height={viewImage.height}>
-                        <Layer><Image image={viewImage}/></Layer>
-                        <Layer><Rect
-                            x={this.state.x}
-                            y={this.state.y}
-                            width={this.state.width}
-                            height={this.state.height}
-                            shadowBlur={5}
-                            fill={this.state.color}
-                            opacity={0.3}
-                          />
-                    </Layer>
-                    </Stage>
+                     onMouseDown={this.onPointerDown.bind(this)}
+                     onMouseUp={this.onPointerUp.bind(this)}
+                     onMouseMove={this.onPointerMove.bind(this)}
+                     onMouseLeave={this.props.onPointerLeave.bind(this)}>
+                     <ImageWithOpacity width={viewImage.width} height={viewImage.height} image={viewImage}
+                            y1={y1} height1={height1}
+                            x2={x2} width2={width2}
+                            color={this.getColor()}
+                            slice={slice}
+                            projection={this.props.projection}
+                    />
                 </div>
                 <div height={viewImage.height}>
                     <Slider className="slider" vertical={this.props.vertical}

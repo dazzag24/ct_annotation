@@ -25,15 +25,19 @@ export default class CTItemPage extends Component {
                 [null, null]
             ],
             zoom: [1, 1, 1],
-            down: false,
-            start: [0, 0]
+            down: null,
+            start: [0, 0],
+            images: [null, null, null],
+            selection: [0, 0, 0, 0]
         }
     }
 
     onSliceChange(slice, projection) {
         let a = this.state.slice
+        let images = this.state.images
         a[projection] = slice
-        this.setState({slice: a})
+        images[projection] = null
+        this.setState({slice: a, images: images})
     }
 
     onZoom(event, x, y, projection) {
@@ -42,61 +46,90 @@ export default class CTItemPage extends Component {
 
         let delta = event.deltaY || event.detail || event.wheelDelta
 
-
-        zoom[projection] = Math.max(1, zoom[projection] - delta / 1000)
+        zoom[projection] = Math.min(256, Math.max(1, zoom[projection] * (1 - delta / 1000)))
         let id = this.props.match.params.id
-        //center[projection][0] = this.props.ct_store.get(id).coordinates[projection][0] + x
-        //center[projection][1] = this.props.ct_store.get(id).coordinates[projection][1] + y
 
         this.setState({center: center,  zoom: zoom})
     }
 
-    onMouseDown(event, x, y, projection) {
-        let id = this.props.match.params.id
-        this.setState({down: true, start: [x, y]})
-    }
-
-    onMouseUp(event, x, y, projection) {
-        this.setState({down: false})
-    }
-
-    onMouseMove(event, x, y, factor, projection) {
-        if (this.state.down) {
-            let center = this.state.center
-            let id = this.props.match.params.id
-            let corner = this.props.ct_store.getCorner(id, projection)
-            let shape = this.props.ct_store.getShape(id, projection)
-
-            console.log(shape)
-
-            if (center[projection][0] == null) {
-                center[projection][0] = Math.ceil(shape[0] / 2)
-                center[projection][1] = Math.ceil(shape[1] / 2)
+    onPointerDown(event, x, y, projection) {
+        if (event.button == 0) {
+            this.startDragging(event, x, y, projection)
+        } else {
+            if (event.button == 0) {
+                this.startSelecting(event, x, y, projection)
             }
-
-            console.log('center before:', center[projection])
-
-            let a = center[projection][0] - (x - this.state.start[0]) / factor[0]
-            let b = center[projection][1] - (y - this.state.start[1]) / factor[1]
-
-            let start = this.state.start
-
-            console.log('move:', x - this.state.start[0], y - this.state.start[1])
-
-            let newCoords = this.canBeCenter(id, event, a, b, projection)
-
-            start[0] = x
-            start[1] = y
-
-            console.log('start', this.state.start)
-            console.log('xy', x, y)
-            console.log(x, y, a, b, newCoords)
-
-            center[projection][0] = newCoords[0]
-            center[projection][1] = newCoords[1]
-            console.log('center after:', center[projection])
-            this.setState({center: center, start: start});
         }
+    }
+
+    startDragging(event, x, y, projection) {
+        this.setState({down: 0, start: [x, y]})
+    }
+
+    startSelecting(event, x, y, projection) {
+        // let selection = this.state.selection
+        // selection = [x, y, 0, 0]
+        // this.setState({down: 0, selection: selection})
+    }
+
+    onPointerUp(event, x, y, projection) {
+        this.setState({down: null})
+    }
+
+    onPointerLeave(event, x, y, projection) {
+        this.setState({down: null})
+    }
+
+    onPointerMove(event, x, y, factor, projection) {
+        const delta = 3
+        let shape = this.props.ct_store.getShape(this.props.match.params.id, projection)
+        let bottom = shape[1] * factor[1] / this.state.zoom[projection]
+        let right = shape[0] * factor[0] / this.state.zoom[projection]
+
+        if (x <= delta || x >= right - delta || y <= 0 || y >= bottom - delta) {
+            this.onPointerUp(event, x, y, projection)
+        } else {
+            if (this.state.down == 0) {
+                this.dragging(event, x, y, factor, projection)
+            } else {
+                if (this.state.down == 0) {
+                    this.selecting(event, x, y, factor, projection)
+                }
+            }
+        }
+    }
+
+    dragging(event, x, y, factor, projection) {
+        let center = this.state.center
+        let id = this.props.match.params.id
+        let corner = this.props.ct_store.getCorner(id, projection)
+        let shape = this.props.ct_store.getShape(id, projection)
+
+        if (center[projection][0] == null) {
+            center[projection][0] = Math.ceil(shape[0] / 2)
+            center[projection][1] = Math.ceil(shape[1] / 2)
+        }
+
+        let a = center[projection][0] - (x - this.state.start[0]) / factor[0]
+        let b = center[projection][1] - (y - this.state.start[1]) / factor[1]
+
+        let start = this.state.start
+
+        let newCoords = this.canBeCenter(id, event, a, b, projection)
+
+        start[0] = x
+        start[1] = y
+
+        center[projection][0] = newCoords[0]
+        center[projection][1] = newCoords[1]
+        this.setState({center: center, start: start});
+    }
+
+    selecting(event, x, y, factor, projection) {
+            let selection = this.state.selection
+            selection[2] = x - selection[0]
+            selection[3] = y - selection[1]
+            this.setState({selection: selection})            
     }
 
     canBeCenter(id, event, x, y, projection) {
@@ -127,47 +160,35 @@ export default class CTItemPage extends Component {
         return [x, y]
     }
 
-    handleInference() {
-        this.props.ct_store.getInference(this.props.match.params.id)
-    }
-
-
-    handleNodulesToggle() {
-        this.setState({nodulesOn: !this.state.nodulesOn})
-    }
-
-    renderNodules(nodules, color, resizeFactor) {
-        let self = this
-        let nodules_shown = nodules.map(function(nodule, ix){
-            if ((self.state.currentSlice > nodule[0] - nodule[3] / 2) & (self.state.currentSlice < nodule[0] + nodule[3] / 2)) {
-                const radius_y = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[4]
-                const radius_x = (1 - Math.abs(nodule[0] - self.state.currentSlice) / (nodule[3]/2)) * nodule[5]
-                return <Ellipse key={ix} x={nodule[2] * resizeFactor}
-                                         y={nodule[1] * resizeFactor}
-                                         radius={{x: radius_x * resizeFactor, y: radius_y * resizeFactor}}
-                                         fill={color} opacity={0.4} />
-            } else
-                return null
-        })
-        return nodules_shown
-    }
-
     renderImageViewer(item, projection) {
         const resizeFactor = 2
         const maxSlice = item.shape[projection]
-        const image = this.props.ct_store.getImageCrop(item.id, this.state.slice[projection], this.state.center[projection],  this.state.zoom[projection], projection)
+        if (this.state.images[projection] == null) {
+            this.state.images[projection] = this.props.ct_store.getImageSlice(item.id, this.state.slice[projection], projection)
+        }
         const spacing = this.props.ct_store.getSpacing(item.id, projection)
         const shape = this.props.ct_store.getShape(item.id, projection)
 
+        let center = this.state.center[projection]
+        let zoom = this.state.zoom[projection]
+
+        let shift = this.props.ct_store.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
+        this.props.ct_store.updateCoordinates(item.id, shift, projection)
+
+        console.log(this.state.slice)
+
         return (
-            <CTSliceViewer slice={this.state.slice[projection]} maxSlice={maxSlice - 1} vertical={true} reverse={true}
-                           factor={resizeFactor} image={image} projection={projection} spacing={spacing} zoom={this.state.zoom[projection]}
-                           shape={shape}
+            <CTSliceViewer slice={this.state.slice} maxSlice={maxSlice - 1} vertical={true} reverse={true}
+                           factor={resizeFactor} image={this.state.images[projection]} projection={projection}
+                           spacing={spacing} zoom={this.state.zoom[projection]}
+                           shape={shape} shift={shift} selection={this.state.selection}
+                           lines={this.state.lines} id={item.id}
                            onSliceChange={this.onSliceChange.bind(this)} 
                            onZoom={this.onZoom.bind(this)}
-                           onMouseDown={this.onMouseDown.bind(this)}
-                           onMouseUp={this.onMouseUp.bind(this)}
-                           onMouseMove={this.onMouseMove.bind(this)}
+                           onPointerDown={this.onPointerDown.bind(this)}
+                           onPointerUp={this.onPointerUp.bind(this)}
+                           onPointerMove={this.onPointerMove.bind(this)}
+                           onPointerLeave={this.onPointerLeave.bind(this)}
                            />
         )
     }
@@ -185,19 +206,6 @@ export default class CTItemPage extends Component {
                     {this.renderImageViewer(item, 1)}
                 </div>
             </div>
-        )
-    }
-
-    handleNoduleClick(nodules, nodule_no) {
-        this.setState({currentSlice: nodules[nodule_no][0]})
-    }
-
-    renderNodulesList(nodules) {
-        return (
-            <ListGroup>
-                { nodules.map( (nodule, ix) =>
-                   <ListGroupItem key={ix} onClick={this.handleNoduleClick.bind(this, nodules, ix)}>[{nodule.slice(0, 4).join(', ')}]</ListGroupItem>)}
-            </ListGroup>
         )
     }
 
