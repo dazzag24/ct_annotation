@@ -14,16 +14,6 @@ import ImageWithOpacity from './opacity.jsx'
 @inject("ct_store")
 @observer
 export default class CTSliceViewer extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {x: 0,
-                      y: 0,
-                      width: 0,
-                      height: 0,
-                      color: "green",
-                      down: false
-                     }
-    }
 
     componentWillReceiveProps(nextProps){
         this.setState({slice: nextProps.slice})
@@ -243,7 +233,9 @@ export default class CTSliceViewer extends Component {
         let x2 = (lines[1]- this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
         let width2 = lines[3] * this.props.factor * this.props.spacing[0] * this.props.zoom
 
+        let color = this.getColor()
         let slice = this.getSlices()
+        let style = {backgroundColor: color[2]}
 
         return (
             <div className="slice-viewer">
@@ -256,13 +248,16 @@ export default class CTSliceViewer extends Component {
                      <ImageWithOpacity width={viewImage.width} height={viewImage.height} image={viewImage}
                             y1={y1} height1={height1}
                             x2={x2} width2={width2}
-                            color={this.getColor()}
+                            color={color}
                             slice={slice}
+                            drawCrops={this.props.drawCrops}
+                            drawSlices={this.props.drawSlices}
                             projection={this.props.projection}
                     />
                 </div>
                 <div height={viewImage.height}>
                     <Slider className="slider" vertical={this.props.vertical}
+                            trackStyle={style}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}
                             onChange={this.onSliderChange.bind(this)} />
                 </div>

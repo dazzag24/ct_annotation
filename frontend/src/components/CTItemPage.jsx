@@ -28,7 +28,9 @@ export default class CTItemPage extends Component {
             down: null,
             start: [0, 0],
             images: [null, null, null],
-            selection: [0, 0, 0, 0]
+            selection: [0, 0, 0, 0],
+            drawCrops: false,
+            drawSlices: false
         }
     }
 
@@ -160,6 +162,14 @@ export default class CTItemPage extends Component {
         return [x, y]
     }
 
+    onDrawCrops() {
+        this.setState({drawCrops: !this.state.drawCrops})
+    }
+
+    onDrawSlices() {
+        this.setState({drawSlices: !this.state.drawSlices})
+    }
+
     renderImageViewer(item, projection) {
         const resizeFactor = 2
         const maxSlice = item.shape[projection]
@@ -175,14 +185,13 @@ export default class CTItemPage extends Component {
         let shift = this.props.ct_store.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
         this.props.ct_store.updateCoordinates(item.id, shift, projection)
 
-        console.log(this.state.slice)
-
         return (
             <CTSliceViewer slice={this.state.slice} maxSlice={maxSlice - 1} vertical={true} reverse={true}
                            factor={resizeFactor} image={this.state.images[projection]} projection={projection}
                            spacing={spacing} zoom={this.state.zoom[projection]}
                            shape={shape} shift={shift} selection={this.state.selection}
-                           lines={this.state.lines} id={item.id}
+                           lines={this.state.lines} id={item.id} drawCrops={this.state.drawCrops}
+                           drawSlices={this.state.drawSlices}
                            onSliceChange={this.onSliceChange.bind(this)} 
                            onZoom={this.onZoom.bind(this)}
                            onPointerDown={this.onPointerDown.bind(this)}
@@ -196,6 +205,11 @@ export default class CTItemPage extends Component {
     renderAllImageViewers(item) {
         return (
             <div>
+                <div>
+                <button className='button' onClick={this.onDrawCrops.bind(this)}> {"Crops"} </button>
+                <button className='button' onClick={this.onDrawSlices.bind(this)}> {"Slices"} </button>
+                </div>
+
                 <div className='lt'>
                     {this.renderImageViewer(item, 0)}
                 </div>
