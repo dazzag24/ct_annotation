@@ -133,6 +133,15 @@ export default class CTSliceViewer extends Component {
         return [this.props.factor * this.props.zoom * spacing[0], this.props.factor * this.props.zoom * spacing[1]]
     }
 
+    onAddNodule(event) {
+        event.preventDefault();
+        let factors = this.getFactors()
+        let currentTargetRect = event.target.getBoundingClientRect()
+        let x = (event.clientX - currentTargetRect.left)
+        let y = (event.clientY - currentTargetRect.top)
+        this.props.onAddNodule(event, x, y, factors, this.props.projection)        
+    }
+
     onPointerMove(event) {
         let factors = this.getFactors()
         let currentTargetRect = event.target.getBoundingClientRect()
@@ -164,15 +173,29 @@ export default class CTSliceViewer extends Component {
     };
 
     onWheel(event) {
-        let factors = this.getFactors()
-        let currentTargetRect = event.target.getBoundingClientRect()
-        let x = (event.clientX - currentTargetRect.left)
-        let y = (event.clientY - currentTargetRect.top)
-        this.props.onZoom(event, x, y, this.props.projection)
+        let delta = event.deltaY || event.detail || event.wheelDelta
+        if (this.props.wheelZoom) {
+            this.props.onZoom(1 - delta / 1000, this.props.projection)
+        } else {
+            let currentSlice = this.props.slice[this.props.projection]
+            let slice = Math.min(Math.max(Math.ceil(currentSlice - delta / 100), this.props.minSlice), this.props.maxSlice)
+            this.props.onSliceChange(slice, this.props.projection)
+        }
         event.stopPropagation()
         event.preventDefault()
     }
 
+    onZoomPlus(event) {
+        this.props.onZoom(1.1, this.props.projection)
+    }
+
+    onZoomMinus(event) {
+        this.props.onZoom(0.9, this.props.projection)
+    }
+
+    onUnzoom(event) {
+        this.props.onUnzoom(this.props.projection)
+    }
 
     getSlices() {
         let slices = this.props.slice
@@ -216,6 +239,21 @@ export default class CTSliceViewer extends Component {
         return colors
     }
 
+    getNodules() {
+        let nodules = []
+        for (let nodule of this.props.nodules) {
+            switch (this.props.projection) {
+                case 0: var coordinates = [nodule[0], nodule[1], nodule[2]]; break
+                case 1: var coordinates = [nodule[2], nodule[0], nodule[1]]; break
+                case 2: var coordinates = [nodule[1], nodule[2], nodule[0]]; break
+            }
+            coordinates[0] = (coordinates[0] - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
+            coordinates[1] = (coordinates[1] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
+            nodules = [...nodules, coordinates]
+        }
+        return nodules
+    }
+
     render(item) {
         const ct_item = this.props.ct_store.get(this.props.id)
         const image = this.props.image
@@ -237,8 +275,6 @@ export default class CTSliceViewer extends Component {
         let slice = this.getSlices()
         let style = {backgroundColor: color[2]}
 
-        console.log(this.props.projection, this.props.minSlice, this.props.maxSlice)
-
         return (
             <div className="slice-viewer">
                 <div className="image"
@@ -246,7 +282,8 @@ export default class CTSliceViewer extends Component {
                      onMouseDown={this.onPointerDown.bind(this)}
                      onMouseUp={this.onPointerUp.bind(this)}
                      onMouseMove={this.onPointerMove.bind(this)}
-                     onMouseLeave={this.props.onPointerLeave.bind(this)}>
+                     onMouseLeave={this.props.onPointerLeave.bind(this)}
+                     onContextMenu={this.onAddNodule.bind(this)}>
                      <ImageWithOpacity width={viewImage.width} height={viewImage.height} image={viewImage}
                             y1={y1} height1={height1}
                             x2={x2} width2={width2}
@@ -255,6 +292,7 @@ export default class CTSliceViewer extends Component {
                             drawCrops={this.props.drawCrops}
                             drawSlices={this.props.drawSlices}
                             projection={this.props.projection}
+                            nodules={this.getNodules()}
                     />
                 </div>
                 <div height={viewImage.height}>
@@ -262,6 +300,11 @@ export default class CTSliceViewer extends Component {
                             trackStyle={style}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}
                             onChange={this.onSliderChange.bind(this)} />
+                </div>
+                <div>
+                    <button className='zoom-button' onClick={this.onZoomPlus.bind(this)}> + </button>
+                    <button className='zoom-button' onClick={this.onZoomMinus.bind(this)}> - </button>
+                    <button className='button' onClick={this.onUnzoom.bind(this)}> {"Unzoom"} </button>
                 </div>
             </div>
         )

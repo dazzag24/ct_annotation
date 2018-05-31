@@ -162,7 +162,7 @@ export default class CT_Store {
         }
 
         if (projection == 0) {
-            slice_no = shape[0]-1 - slice_no
+            slice_no = shape[0] - 1 - slice_no
         }
 
         console.log('slice', slice_no)

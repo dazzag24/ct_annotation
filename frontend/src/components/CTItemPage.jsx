@@ -30,7 +30,9 @@ export default class CTItemPage extends Component {
             images: [null, null, null],
             selection: [0, 0, 0, 0],
             drawCrops: false,
-            drawSlices: false
+            drawSlices: false,
+            wheelZoom: false,
+            nodules: []
         }
     }
 
@@ -42,14 +44,11 @@ export default class CTItemPage extends Component {
         this.setState({slice: a, images: images})
     }
 
-    onZoom(event, x, y, projection) {
+    onZoom(factor, projection) {
         let center = this.state.center
         let zoom = this.state.zoom
 
-        let delta = event.deltaY || event.detail || event.wheelDelta
-
-        zoom[projection] = Math.min(256, Math.max(1, zoom[projection] * (1 - delta / 1000)))
-        let id = this.props.match.params.id
+        zoom[projection] = Math.min(256, Math.max(1, zoom[projection] * factor))
 
         this.setState({center: center,  zoom: zoom})
     }
@@ -170,6 +169,36 @@ export default class CTItemPage extends Component {
         this.setState({drawSlices: !this.state.drawSlices})
     }
 
+    onWheelFunction() {
+        this.setState({wheelZoom: !this.state.wheelZoom})
+    }
+
+    onUnzoom(projection) {
+        let zoom = this.state.zoom
+        zoom[projection] = 1
+        this.setState({zoom: zoom})
+    }
+
+    onUnzoomAll(projection) {
+        this.setState({zoom: [1, 1, 1]})
+    }
+
+    onAddNodule(event, x, y, factor, projection) {
+        let id = this.props.match.params.id
+        let corner = this.props.ct_store.getCorner(id, projection)
+        let shape = this.props.ct_store.getShape(id, projection)
+        let nodules = this.state.nodules
+
+        switch (projection) {
+            case 0: var coordinates = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]; break
+            case 1: var coordinates = [y / factor[1] + corner[1], this.state.slice[projection], x / factor[0] + corner[0]]; break
+            case 2: var coordinates = [this.state.slice[projection], x / factor[0] + corner[0], y / factor[1] + corner[1]]; break
+        }
+
+        console.log(coordinates)
+        this.setState({nodules: [...this.state.nodules, coordinates]})
+    }
+
     renderImageViewer(item, projection) {
         const resizeFactor = 2
         const maxSlice = item.shape[projection]
@@ -191,13 +220,17 @@ export default class CTItemPage extends Component {
                            spacing={spacing} zoom={this.state.zoom[projection]}
                            shape={shape} shift={shift} selection={this.state.selection}
                            lines={this.state.lines} id={item.id} drawCrops={this.state.drawCrops}
+                           nodules={this.state.nodules}
                            drawSlices={this.state.drawSlices}
+                           wheelZoom={this.state.wheelZoom}
                            onSliceChange={this.onSliceChange.bind(this)} 
                            onZoom={this.onZoom.bind(this)}
                            onPointerDown={this.onPointerDown.bind(this)}
                            onPointerUp={this.onPointerUp.bind(this)}
                            onPointerMove={this.onPointerMove.bind(this)}
                            onPointerLeave={this.onPointerLeave.bind(this)}
+                           onUnzoom={this.onUnzoom.bind(this)}
+                           onAddNodule={this.onAddNodule.bind(this)}
                            />
         )
     }
@@ -208,16 +241,18 @@ export default class CTItemPage extends Component {
                 <div>
                 <button className='button' onClick={this.onDrawCrops.bind(this)}> {"Crops"} </button>
                 <button className='button' onClick={this.onDrawSlices.bind(this)}> {"Slices"} </button>
+                <button className='button' onClick={this.onWheelFunction.bind(this)}> {"Wheel"} </button>
+                <button className='button' onClick={this.onUnzoomAll.bind(this)}> {"Unzoom"} </button>
                 </div>
 
-                <div className='lt'>
+                <div className='xy'>
                     {this.renderImageViewer(item, 0)}
                 </div>
-                <div className='rt'>
-                    {this.renderImageViewer(item, 2)}
-                </div>
-                <div className='rb'>
+                <div className='xz'>
                     {this.renderImageViewer(item, 1)}
+                </div>
+                <div className='yz'>
+                    {this.renderImageViewer(item, 2)}
                 </div>
             </div>
         )

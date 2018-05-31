@@ -93,6 +93,11 @@ label.predict {
 	margin-top: 0.2rem;
 }
 
+.page.item .slice-viewer .zoom-button {
+    margin-left: 1rem;
+    margin-bottom: 0.2rem;
+}
+
 .page.item button.get-inference {
 	position: absolute;
 	top: 0;
@@ -140,22 +145,23 @@ label.predict {
 	background: #eeeeee;
 }
 
-.lt {
+.xy {
     position: absolute;
     height: 600px;
     width: 600px;
 }
 
-.rt {
+.yz {
     position: absolute;
     height: 600px;
     width: 600px;
-    left: 610px;
+    top: 700px;
 }
 
-.rb {
+.xz {
     position: absolute;
     height: 600px;
     width: 600px;
-    top: 610px;
+    left: 800px;
+    top: 700px;
 }
