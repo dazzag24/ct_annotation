@@ -165,16 +165,20 @@ export default class CT_Store {
             slice_no = shape[0] - 1 - slice_no
         }
 
-        console.log('slice', slice_no)
-
         for(let i=0; i < height; i++){
             for(let j=0; j < width; j++){
                 const coord = [j, i, slice_no]
                 const pixel = this.getPixel(image, shape, coord, axes, depth)
-                if (projection == 0) {
-                    var pos = (i * width + j) * 4
-                } else {
-                    var pos = height * width * 4 - (i * width + j) * 4
+                switch (projection) {
+                    case 0:
+                        var pos = (i * width + j) * 4
+                        break
+                    case 1:
+                        var pos = height * width * 4 - (i * width - j) * 4
+                        break
+                    case 2:
+                        var pos = ((height - i) * width + j) * 4
+                        break
                 }
                 bitmapImage[pos + 0] = pixel * colorCoef[0]
                 bitmapImage[pos + 1] = pixel * colorCoef[1]

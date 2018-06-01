@@ -199,25 +199,29 @@ export default class CTSliceViewer extends Component {
 
     getSlices() {
         let slices = this.props.slice
-        var x, y
+        let x, y, z
         let shift = this.props.shift
         let shape = this.props.shape
         switch (this.props.projection) {
             case 0:
                 x = this.props.slice[2]
                 y = this.props.slice[1]
+                z = this.props.slice[0]
                 break
             case 1:
-                x = shape[0] - this.props.slice[2]
+                x = this.props.slice[2]
                 y = this.props.slice[0]
+                z = this.props.slice[1]
                 break
             case 2:
-                x = shape[0] - this.props.slice[1]
+                x = this.props.slice[1]
                 y = this.props.slice[0]
+                z = this.props.slice[2]
                 break
         }
         return [(x - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom,
-                (y - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom]
+                (y - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom,
+                z]
     }
 
     getColor() {
@@ -241,14 +245,19 @@ export default class CTSliceViewer extends Component {
 
     getNodules() {
         let nodules = []
+        let shape = this.props.shape
         for (let nodule of this.props.nodules) {
             switch (this.props.projection) {
-                case 0: var coordinates = [nodule[0], nodule[1], nodule[2]]; break
-                case 1: var coordinates = [nodule[2], nodule[0], nodule[1]]; break
-                case 2: var coordinates = [nodule[1], nodule[2], nodule[0]]; break
+                case 0: var coordinates = [nodule[0], nodule[1], nodule[2], nodule[3]]; break
+                case 1: var coordinates = [nodule[0], nodule[2], nodule[1], nodule[3]]; break
+                case 2: var coordinates = [nodule[1], nodule[2], nodule[0], nodule[3]]; break
             }
+            console.log('nodule', coordinates)
             coordinates[0] = (coordinates[0] - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
             coordinates[1] = (coordinates[1] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
+            coordinates[2] = coordinates[2] * this.props.factor* this.props.spacing[2] * this.props.zoom
+            coordinates[3] = coordinates[3] * this.props.factor * this.props.zoom
+            console.log('coord', coordinates)
             nodules = [...nodules, coordinates]
         }
         return nodules

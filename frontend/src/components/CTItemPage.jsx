@@ -190,13 +190,16 @@ export default class CTItemPage extends Component {
         let nodules = this.state.nodules
 
         switch (projection) {
-            case 0: var coordinates = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]; break
-            case 1: var coordinates = [y / factor[1] + corner[1], this.state.slice[projection], x / factor[0] + corner[0]]; break
-            case 2: var coordinates = [this.state.slice[projection], x / factor[0] + corner[0], y / factor[1] + corner[1]]; break
+            case 0: var coordinates = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection], 20]; break
+            case 1: var coordinates = [x / factor[0] + corner[0], this.state.slice[projection], y / factor[1] + corner[1], 20]; break
+            case 2: var coordinates = [this.state.slice[projection], x / factor[0] + corner[0], y / factor[1] + corner[1], 20]; break
         }
 
-        console.log(coordinates)
         this.setState({nodules: [...this.state.nodules, coordinates]})
+    }
+
+    onClearNodules() {
+        this.setState({nodules: []})
     }
 
     renderImageViewer(item, projection) {
@@ -243,6 +246,7 @@ export default class CTItemPage extends Component {
                 <button className='button' onClick={this.onDrawSlices.bind(this)}> {"Slices"} </button>
                 <button className='button' onClick={this.onWheelFunction.bind(this)}> {"Wheel"} </button>
                 <button className='button' onClick={this.onUnzoomAll.bind(this)}> {"Unzoom"} </button>
+                <button className='button' onClick={this.onClearNodules.bind(this)}> {"Clear"} </button>
                 </div>
 
                 <div className='xy'>
