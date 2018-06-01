@@ -85,20 +85,8 @@ export default class CT_Store {
 
     getSpacing(id, projection) {
         const spacing = this.items.get(id).spacing
-        switch (projection) {
-            case 0:
-                var spacing_2d = [spacing[2], spacing[1], spacing[0]]
-                break
-            case 1:
-                var spacing_2d = [spacing[2], spacing[0], spacing[1]]
-                break
-            case 2:
-                var spacing_2d = [spacing[1], spacing[0], spacing[2]]
-                break
-        }
-        //spacing_2d[0] = spacing_2d[0]
-        //spacing_2d[1] = spacing_2d[1]
-        return spacing_2d
+        const axis = this.getAxis(projection)
+        return [spacing[axis[0]], spacing[axis[1]], spacing[axis[2]]]
     }
 
     getCorner(id, projection) {
@@ -107,18 +95,8 @@ export default class CT_Store {
 
     getShape(id, projection) {
         const shape = this.items.get(id).shape
-        switch (projection) {
-            case 0:
-                var shape_2d = [shape[2], shape[1]]
-                break
-            case 1:
-                var shape_2d = [shape[2], shape[0]]
-                break
-            case 2:
-                var shape_2d = [shape[1], shape[0]]
-                break
-        }
-        return shape_2d        
+        const axis = this.getAxis(projection)
+        return [shape[axis[0]], shape[axis[1]], shape[axis[2]]]       
     }
 
     getPixel(image, shape, coord, axes, depth=1) {
@@ -141,6 +119,19 @@ export default class CT_Store {
             pixel = Math.max.apply(null, arr)
         }
         return pixel
+    }
+
+    getAxis(projection) {
+        let axis
+        switch (projection) {
+            case 0:
+                axis = [2, 1, 0]; break
+            case 1:
+                axis = [2, 0, 1]; break
+            case 2:
+                axis = [1, 0, 2]; break
+        }
+        return axis
     }
 
     makeImage(id, image, shape, slice_no, projection=0, depth=1, color='grey', alpha=1) {
