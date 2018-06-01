@@ -248,16 +248,15 @@ export default class CTSliceViewer extends Component {
         let shape = this.props.shape
         for (let nodule of this.props.nodules) {
             switch (this.props.projection) {
-                case 0: var coordinates = [nodule[0], nodule[1], nodule[2], nodule[3]]; break
-                case 1: var coordinates = [nodule[0], nodule[2], nodule[1], nodule[3]]; break
-                case 2: var coordinates = [nodule[1], nodule[2], nodule[0], nodule[3]]; break
+                case 0: var coordinates = [nodule[0], nodule[1], nodule[2], nodule[3], nodule[3]]; break
+                case 1: var coordinates = [nodule[0], nodule[2], nodule[1], nodule[3], nodule[3]]; break
+                case 2: var coordinates = [nodule[1], nodule[2], nodule[0], nodule[3], nodule[3]]; break
             }
-            console.log('nodule', coordinates)
             coordinates[0] = (coordinates[0] - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
             coordinates[1] = (coordinates[1] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
-            coordinates[2] = coordinates[2] * this.props.factor* this.props.spacing[2] * this.props.zoom
+            coordinates[2] = coordinates[2]
             coordinates[3] = coordinates[3] * this.props.factor * this.props.zoom
-            console.log('coord', coordinates)
+            coordinates[4] = coordinates[4]  / this.props.spacing[2]
             nodules = [...nodules, coordinates]
         }
         return nodules
@@ -311,6 +310,7 @@ export default class CTSliceViewer extends Component {
                             onChange={this.onSliderChange.bind(this)} />
                 </div>
                 <div>
+                    <div> {this.props.slice[this.props.projection]} </div>
                     <button className='zoom-button' onClick={this.onZoomPlus.bind(this)}> + </button>
                     <button className='zoom-button' onClick={this.onZoomMinus.bind(this)}> - </button>
                     <button className='button' onClick={this.onUnzoom.bind(this)}> {"Unzoom"} </button>

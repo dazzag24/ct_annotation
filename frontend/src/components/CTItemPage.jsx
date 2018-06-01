@@ -74,7 +74,9 @@ export default class CTItemPage extends Component {
     }
 
     onPointerUp(event, x, y, projection) {
-        this.setState({down: null})
+        if (this.state.down != null) {
+            this.setState({down: null})
+        }
     }
 
     onPointerLeave(event, x, y, projection) {
@@ -190,9 +192,9 @@ export default class CTItemPage extends Component {
         let nodules = this.state.nodules
 
         switch (projection) {
-            case 0: var coordinates = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection], 20]; break
-            case 1: var coordinates = [x / factor[0] + corner[0], this.state.slice[projection], y / factor[1] + corner[1], 20]; break
-            case 2: var coordinates = [this.state.slice[projection], x / factor[0] + corner[0], y / factor[1] + corner[1], 20]; break
+            case 0: var coordinates = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection], 10]; break
+            case 1: var coordinates = [x / factor[0] + corner[0], this.state.slice[projection], y / factor[1] + corner[1], 10]; break
+            case 2: var coordinates = [this.state.slice[projection], x / factor[0] + corner[0], y / factor[1] + corner[1], 10]; break
         }
 
         this.setState({nodules: [...this.state.nodules, coordinates]})
@@ -200,6 +202,22 @@ export default class CTItemPage extends Component {
 
     onClearNodules() {
         this.setState({nodules: []})
+    }
+
+    selectNodule() {
+        let index=0
+        let nodules = this.state.nodules
+        let id = this.props.match.params.id
+        let spacing = this.props.ct_store.get(id).spacing
+        let shape = this.props.ct_store.get(id).shape
+        let s1 = Math.ceil(nodules[index][2])
+        let s2 = Math.ceil(nodules[index][1])
+        let s3 = Math.ceil(nodules[index][0])
+
+        let c1 = [nodules[index][0], nodules[index][1]]
+        let c2 = [nodules[index][0], nodules[index][2]]
+        let c3 = [nodules[index][1], nodules[index][2]]
+        this.setState({slice: [s1, s2, s3], images: [null, null, null], center: [c1,c2,c3]})
     }
 
     renderImageViewer(item, projection) {
@@ -257,6 +275,11 @@ export default class CTItemPage extends Component {
                 </div>
                 <div className='yz'>
                     {this.renderImageViewer(item, 2)}
+                </div>
+                <div  onClick={this.selectNodule.bind(this)} className='nodulesList'>
+                    {this.state.nodules.map(function(nodule, index){
+                            return <div> {nodule[0]} {nodule[1]} {nodule[2]} </div>
+                        })}
                 </div>
             </div>
         )

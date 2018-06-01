@@ -76,19 +76,17 @@ export default class ImageWithOpacity extends Component {
                         </Layer>
 
                         {this.props.nodules.map(function(nodule, index){
-                            let lower = nodule[2] - nodule[3]
-                            let upper = nodule[2] + nodule[3]
-                            let opacity
-                            console.log('bounds', lower, upper, slice[2])
-                            if ((slice[2] >= lower) && (slice[2] <= upper)) {
+                            let opacity, radius
+                            if (Math.abs(slice[2] - nodule[2]) < nodule[4]) {
                                 opacity = 0.3
+                                radius = Math.sqrt(nodule[4] * nodule[4] - (slice[2] - nodule[2]) * (slice[2] - nodule[2]))
+                                radius = radius * nodule[3] / nodule[4]
                             } else {
                                 opacity = 0
                             }
-                            console.log('opacity', (slice[2] >= lower) && (slice[2] <= upper), opacity)
                             return <Layer><Circle
                                 x={nodule[0]} y={nodule[1]}
-                                radius={nodule[3]}
+                                radius={radius}
                                 shadowBlur={5}
                                 opacity={opacity}
                                 fill={"green"}

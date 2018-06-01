@@ -165,3 +165,10 @@ label.predict {
     width: 600px;
     top: 700px;
 }
+
+.nodulesList {
+    position: absolute;
+    height: 600px;
+    width: 600px;
+    left: 800px;
+}
