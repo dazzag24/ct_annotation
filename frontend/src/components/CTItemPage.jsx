@@ -191,6 +191,16 @@ export default class CTItemPage extends Component {
         this.setState({nodules: []})
     }
 
+    onNoduleClick(event, index, x, y, factor, projection) {
+        let nodules = this.state.nodules
+        let id = this.props.match.params.id
+        let corner = this.props.ct_store.getCorner(id, projection)
+        let axis = this.props.ct_store.getReverseAxis(projection)
+        let shiftedNodule = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]
+        nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3]]
+        this.setState({nodules: nodules})
+    }
+
     selectNodule(index) {
         let nodules = this.state.nodules
         let id = this.props.match.params.id
@@ -238,6 +248,7 @@ export default class CTItemPage extends Component {
                            onPointerLeave={this.onPointerLeave.bind(this)}
                            onUnzoom={this.onUnzoom.bind(this)}
                            onAddNodule={this.onAddNodule.bind(this)}
+                           onNoduleClick={this.onNoduleClick.bind(this)}
                            />
         )
     }

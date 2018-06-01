@@ -43,7 +43,7 @@ export default class ImageWithOpacity extends Component {
         let label = lengthInMm.toFixed(nDigits) + ' mm'
         let dash = [33, 10]
 
-        return (    <Stage width={this.props.width} height={this.props.height}>
+        return (    <Stage  width={this.props.width} height={this.props.height}>
                         <Layer><Image image={this.props.image}/></Layer>
                         <Layer><Rect
                             x={0} y={0}
@@ -90,7 +90,7 @@ export default class ImageWithOpacity extends Component {
                           />
                         </Layer>
 
-                        {this.props.nodules.map(function(nodule, index){
+                        {this.props.nodules.map((nodule, index) => {
                             let opacity, radius
                             if (Math.abs(slice[2] - nodule[2]) < nodule[4]) {
                                 opacity = 0.3
@@ -99,7 +99,7 @@ export default class ImageWithOpacity extends Component {
                             } else {
                                 opacity = 0
                             }
-                            return <Layer><Circle
+                            return <Layer><Circle onClick={this.props.onNoduleClick.bind(this, index)}
                                 x={nodule[0]} y={nodule[1]}
                                 radius={radius}
                                 shadowBlur={5}

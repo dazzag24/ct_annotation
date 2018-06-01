@@ -144,6 +144,18 @@ export default class CTSliceViewer extends Component {
         this.props.onUnzoom(this.props.projection)
     }
 
+    onNoduleClick(index, event) {
+        let factors = this.getFactors()
+        let imageX = document.getElementById('image'+this.props.projection).getBoundingClientRect().x
+        let imageY = document.getElementById('image'+this.props.projection).getBoundingClientRect().y 
+
+        let x = (event.evt.clientX - imageX)
+        let y = (event.evt.clientY - imageY)
+        this.props.onNoduleClick(event, index, x, y, factors, this.props.projection)
+        event.stopPropagation()
+        event.preventDefault()
+    }
+
     getSlices() {
         let shift = this.props.shift
         let axis = this.props.ct_store.getAxis(this.props.projection)
@@ -204,7 +216,7 @@ export default class CTSliceViewer extends Component {
 
         return (
             <div className="slice-viewer">
-                <div className="image"
+                <div className="image" id={'image'+this.props.projection}
                      onWheel={this.onWheel.bind(this)}
                      onMouseDown={this.onPointerDown.bind(this)}
                      onMouseUp={this.onPointerUp.bind(this)}
@@ -221,6 +233,7 @@ export default class CTSliceViewer extends Component {
                             drawSlices={this.props.drawSlices}
                             projection={this.props.projection}
                             nodules={this.getNodules()}
+                            onNoduleClick={this.onNoduleClick.bind(this)}
                     />
                 </div>
                 <div height={viewImage.height}>
