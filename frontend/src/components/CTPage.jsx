@@ -1,40 +1,80 @@
 import React from 'react'
 import { Component } from 'react'
-import { Link } from 'react-router-dom'
-import { Grid, Row, Col, Button } from 'react-bootstrap'
-import { Icon } from 'react-fa'
 import { inject, observer } from 'mobx-react'
-import { values } from 'mobx'
+import ReactBootstrapSlider from 'react-bootstrap-slider'
 
+import VolumeView from './3dView.jsx'
+import LoadingSpinner from './LoadingSpinner.jsx'
 
 @inject("ct_store")
 @observer
 export default class CTPage extends Component {
-    renderItem(item) {
-        return (
-        <Col xs={6} sm={4} md={3} lg={2} key={item.id}>
-            <div className="item">
-            <Link to={this.props.match.path + item.id}>
-                <div>
-                    <Icon name="universal-access"/><br/>
-                    <span className="name">{item.name}</span>
-                </div>
-            </Link>
-            </div>
-        </Col>
-        )
+  constructor (props) {
+    super(props)
+    this.state = {
+      sliderCurrentValue: 0,
+      sliderStep: 1,
+      sliderMax: 128 - 1,
+      sliderMin: 0,
+      sliderOnPlay: false
     }
+  }
 
-    render() {
-        const self = this
-        return (
-        <div className="page ct">
-            <Grid fluid>
-            <Row>
-                { values(this.props.ct_store.items).map( item => self.renderItem(item) ) }
-            </Row>
-            </Grid>
-        </div>
-        )
+  sliderChangeValue (value) {
+    this.setState({sliderCurrentValue: value.target.value})
+  }
+
+  render() {
+    const self = this
+
+    const nodules = []
+    nodules.push([20, 98, 26, 7])
+    nodules.push([44, 122, 247, 6])
+    nodules.push([55, 136, 229, 7])
+
+    if (this.props.ct_store.items === undefined) {
+      return <div>Loading</div>
     }
+    const item = this.props.ct_store.get('01')
+    if (item === undefined) {
+      return <LoadingSpinner text='Загрузка снимка' />
+    }
+    if (item.image === null) {
+      return <LoadingSpinner text='Загрузка снимка' />
+    }
+    
+    // this.props.ct_store.getInference('01')
+    // if (item.nodules_true === null) {
+    //   return <div>Making prediction</div>
+    // }
+    // return (
+    //   <div>
+    //     <VolumeView image={[...Array(256 * 256).keys()]}
+    //       slice={this.state.sliderCurrentValue}
+    //       key={this.state.sliderCurrentValue}/>
+    //     <ReactBootstrapSlider value={this.state.sliderCurrentValue}
+    //       step={this.state.sliderStep}
+    //       max={this.state.sliderMax}
+    //       min={this.state.sliderMin}
+    //       change={this.sliderChangeValue.bind(this)}
+    //     />
+    //   </div>
+    // )
+    return (
+      <div>
+        <VolumeView image={item.image}
+          shape={item.shape}
+          spacing={[1.7, 1, 1]}
+          nodules={nodules}/>
+      </div>
+    )
+    // return (
+    //   <div>
+    //     <VolumeView image={[...Array(256 * 256 * 128).keys()].map(Math.sqrt)}
+    //       shape={[128, 256, 256]}
+    //       spacing={[1.7, 1, 1]}
+    //       nodules={nodules} />
+    //   </div>
+    // )
+  }
 }

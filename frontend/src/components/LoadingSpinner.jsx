@@ -8,7 +8,7 @@ export default class LoadingSpinner extends Component {
         return (
             <div className="loading">
                 <Icon name='spinner' spin></Icon>
-                { this.props.text ? <span>{this.props.text}</span> : null }
+                { this.props.text ? <span>{' '+ this.props.text}</span> : null }
             </div>
         )
     }
