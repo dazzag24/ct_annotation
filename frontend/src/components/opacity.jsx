@@ -1,6 +1,6 @@
 import React from 'react'
 import { Component } from 'react'
-import { Layer, Stage, Image, Circle, Line, Rect } from 'react-konva'
+import { Layer, Stage, Image, Circle, Line, Rect, Text } from 'react-konva'
 
 export default class ImageWithOpacity extends Component {
     render () {
@@ -29,6 +29,19 @@ export default class ImageWithOpacity extends Component {
         else {
             var lineOpacity = 0
         }
+
+        let scaleX = this.props.width * 0.8
+        let length = this.props.width * 0.12
+        let scaleY = this.props.height * 0.95
+        let lengthInMm = length / this.props.scale
+        let nDigits
+        if (length / this.props.scale > 10) {
+            nDigits = 0
+        } else {
+            nDigits = 1
+        }
+        let label = lengthInMm.toFixed(nDigits) + ' mm'
+        let dash = [33, 10]
 
         return (    <Stage width={this.props.width} height={this.props.height}>
                         <Layer><Image image={this.props.image}/></Layer>
@@ -65,6 +78,7 @@ export default class ImageWithOpacity extends Component {
                             stroke={this.props.color[1]}
                             strokeWidth={lineWidth}
                             opacity={lineOpacity}
+                            dash={dash}
                           />
                            </Layer>
                           <Layer><Line
@@ -72,6 +86,7 @@ export default class ImageWithOpacity extends Component {
                             stroke={this.props.color[0]}
                             strokeWidth={lineWidth}
                             opacity={lineOpacity}
+                            dash={dash}
                           />
                         </Layer>
 
@@ -93,6 +108,24 @@ export default class ImageWithOpacity extends Component {
                               />
                               </Layer>
                         })}
+
+                        <Layer><Line
+                            points={[scaleX, scaleY,
+                                     scaleX+length, scaleY]}
+                            stroke={'yellow'}
+                            strokeWidth={2}
+                          />
+                        </Layer>
+
+                        <Layer><Text
+                            x={scaleX}
+                            y={scaleY-20}
+                            fontSize={20}
+                            fill={'yellow'}
+                            text={label}
+                          />
+                        </Layer>
+
                      
                     </Stage>
         )

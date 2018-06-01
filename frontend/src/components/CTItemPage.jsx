@@ -94,10 +94,6 @@ export default class CTItemPage extends Component {
         } else {
             if (this.state.down == 0) {
                 this.dragging(event, x, y, factor, projection)
-            } else {
-                if (this.state.down == 0) {
-                    this.selecting(event, x, y, factor, projection)
-                }
             }
         }
     }
@@ -126,13 +122,6 @@ export default class CTItemPage extends Component {
         center[projection][0] = newCoords[0]
         center[projection][1] = newCoords[1]
         this.setState({center: center, start: start});
-    }
-
-    selecting(event, x, y, factor, projection) {
-            let selection = this.state.selection
-            selection[2] = x - selection[0]
-            selection[3] = y - selection[1]
-            this.setState({selection: selection})            
     }
 
     canBeCenter(id, event, x, y, projection) {
@@ -190,33 +179,30 @@ export default class CTItemPage extends Component {
         let corner = this.props.ct_store.getCorner(id, projection)
         let shape = this.props.ct_store.getShape(id, projection)
         let nodules = this.state.nodules
+        let axis = this.props.ct_store.getReverseAxis(projection)
 
-        switch (projection) {
-            case 0: var coordinates = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection], 10]; break
-            case 1: var coordinates = [x / factor[0] + corner[0], this.state.slice[projection], y / factor[1] + corner[1], 10]; break
-            case 2: var coordinates = [this.state.slice[projection], x / factor[0] + corner[0], y / factor[1] + corner[1], 10]; break
-        }
+        let base_coord = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]
+        let coord = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 10]
 
-        this.setState({nodules: [...this.state.nodules, coordinates]})
+        this.setState({nodules: [...this.state.nodules, coord]})
     }
 
     onClearNodules() {
         this.setState({nodules: []})
     }
 
-    selectNodule() {
-        let index=0
+    selectNodule(index) {
         let nodules = this.state.nodules
         let id = this.props.match.params.id
         let spacing = this.props.ct_store.get(id).spacing
         let shape = this.props.ct_store.get(id).shape
-        let s1 = Math.ceil(nodules[index][2])
+        let s1 = Math.ceil(nodules[index][0])
         let s2 = Math.ceil(nodules[index][1])
-        let s3 = Math.ceil(nodules[index][0])
+        let s3 = Math.ceil(nodules[index][2])
 
-        let c1 = [nodules[index][0], nodules[index][1]]
-        let c2 = [nodules[index][0], nodules[index][2]]
-        let c3 = [nodules[index][1], nodules[index][2]]
+        let c1 = [nodules[index][2], nodules[index][1]]
+        let c2 = [nodules[index][2], nodules[index][0]]
+        let c3 = [nodules[index][1], nodules[index][0]]
         this.setState({slice: [s1, s2, s3], images: [null, null, null], center: [c1,c2,c3]})
     }
 
@@ -276,9 +262,9 @@ export default class CTItemPage extends Component {
                 <div className='yz'>
                     {this.renderImageViewer(item, 2)}
                 </div>
-                <div  onClick={this.selectNodule.bind(this)} className='nodulesList'>
-                    {this.state.nodules.map(function(nodule, index){
-                            return <div> {nodule[0]} {nodule[1]} {nodule[2]} </div>
+                <div  className='nodulesList'>
+                    {this.state.nodules.map((nodule, index) => {
+                            return <button onClick={this.selectNodule.bind(this, index)}> {nodule[0]} {nodule[1]} {nodule[2]} </button>
                         })}
                 </div>
             </div>

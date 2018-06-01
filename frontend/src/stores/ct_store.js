@@ -134,6 +134,19 @@ export default class CT_Store {
         return axis
     }
 
+    getReverseAxis(projection) {
+        let axis
+        switch (projection) {
+            case 0:
+                axis = [2, 1, 0]; break
+            case 1:
+                axis = [1, 2, 0]; break
+            case 2:
+                axis = [1, 0, 2]; break
+        }
+        return axis
+    }
+
     makeImage(id, image, shape, slice_no, projection=0, depth=1, color='grey', alpha=1) {
         let axes, width, height
         switch (projection){

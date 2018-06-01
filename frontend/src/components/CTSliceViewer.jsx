@@ -37,69 +37,16 @@ export default class CTSliceViewer extends Component {
         this.setState({slice: slice})
     }
 
-    getSpacing() {
-        switch (this.props.projection) {
-            case 0:
-                var aspectRatio = [this.props.spacing[2], this.props.spacing[1]]
-                break
-            case 1:
-                var aspectRatio = [this.props.spacing[2], this.props.spacing[0]]
-                break
-            case 2:
-                var aspectRatio = [this.props.spacing[1], this.props.spacing[0]]
-                break
-        }
-        aspectRatio[0] = aspectRatio[0]
-        aspectRatio[1] = aspectRatio[1]
-        return aspectRatio
-    }
-
-    getShape() {
-        switch (this.props.projection) {
-            case 0:
-                var shape = [this.props.shape[2], this.props.shape[1]]
-                break
-            case 1:
-                var shape = [this.props.shape[2], this.props.shape[0]]
-                break
-            case 2:
-                var shape = [this.props.shape[1], this.props.shape[0]]
-                break
-        }
-        return shape        
-    }
-
     getLines(coordinates, width, height) {
-        const spacing = this.props.ct_store.get(this.props.id).spacing
-        let coordinates_yz = coordinates[2]
-        let coordinates_xz = coordinates[1]
-        let coordinates_xy = coordinates[0]
-        
-        let coordinates_yz_0 = coordinates_yz[0] //* spacing[1]
-        let coordinates_yz_1 = coordinates_yz[1] //* spacing[0]
-        let coordinates_yz_2 = coordinates_yz[2] //* spacing[1]
-        let coordinates_yz_3 = coordinates_yz[3] //* spacing[0]
-
-        let coordinates_xz_0 = coordinates_xz[0] //* spacing[2]
-        let coordinates_xz_1 = coordinates_xz[1] //* spacing[0]
-        let coordinates_xz_2 = coordinates_xz[2] //* spacing[2]
-        let coordinates_xz_3 = coordinates_xz[3] //* spacing[0]
-        
-        let coordinates_xy_0 = coordinates_xy[0] //* spacing[2]
-        let coordinates_xy_1 = coordinates_xy[1] //* spacing[1]
-        let coordinates_xy_2 = coordinates_xy[2] //* spacing[2]
-        let coordinates_xy_3 = coordinates_xy[3] //* spacing[1]
-
-
         switch (this.props.projection) {
             case 0:
-                var lines = [height - coordinates_yz_0 -  coordinates_yz_2, width - coordinates_xz_0 - coordinates_xz_2, coordinates_yz_2, coordinates_xz_2]
-                break
-            case 2:
-                var lines = [coordinates_xz_1, width - coordinates_xy_1 - coordinates_xy_3, coordinates_xz_3, coordinates_xy_3]
+                var lines = [coordinates[2][0], coordinates[1][0], coordinates[2][2], coordinates[1][2]]
                 break
             case 1:
-                var lines = [ coordinates_yz_1, width - coordinates_xy_2 - coordinates_xy_0, coordinates_yz_3, coordinates_xy_2]
+                var lines = [coordinates[2][1], coordinates[0][0], coordinates[2][3], coordinates[0][2]]
+                break
+            case 2:
+                var lines = [coordinates[1][1], coordinates[0][1], coordinates[1][3], coordinates[0][3]]
                 break
         }
         return lines
@@ -198,60 +145,31 @@ export default class CTSliceViewer extends Component {
     }
 
     getSlices() {
-        let slices = this.props.slice
-        let x, y, z
         let shift = this.props.shift
-        let shape = this.props.shape
-        switch (this.props.projection) {
-            case 0:
-                x = this.props.slice[2]
-                y = this.props.slice[1]
-                z = this.props.slice[0]
-                break
-            case 1:
-                x = this.props.slice[2]
-                y = this.props.slice[0]
-                z = this.props.slice[1]
-                break
-            case 2:
-                x = this.props.slice[1]
-                y = this.props.slice[0]
-                z = this.props.slice[2]
-                break
-        }
+        let axis = this.props.ct_store.getAxis(this.props.projection)
+        let x = this.props.slice[axis[0]]
+        let y = this.props.slice[axis[1]]
+        let z = this.props.slice[axis[2]]
+
         return [(x - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom,
                 (y - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom,
                 z]
     }
 
     getColor() {
-        let colors = ['red', 'red', 'red']
-        switch (this.props.projection) {
-            case 0:
-                colors[0] = 'green'
-                colors[1] = 'blue'
-                break
-            case 1:
-                colors[0] = 'green'
-                colors[2] = 'blue'
-                break
-            case 2:
-                colors[0] = 'blue'
-                colors[2] = 'green'
-                break
-        }
-        return colors
+        let colors = ['red', 'blue', 'green']
+        let axis = this.props.ct_store.getAxis(this.props.projection)
+        return [colors[axis[0]], colors[axis[1]], colors[axis[2]]]
     }
 
     getNodules() {
         let nodules = []
+        let coordinates
         let shape = this.props.shape
+        let axis = this.props.ct_store.getAxis(this.props.projection)
+
         for (let nodule of this.props.nodules) {
-            switch (this.props.projection) {
-                case 0: var coordinates = [nodule[0], nodule[1], nodule[2], nodule[3], nodule[3]]; break
-                case 1: var coordinates = [nodule[0], nodule[2], nodule[1], nodule[3], nodule[3]]; break
-                case 2: var coordinates = [nodule[1], nodule[2], nodule[0], nodule[3], nodule[3]]; break
-            }
+            coordinates = [nodule[axis[0]], nodule[axis[1]], nodule[axis[2]], nodule[3], nodule[3]]
             coordinates[0] = (coordinates[0] - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
             coordinates[1] = (coordinates[1] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
             coordinates[2] = coordinates[2]
@@ -282,6 +200,7 @@ export default class CTSliceViewer extends Component {
         let color = this.getColor()
         let slice = this.getSlices()
         let style = {backgroundColor: color[2]}
+        let scale = 1 / (this.props.spacing[0]) * this.props.factor * this.props.zoom
 
         return (
             <div className="slice-viewer">
@@ -297,6 +216,7 @@ export default class CTSliceViewer extends Component {
                             x2={x2} width2={width2}
                             color={color}
                             slice={slice}
+                            scale={scale}
                             drawCrops={this.props.drawCrops}
                             drawSlices={this.props.drawSlices}
                             projection={this.props.projection}
