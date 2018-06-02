@@ -27,13 +27,14 @@ export default class CTItemPage extends Component {
             zoom: [1, 1, 1],
             imageClicked: null,
             noduleClicked: null,
-            start: [0, 0],
+            start: null,
             images: [null, null, null],
             selection: [0, 0, 0, 0],
             drawCrops: false,
             drawSlices: false,
             wheelZoom: false,
             chooseRadius: false,
+            radiusRatio: 0,
             nodules: []
         }
     }
@@ -56,7 +57,6 @@ export default class CTItemPage extends Component {
     }
 
     onPointerDown(event, x, y, factors, projection) {
-        console.log('down', event.button)
         if (event.button == 0) {
             this.startMoving(event, x, y, projection)
         } else {
@@ -71,7 +71,6 @@ export default class CTItemPage extends Component {
     }
 
     noduleCenter(event, x, y, factors, projection) {
-        console.log('Select center')
         let id = this.props.match.params.id
         let corner = this.props.ct_store.getCorner(id, projection)
         let shape = this.props.ct_store.getShape(id, projection)
@@ -85,14 +84,13 @@ export default class CTItemPage extends Component {
     }
 
     onPointerUp(event, x, y, projection) {
-        console.log('up', event.button)
         if (this.state.imageClicked != null) {
-            this.setState({imageClicked: null, chooseRadius: false})
+            this.setState({imageClicked: null, chooseRadius: false, noduleClicked: null, noduleIndex: null})
         }
     }
 
     onPointerLeave(event, x, y, projection) {
-        this.setState({imageClicked: null, noduleClicked: null, chooseRadius: false})
+        this.setState({imageClicked: null, noduleClicked: null, chooseRadius: false, noduleIndex: null})
     }
 
     onPointerMove(event, x, y, factor, projection) {
@@ -101,14 +99,12 @@ export default class CTItemPage extends Component {
         let bottom = shape[1] * factor[1] / this.state.zoom[projection]
         let right = shape[0] * factor[0] / this.state.zoom[projection]
 
-        if (x <= delta || x >= right - delta || y <= 0 || y >= bottom - delta) {
-            this.onPointerUp(event, x, y, projection)
-        } else {
-            switch (this.state.imageClicked) {
-                case 0: this.moving(event, x, y, factor, projection); break
-                case 2: this.selectRadius(event, x, y, factor, projection); break
-            }
+        switch (this.state.imageClicked) {
+            case 0: this.moving(event, x, y, factor, projection); break
+            case 2: this.selectRadius(event, x, y, factor, projection); break
         }
+        let index = this.state.noduleIndex
+        this.onNodulePointerMove(event, index, x, y, factor, projection)
     }
 
     moving(event, x, y, factor, projection) {
@@ -165,13 +161,11 @@ export default class CTItemPage extends Component {
         return [x, y]
     }
 
-    selectRadius(event, x, y, factor, projection) {
-        nodules = this.state.nodules
-        let nodule = this.state.nodules[nodules.length - 1]
+    getRadius(index, x, y, factor, projection) {
         let id = this.props.match.params.id
         let corner = this.props.ct_store.getCorner(id, projection)
-        let shape = this.props.ct_store.getShape(id, projection)
         let nodules = this.state.nodules
+        let nodule = this.state.nodules[index]
         let axis = this.props.ct_store.getAxis(projection)
         let spacing = this.props.ct_store.getSpacing(id, projection)
 
@@ -179,9 +173,16 @@ export default class CTItemPage extends Component {
         let r1 = (base_coord[0] - nodule[axis[0]]) * spacing[0]
         let r2 = (base_coord[1] - nodule[axis[1]]) * spacing[1]
 
-        let radius = Math.ceil(Math.sqrt(r1 * r1 + r2 * r2))
+        return Math.sqrt(r1 * r1 + r2 * r2)
+    }
+
+    selectRadius(event, x, y, factor, projection) {
+        let nodules = this.state.nodules
+        let index = nodules.length - 1
+        let nodule = nodules[index]
+        let radius = this.getRadius(index, x, y, factor, projection)
         nodule[3] = radius
-        nodules[nodules.length - 1] = nodule
+        nodules[index] = nodule
         this.setState({nodules: nodules})
 
     }
@@ -213,30 +214,71 @@ export default class CTItemPage extends Component {
     }
 
     onNodulePointerDown(event, index, x, y, factor, projection) {
-        this.setState({noduleClicked: event.evt.button})
+        let selectedRadius = this.getRadius(index, x, y, factor, projection)
+
+        let id = this.props.match.params.id
+        let axis = this.props.ct_store.getAxis(projection)
+        let spacing = this.props.ct_store.getSpacing(id, projection)
+        
+        let noduleRadius = this.state.nodules[index][3]
+        let shiftInSlices = (this.state.slice[projection] - this.state.nodules[index][axis[2]]) * spacing[2]
+        
+        let radius = Math.sqrt(noduleRadius * noduleRadius - shiftInSlices * shiftInSlices)
+        
+        this.setState({noduleClicked: event.evt.button,
+                       radiusRatio: selectedRadius / radius,
+                       noduleIndex: index,
+                       start: [x, y]})
     }
 
     onNodulePointerUp(event, index, x, y, factor, projection) {
-        this.setState({noduleClicked: null, imageClicked: null})
+        this.setState({noduleClicked: null, imageClicked: null, radiusRatio: 0, noduleIndex: null})
     }
 
     onNodulePointerMove(event, index, x, y, factor, projection) {
         if (this.state.noduleClicked == 0) {
-            let nodules = this.state.nodules
-            let id = this.props.match.params.id
-            let corner = this.props.ct_store.getCorner(id, projection)
-            let axis = this.props.ct_store.getReverseAxis(projection)
-            let sliceAx = this.props.ct_store.getAxis(projection)[2]
-            let shiftedNodule = [x / factor[0] + corner[0], y / factor[1] + corner[1], nodules[index][sliceAx]]
-            nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3]]
-            this.setState({nodules: nodules})
+            if (this.state.radiusRatio < 0.8) {
+                this.moveNodule(event, index, x, y, factor, projection)
+            } else {
+                this.changeRadius(event, index, x, y, factor, projection)
+            }
         }
+    }
+
+    changeRadius(event, index, x, y, factor, projection) {
+        let selectedRadius = this.getRadius(index, x, y, factor, projection)
+        let id = this.props.match.params.id
+        let axis = this.props.ct_store.getAxis(projection)
+        let spacing = this.props.ct_store.getSpacing(id, projection)
+        
+        let nodules = this.state.nodules
+        let sliceRadius = selectedRadius / this.state.radiusRatio
+        let shiftInSlices = (this.state.slice[projection] - nodules[index][axis[2]]) * spacing[2]
+
+        console.log(shiftInSlices)
+
+        nodules[index][3] = Math.sqrt(sliceRadius * sliceRadius + shiftInSlices * shiftInSlices) 
+
+        this.setState({nodules: nodules})
+    }
+
+    moveNodule(event, index, x, y, factor, projection) {
+        console.log('x, y:', x, y, 'start:', this.state.start)
+        let nodules = this.state.nodules
+        let id = this.props.match.params.id
+        let corner = this.props.ct_store.getCorner(id, projection)
+        let axis = this.props.ct_store.getReverseAxis(projection)
+        let revAxis = this.props.ct_store.getAxis(projection)
+        let shiftedNodule = [nodules[index][revAxis[0]] + (x - this.state.start[0]) / factor[0],
+                             nodules[index][revAxis[1]] + (y - this.state.start[1]) / factor[1],
+                             nodules[index][revAxis[2]]]
+        nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3]]
+        this.setState({nodules: nodules, start: [x, y]})
     }
 
     onNoduleContextMenu(event, index, x, y, factor, projection) {
         if (!this.state.chooseRadius) {
             let nodules = this.state.nodules
-            console.log(nodules, index)
             nodules.splice(index, 1)
             this.setState({nodules: nodules})
         } else {
