@@ -25,13 +25,15 @@ export default class CTItemPage extends Component {
                 [null, null]
             ],
             zoom: [1, 1, 1],
-            down: null,
+            imageClicked: null,
+            noduleClicked: null,
             start: [0, 0],
             images: [null, null, null],
             selection: [0, 0, 0, 0],
             drawCrops: false,
             drawSlices: false,
             wheelZoom: false,
+            chooseRadius: false,
             nodules: []
         }
     }
@@ -53,34 +55,44 @@ export default class CTItemPage extends Component {
         this.setState({center: center,  zoom: zoom})
     }
 
-    onPointerDown(event, x, y, projection) {
+    onPointerDown(event, x, y, factors, projection) {
+        console.log('down', event.button)
         if (event.button == 0) {
-            this.startDragging(event, x, y, projection)
+            this.startMoving(event, x, y, projection)
         } else {
-            if (event.button == 0) {
-                this.startSelecting(event, x, y, projection)
+            if (event.button == 2) {
+                this.noduleCenter(event, x, y, factors, projection)
             }
         }
     }
 
-    startDragging(event, x, y, projection) {
-        this.setState({down: 0, start: [x, y]})
+    startMoving(event, x, y, projection) {
+        this.setState({imageClicked: event.button, start: [x, y]})
     }
 
-    startSelecting(event, x, y, projection) {
-        // let selection = this.state.selection
-        // selection = [x, y, 0, 0]
-        // this.setState({down: 0, selection: selection})
+    noduleCenter(event, x, y, factors, projection) {
+        console.log('Select center')
+        let id = this.props.match.params.id
+        let corner = this.props.ct_store.getCorner(id, projection)
+        let shape = this.props.ct_store.getShape(id, projection)
+        let nodules = this.state.nodules
+        let axis = this.props.ct_store.getReverseAxis(projection)
+
+        let base_coord = [x / factors[0] + corner[0], y / factors[1] + corner[1], this.state.slice[projection]]
+        let coord = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 0]
+
+        this.setState({imageClicked: event.button, chooseRadius: true, nodules: [...this.state.nodules, coord]})
     }
 
     onPointerUp(event, x, y, projection) {
-        if (this.state.down != null) {
-            this.setState({down: null})
+        console.log('up', event.button)
+        if (this.state.imageClicked != null) {
+            this.setState({imageClicked: null, chooseRadius: false})
         }
     }
 
     onPointerLeave(event, x, y, projection) {
-        this.setState({down: null})
+        this.setState({imageClicked: null, noduleClicked: null, chooseRadius: false})
     }
 
     onPointerMove(event, x, y, factor, projection) {
@@ -92,13 +104,14 @@ export default class CTItemPage extends Component {
         if (x <= delta || x >= right - delta || y <= 0 || y >= bottom - delta) {
             this.onPointerUp(event, x, y, projection)
         } else {
-            if (this.state.down == 0) {
-                this.dragging(event, x, y, factor, projection)
+            switch (this.state.imageClicked) {
+                case 0: this.moving(event, x, y, factor, projection); break
+                case 2: this.selectRadius(event, x, y, factor, projection); break
             }
         }
     }
 
-    dragging(event, x, y, factor, projection) {
+    moving(event, x, y, factor, projection) {
         let center = this.state.center
         let id = this.props.match.params.id
         let corner = this.props.ct_store.getCorner(id, projection)
@@ -152,6 +165,27 @@ export default class CTItemPage extends Component {
         return [x, y]
     }
 
+    selectRadius(event, x, y, factor, projection) {
+        nodules = this.state.nodules
+        let nodule = this.state.nodules[nodules.length - 1]
+        let id = this.props.match.params.id
+        let corner = this.props.ct_store.getCorner(id, projection)
+        let shape = this.props.ct_store.getShape(id, projection)
+        let nodules = this.state.nodules
+        let axis = this.props.ct_store.getAxis(projection)
+        let spacing = this.props.ct_store.getSpacing(id, projection)
+
+        let base_coord = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]
+        let r1 = (base_coord[0] - nodule[axis[0]]) * spacing[0]
+        let r2 = (base_coord[1] - nodule[axis[1]]) * spacing[1]
+
+        let radius = Math.ceil(Math.sqrt(r1 * r1 + r2 * r2))
+        nodule[3] = radius
+        nodules[nodules.length - 1] = nodule
+        this.setState({nodules: nodules})
+
+    }
+
     onDrawCrops() {
         this.setState({drawCrops: !this.state.drawCrops})
     }
@@ -174,31 +208,40 @@ export default class CTItemPage extends Component {
         this.setState({zoom: [1, 1, 1]})
     }
 
-    onAddNodule(event, x, y, factor, projection) {
-        let id = this.props.match.params.id
-        let corner = this.props.ct_store.getCorner(id, projection)
-        let shape = this.props.ct_store.getShape(id, projection)
-        let nodules = this.state.nodules
-        let axis = this.props.ct_store.getReverseAxis(projection)
-
-        let base_coord = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]
-        let coord = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 10]
-
-        this.setState({nodules: [...this.state.nodules, coord]})
-    }
-
     onClearNodules() {
         this.setState({nodules: []})
     }
 
-    onNoduleClick(event, index, x, y, factor, projection) {
-        let nodules = this.state.nodules
-        let id = this.props.match.params.id
-        let corner = this.props.ct_store.getCorner(id, projection)
-        let axis = this.props.ct_store.getReverseAxis(projection)
-        let shiftedNodule = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]
-        nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3]]
-        this.setState({nodules: nodules})
+    onNodulePointerDown(event, index, x, y, factor, projection) {
+        this.setState({noduleClicked: event.evt.button})
+    }
+
+    onNodulePointerUp(event, index, x, y, factor, projection) {
+        this.setState({noduleClicked: null, imageClicked: null})
+    }
+
+    onNodulePointerMove(event, index, x, y, factor, projection) {
+        if (this.state.noduleClicked == 0) {
+            let nodules = this.state.nodules
+            let id = this.props.match.params.id
+            let corner = this.props.ct_store.getCorner(id, projection)
+            let axis = this.props.ct_store.getReverseAxis(projection)
+            let sliceAx = this.props.ct_store.getAxis(projection)[2]
+            let shiftedNodule = [x / factor[0] + corner[0], y / factor[1] + corner[1], nodules[index][sliceAx]]
+            nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3]]
+            this.setState({nodules: nodules})
+        }
+    }
+
+    onNoduleContextMenu(event, index, x, y, factor, projection) {
+        if (!this.state.chooseRadius) {
+            let nodules = this.state.nodules
+            console.log(nodules, index)
+            nodules.splice(index, 1)
+            this.setState({nodules: nodules})
+        } else {
+            this.setState({chooseRadius: false})
+        }
     }
 
     selectNodule(index) {
@@ -247,8 +290,10 @@ export default class CTItemPage extends Component {
                            onPointerMove={this.onPointerMove.bind(this)}
                            onPointerLeave={this.onPointerLeave.bind(this)}
                            onUnzoom={this.onUnzoom.bind(this)}
-                           onAddNodule={this.onAddNodule.bind(this)}
-                           onNoduleClick={this.onNoduleClick.bind(this)}
+                           onNodulePointerDown={this.onNodulePointerDown.bind(this)}
+                           onNodulePointerUp={this.onNodulePointerUp.bind(this)}
+                           onNodulePointerMove={this.onNodulePointerMove.bind(this)}
+                           onNoduleContextMenu={this.onNoduleContextMenu.bind(this)}
                            />
         )
     }
@@ -275,7 +320,9 @@ export default class CTItemPage extends Component {
                 </div>
                 <div  className='nodulesList'>
                     {this.state.nodules.map((nodule, index) => {
-                            return <button onClick={this.selectNodule.bind(this, index)}> {nodule[0]} {nodule[1]} {nodule[2]} </button>
+                            return <button onClick={this.selectNodule.bind(this, index)}>
+                                {nodule[0].toFixed(0)} {nodule[1].toFixed(0)} {nodule[2].toFixed(0)} {nodule[3].toFixed(0)}
+                            </button>
                         })}
                 </div>
             </div>

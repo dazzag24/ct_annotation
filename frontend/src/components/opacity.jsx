@@ -99,7 +99,13 @@ export default class ImageWithOpacity extends Component {
                             } else {
                                 opacity = 0
                             }
-                            return <Layer><Circle onClick={this.props.onNoduleClick.bind(this, index)}
+                            return <Layer><Circle
+                                // onClick={this.props.onNoduleClick.bind(this, index)}
+                                onMouseDown={this.props.onNodulePointerDown.bind(this, index)}
+                                onMouseUp={this.props.onNodulePointerUp.bind(this, index)}
+                                onMouseMove={this.props.onNodulePointerMove.bind(this, index)}
+                                // onMouseLeave={this.props.onNodulePointerLeave.bind(this, index)}
+                                onContextMenu={this.props.onNoduleContextMenu.bind(this, index)}
                                 x={nodule[0]} y={nodule[1]}
                                 radius={radius}
                                 shadowBlur={5}

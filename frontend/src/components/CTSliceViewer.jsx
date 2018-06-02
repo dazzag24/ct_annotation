@@ -80,14 +80,14 @@ export default class CTSliceViewer extends Component {
         return [this.props.factor * this.props.zoom * spacing[0], this.props.factor * this.props.zoom * spacing[1]]
     }
 
-    onAddNodule(event) {
-        event.preventDefault();
-        let factors = this.getFactors()
-        let currentTargetRect = event.target.getBoundingClientRect()
-        let x = (event.clientX - currentTargetRect.left)
-        let y = (event.clientY - currentTargetRect.top)
-        this.props.onAddNodule(event, x, y, factors, this.props.projection)        
-    }
+    // onAddNodule(event) {
+    //     event.preventDefault();
+    //     let factors = this.getFactors()
+    //     let currentTargetRect = event.target.getBoundingClientRect()
+    //     let x = (event.clientX - currentTargetRect.left)
+    //     let y = (event.clientY - currentTargetRect.top)
+    //     this.props.onAddNodule(event, x, y, factors, this.props.projection)        
+    // }
 
     onPointerMove(event) {
         let factors = this.getFactors()
@@ -144,16 +144,47 @@ export default class CTSliceViewer extends Component {
         this.props.onUnzoom(this.props.projection)
     }
 
-    onNoduleClick(index, event) {
-        let factors = this.getFactors()
+    getPointerPositionOnNodule(event) {
         let imageX = document.getElementById('image'+this.props.projection).getBoundingClientRect().x
         let imageY = document.getElementById('image'+this.props.projection).getBoundingClientRect().y 
 
         let x = (event.evt.clientX - imageX)
         let y = (event.evt.clientY - imageY)
-        this.props.onNoduleClick(event, index, x, y, factors, this.props.projection)
-        event.stopPropagation()
-        event.preventDefault()
+
+        return {x: x, y: y}
+    }
+
+    onNodulePointerDown(index, event) {
+        const {x, y} = this.getPointerPositionOnNodule(event)
+        let factors = this.getFactors()
+        this.props.onNodulePointerDown(event, index, x, y, factors, this.props.projection)
+        event.evt.stopPropagation()
+        event.evt.preventDefault()
+    }
+
+
+    onNodulePointerUp(index, event) {
+        console.log('pointerUp')
+        const {x, y} = this.getPointerPositionOnNodule(event)
+        let factors = this.getFactors()
+        this.props.onNodulePointerUp(event, index, x, y, factors, this.props.projection)
+        event.evt.stopPropagation()
+        event.evt.preventDefault()
+    }
+
+
+    onNodulePointerMove(index, event) {
+        const {x, y} = this.getPointerPositionOnNodule(event)
+        let factors = this.getFactors()
+        this.props.onNodulePointerMove(event, index, x, y, factors, this.props.projection)
+    }
+
+    onNoduleContextMenu(index, event) {
+        const {x, y} = this.getPointerPositionOnNodule(event)
+        let factors = this.getFactors()
+        this.props.onNoduleContextMenu(event, index, x, y, factors, this.props.projection)
+        event.evt.stopPropagation()
+        event.evt.preventDefault()      
     }
 
     getSlices() {
@@ -221,8 +252,7 @@ export default class CTSliceViewer extends Component {
                      onMouseDown={this.onPointerDown.bind(this)}
                      onMouseUp={this.onPointerUp.bind(this)}
                      onMouseMove={this.onPointerMove.bind(this)}
-                     onMouseLeave={this.props.onPointerLeave.bind(this)}
-                     onContextMenu={this.onAddNodule.bind(this)}>
+                     onMouseLeave={this.props.onPointerLeave.bind(this)}>
                      <ImageWithOpacity width={viewImage.width} height={viewImage.height} image={viewImage}
                             y1={y1} height1={height1}
                             x2={x2} width2={width2}
@@ -233,7 +263,11 @@ export default class CTSliceViewer extends Component {
                             drawSlices={this.props.drawSlices}
                             projection={this.props.projection}
                             nodules={this.getNodules()}
-                            onNoduleClick={this.onNoduleClick.bind(this)}
+                            onNodulePointerDown={this.onNodulePointerDown.bind(this)}
+                            onNodulePointerUp={this.onNodulePointerUp.bind(this)}
+                            onNodulePointerMove={this.onNodulePointerMove.bind(this)}
+                            // onNodulePointerLeave={this.props.onPointerLeave.bind(this)}
+                            onNoduleContextMenu={this.onNoduleContextMenu.bind(this)}
                     />
                 </div>
                 <div height={viewImage.height}>
