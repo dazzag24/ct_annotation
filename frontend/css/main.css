@@ -54,7 +54,7 @@ body {
 .page.item h2 {
 	font-size: 1rem;
 	margin-top: 0.5rem;
-  margin-left: 0.6rem;
+    margin-left: 0.6rem;
 }
 
 .page.item .image-viewer {
@@ -69,33 +69,58 @@ body {
 	margin-left: 0.1rem;
 }
 
-.nodules.react-toggle--checked .react-toggle-track {
-  background-color: #990000;
-}
-label.nodules {
-  color: #990000;
-}
-.predict.react-toggle--checked .react-toggle-track {
-  background-color: #009900;
-}
-label.predict {
-  color: #009900;
+.header {
+    background-color: gray;
+    border:2px solid black;
+    padding: 0.2rem;
+    margin-bottom: 0.5rem;
 }
 
+.header > .toolbar {
+    margin-left: 0.1rem;
+}
 
-.page.item .slice-viewer {
-	display: flex;
+.controls {
+    margin-left: 1rem;
+    margin-bottom: 0.2rem;}
+
+.dropdown-menu {
+    font-size: 2vmin;
+    padding: 0.2rem;
+    width: 1rem;
+}
+
+.toolbar > button {
+    margin-left: 0.1rem;
+    width: 2rem;
+    height: 1rem;
+    font-size: 2vmin;
+    padding: 0;
+    text-align: center;
+}
+
+.controls > button {
+    margin-left: 0.1rem;
+    width: 2rem;
+    height: 1rem;
+    font-size: 2vmin;
+    padding: 0;
+    text-align: center;
+}
+
+.dropdown-menu > li > a {
+    cursor: pointer;
+}
+
+.nodulesList > li {
+    cursor: pointer;
+    font-size: 2vmin;
 }
 
 .page.item .slice-viewer .slider {
 	height: 98%;
-	margin-left: 0.2rem;
+	margin-left: 0.4rem;
 	margin-top: 0.2rem;
-}
-
-.page.item .slice-viewer .zoom-button {
-    margin-left: 1rem;
-    margin-bottom: 0.2rem;
 }
 
 .page.item button.get-inference {
@@ -146,7 +171,6 @@ label.predict {
 }
 
 .xy {
-    position: absolute;
     height: 600px;
     width: 600px;
 }
@@ -164,11 +188,4 @@ label.predict {
     height: 600px;
     width: 600px;
     top: 700px;
-}
-
-.nodulesList {
-    position: absolute;
-    height: 600px;
-    width: 600px;
-    left: 800px;
 }

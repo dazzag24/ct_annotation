@@ -53,10 +53,7 @@ export default class CTSliceViewer extends Component {
     }
 
     drawImage(image, item, projection) {
-        //const item = this.props.ct_store.get(this.props.match.params.id)
-        const coordinates = item.coordinates
         const spacing = this.props.spacing
-        // const lines = this.getLines(coordinates, image.width, image.height)
 
         const canvas = document.createElement('canvas')
         canvas.width = image.width / this.props.zoom
@@ -157,7 +154,7 @@ export default class CTSliceViewer extends Component {
     onNodulePointerDown(index, event) {
         const {x, y} = this.getPointerPositionOnNodule(event)
         let factors = this.getFactors()
-        this.props.onNodulePointerDown(event, index, x, y, factors, this.props.projection)
+        this.props.onNodulePointerDown(event.evt, index, x, y, factors, this.props.projection)
         event.evt.stopPropagation()
         event.evt.preventDefault()
     }
@@ -166,7 +163,7 @@ export default class CTSliceViewer extends Component {
     onNodulePointerUp(index, event) {
         const {x, y} = this.getPointerPositionOnNodule(event)
         let factors = this.getFactors()
-        this.props.onNodulePointerUp(event, index, x, y, factors, this.props.projection)
+        this.props.onNodulePointerUp(event.evt, index, x, y, factors, this.props.projection)
         event.evt.stopPropagation()
         event.evt.preventDefault()
     }
@@ -175,13 +172,13 @@ export default class CTSliceViewer extends Component {
     onNodulePointerMove(index, event) {
         const {x, y} = this.getPointerPositionOnNodule(event)
         let factors = this.getFactors()
-        this.props.onNodulePointerMove(event, index, x, y, factors, this.props.projection)
+        this.props.onNodulePointerMove(event.evt, index, x, y, factors, this.props.projection)
     }
 
     onNoduleContextMenu(index, event) {
         const {x, y} = this.getPointerPositionOnNodule(event)
         let factors = this.getFactors()
-        this.props.onNoduleContextMenu(event, index, x, y, factors, this.props.projection)
+        this.props.onNoduleContextMenu(event.evt, index, x, y, factors, this.props.projection)
         event.evt.stopPropagation()
         event.evt.preventDefault()      
     }
@@ -189,9 +186,7 @@ export default class CTSliceViewer extends Component {
     getSlices() {
         let shift = this.props.shift
         let axis = this.props.ct_store.getAxis(this.props.projection)
-        let x = this.props.slice[axis[0]]
-        let y = this.props.slice[axis[1]]
-        let z = this.props.slice[axis[2]]
+        let [x, y, z] = [this.props.slice[axis[0]], this.props.slice[axis[1]], this.props.slice[axis[2]]]
 
         return [(x - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom,
                 (y - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom,
@@ -246,7 +241,9 @@ export default class CTSliceViewer extends Component {
 
         return (
             <div className="slice-viewer">
+                <Row><Col>
                 <div className="image" id={'image'+this.props.projection}
+                     style={{display: 'inline'}}
                      onWheel={this.onWheel.bind(this)}
                      onMouseDown={this.onPointerDown.bind(this)}
                      onMouseUp={this.onPointerUp.bind(this)}
@@ -268,27 +265,36 @@ export default class CTSliceViewer extends Component {
                             onNoduleContextMenu={this.onNoduleContextMenu.bind(this)}
                     />
                 </div>
-                <div height={viewImage.height}>
+                </Col>
+                <Col>
+                <div height={viewImage.height} style={{display: 'inline'}}>
                     <Slider className="slider" vertical={this.props.vertical}
                             trackStyle={style}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}
                             onChange={this.onSliderChange.bind(this)} />
                 </div>
-                <div>
-                    <div> {this.props.slice[this.props.projection]} </div>
-                    <button className='zoom-button' onClick={this.onZoomPlus.bind(this)}> + </button>
-                    <button className='zoom-button' onClick={this.onZoomMinus.bind(this)}> - </button>
-                    <button className='button' onClick={this.onUnzoom.bind(this)}> {"Unzoom"} </button>
+                </Col>
+                </Row>
+                <Row>
+                <Col>
+                <div className='controls'>
+                    <button className='btn btn-light zoom-button' onClick={this.onZoomPlus.bind(this)}> + </button>
+                    <button className='btn btn-light zoom-button' onClick={this.onZoomMinus.bind(this)}> - </button>
+                    <button className='btn btn-light button' onClick={this.onUnzoom.bind(this)}> {"Unzoom"} </button>
                 </div>
+                </Col>
+                </Row>
             </div>
         )
     }
 }
 
+// <div> {(this.props.slice[this.props.projection] * this.props.spacing[2]).toFixed(1)} mm </div>
+
 CTSliceViewer.propTypes = {
     minSlice: PropTypes.number,
     maxSlice: PropTypes.number.isRequired,
-    slice: PropTypes.number,
+    slice: PropTypes.array,
     vertical: PropTypes.bool,
     reverse: PropTypes.bool,
 }

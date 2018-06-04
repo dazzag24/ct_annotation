@@ -93,7 +93,7 @@ export default class ImageWithOpacity extends Component {
                         {this.props.nodules.map((nodule, index) => {
                             let opacity, radius
                             if (Math.abs(slice[2] - nodule[2]) < nodule[4]) {
-                                opacity = 0.3
+                                opacity = 0.6
                                 radius = Math.sqrt(nodule[4] * nodule[4] - (slice[2] - nodule[2]) * (slice[2] - nodule[2]))
                                 radius = radius * nodule[3] / nodule[4]
                             } else {
