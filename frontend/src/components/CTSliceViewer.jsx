@@ -164,7 +164,6 @@ export default class CTSliceViewer extends Component {
 
 
     onNodulePointerUp(index, event) {
-        console.log('pointerUp')
         const {x, y} = this.getPointerPositionOnNodule(event)
         let factors = this.getFactors()
         this.props.onNodulePointerUp(event, index, x, y, factors, this.props.projection)
@@ -266,7 +265,6 @@ export default class CTSliceViewer extends Component {
                             onNodulePointerDown={this.onNodulePointerDown.bind(this)}
                             onNodulePointerUp={this.onNodulePointerUp.bind(this)}
                             onNodulePointerMove={this.onNodulePointerMove.bind(this)}
-                            // onNodulePointerLeave={this.props.onPointerLeave.bind(this)}
                             onNoduleContextMenu={this.onNoduleContextMenu.bind(this)}
                     />
                 </div>

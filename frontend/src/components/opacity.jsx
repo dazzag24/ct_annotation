@@ -43,37 +43,37 @@ export default class ImageWithOpacity extends Component {
         let label = lengthInMm.toFixed(nDigits) + ' mm'
         let dash = [33, 10]
 
-        return (    <Stage  width={this.props.width} height={this.props.height}>
-                        <Layer><Image image={this.props.image}/></Layer>
-                        <Layer><Rect
+        return (    <Stage className={'stage'} width={this.props.width} height={this.props.height}>
+                        <Layer className={'layer'}><Image image={this.props.image}/></Layer>
+                        <Layer className={'layer'}><Rect
                             x={0} y={0}
                             width={w1+w2+w3} height={h1}
                             fill={color}
                             opacity={opacity}
                           />
                         </Layer>
-                        <Layer><Rect
+                        <Layer className={'layer'}><Rect
                             x={0} y={h1}
                             width={w1} height={h2}
                             fill={color}
                             opacity={opacity}
                           />
                         </Layer>
-                        <Layer><Rect
+                        <Layer className={'layer'}><Rect
                             x={w1+w2} y={h1}
                             width={w3} height={h2}
                             fill={color}
                             opacity={opacity}
                           />
                         </Layer>
-                        <Layer><Rect
+                        <Layer className={'layer'}><Rect
                             x={0} y={h1+h2}
                             width={w1+w2+w3} height={h3}
                             fill={color}
                             opacity={opacity}
                           />
                         </Layer>
-                        <Layer><Line
+                        <Layer className={'layer'}><Line
                             points={[0, slice[1], this.props.width, slice[1]]}
                             stroke={this.props.color[1]}
                             strokeWidth={lineWidth}
@@ -81,7 +81,7 @@ export default class ImageWithOpacity extends Component {
                             dash={dash}
                           />
                            </Layer>
-                          <Layer><Line
+                          <Layer className={'layer'}><Line
                             points={[slice[0], 0, slice[0], this.props.height]}
                             stroke={this.props.color[0]}
                             strokeWidth={lineWidth}
@@ -99,12 +99,10 @@ export default class ImageWithOpacity extends Component {
                             } else {
                                 opacity = 0
                             }
-                            return <Layer><Circle
-                                // onClick={this.props.onNoduleClick.bind(this, index)}
+                            return <Layer key={'layer'+index}><Circle
                                 onMouseDown={this.props.onNodulePointerDown.bind(this, index)}
                                 onMouseUp={this.props.onNodulePointerUp.bind(this, index)}
                                 onMouseMove={this.props.onNodulePointerMove.bind(this, index)}
-                                // onMouseLeave={this.props.onNodulePointerLeave.bind(this, index)}
                                 onContextMenu={this.props.onNoduleContextMenu.bind(this, index)}
                                 x={nodule[0]} y={nodule[1]}
                                 radius={radius}

@@ -57,12 +57,9 @@ export default class CTItemPage extends Component {
     }
 
     onPointerDown(event, x, y, factors, projection) {
-        if (event.button == 0) {
-            this.startMoving(event, x, y, projection)
-        } else {
-            if (event.button == 2) {
-                this.noduleCenter(event, x, y, factors, projection)
-            }
+        switch (event.button) {
+            case 0: this.startMoving(event, x, y, projection); break
+            case 2: this.startNodule(event, x, y, factors, projection); break
         }
     }
 
@@ -70,7 +67,7 @@ export default class CTItemPage extends Component {
         this.setState({imageClicked: event.button, start: [x, y]})
     }
 
-    noduleCenter(event, x, y, factors, projection) {
+    startNodule(event, x, y, factors, projection) {
         let id = this.props.match.params.id
         let corner = this.props.ct_store.getCorner(id, projection)
         let shape = this.props.ct_store.getShape(id, projection)
@@ -80,13 +77,27 @@ export default class CTItemPage extends Component {
         let base_coord = [x / factors[0] + corner[0], y / factors[1] + corner[1], this.state.slice[projection]]
         let coord = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 0]
 
-        this.setState({imageClicked: event.button, chooseRadius: true, nodules: [...this.state.nodules, coord]})
+        this.setState({imageClicked: event.button,
+                       chooseRadius: true,
+                       nodules: [...this.state.nodules, coord],
+                       start: [x, y]
+                   })
     }
 
     onPointerUp(event, x, y, projection) {
         if (this.state.imageClicked != null) {
-            this.setState({imageClicked: null, chooseRadius: false, noduleClicked: null, noduleIndex: null})
+            let nodules = this.removeZeroNodule()
+            this.setState({nodules: nodules, imageClicked: null, chooseRadius: false, noduleClicked: null, noduleIndex: null})
         }
+    }
+
+    removeZeroNodule() {
+        let nodules = this.state.nodules
+        let nodule = nodules[nodules.length-1]
+        if (nodule[3] == 0) {
+            nodules.splice(nodules.length-1, 1)
+        }
+        return nodules
     }
 
     onPointerLeave(event, x, y, projection) {
@@ -163,17 +174,23 @@ export default class CTItemPage extends Component {
 
     getRadius(index, x, y, factor, projection) {
         let id = this.props.match.params.id
-        let corner = this.props.ct_store.getCorner(id, projection)
         let nodules = this.state.nodules
         let nodule = this.state.nodules[index]
         let axis = this.props.ct_store.getAxis(projection)
         let spacing = this.props.ct_store.getSpacing(id, projection)
 
-        let base_coord = [x / factor[0] + corner[0], y / factor[1] + corner[1], this.state.slice[projection]]
+        let base_coord = this.getAbsoluteCoordinates(x, y, factor, projection)
         let r1 = (base_coord[0] - nodule[axis[0]]) * spacing[0]
         let r2 = (base_coord[1] - nodule[axis[1]]) * spacing[1]
 
         return Math.sqrt(r1 * r1 + r2 * r2)
+    }
+
+    getAbsoluteCoordinates(x, y, factor, projection) {
+        let id = this.props.match.params.id
+        let corner = this.props.ct_store.getCorner(id, projection)
+
+        return [x / factor[0] + corner[0], y / factor[1] + corner[1]]
     }
 
     selectRadius(event, x, y, factor, projection) {
@@ -181,7 +198,20 @@ export default class CTItemPage extends Component {
         let index = nodules.length - 1
         let nodule = nodules[index]
         let radius = this.getRadius(index, x, y, factor, projection)
-        nodule[3] = radius
+
+        x = this.getAbsoluteCoordinates(x, y, factor, projection)[0]
+        y = this.getAbsoluteCoordinates(x, y, factor, projection)[1]
+
+        let start = this.state.start
+
+        let new_x = (x +  this.getAbsoluteCoordinates(start[0], start[1], factor, projection)[0]) / 2
+        let new_y = (y +  this.getAbsoluteCoordinates(start[0], start[1], factor, projection)[1]) / 2
+
+        let coord = [new_x, new_y, this.state.slice[projection]]
+        
+        let axis = this.props.ct_store.getReverseAxis(projection)
+
+        nodule = [coord[axis[0]], coord[axis[1]], coord[axis[2]], radius]
         nodules[index] = nodule
         this.setState({nodules: nodules})
 
@@ -255,15 +285,12 @@ export default class CTItemPage extends Component {
         let sliceRadius = selectedRadius / this.state.radiusRatio
         let shiftInSlices = (this.state.slice[projection] - nodules[index][axis[2]]) * spacing[2]
 
-        console.log(shiftInSlices)
-
         nodules[index][3] = Math.sqrt(sliceRadius * sliceRadius + shiftInSlices * shiftInSlices) 
 
         this.setState({nodules: nodules})
     }
 
     moveNodule(event, index, x, y, factor, projection) {
-        console.log('x, y:', x, y, 'start:', this.state.start)
         let nodules = this.state.nodules
         let id = this.props.match.params.id
         let corner = this.props.ct_store.getCorner(id, projection)
@@ -362,7 +389,7 @@ export default class CTItemPage extends Component {
                 </div>
                 <div  className='nodulesList'>
                     {this.state.nodules.map((nodule, index) => {
-                            return <button onClick={this.selectNodule.bind(this, index)}>
+                            return <button key={'nodule'+index} onClick={this.selectNodule.bind(this, index)}>
                                 {nodule[0].toFixed(0)} {nodule[1].toFixed(0)} {nodule[2].toFixed(0)} {nodule[3].toFixed(0)}
                             </button>
                         })}
