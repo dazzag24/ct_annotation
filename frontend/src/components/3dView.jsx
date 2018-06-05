@@ -53,10 +53,10 @@ function makeCanvas (image, shape, normalTo, slice, p, mipDepth = 1) {
       break
     case 'Y':
       [low, high] = bounds(shape[1], slice, mipDepth)
-      for (var i = 0; i < shape[0]; i++) {
-        for (var j = 0; j < shape[2]; j++) {
+      for (i = 0; i < shape[0]; i++) {
+        for (j = 0; j < shape[2]; j++) {
           var vals = []
-          for (var k = low; k < high; k++) {
+          for (k = low; k < high; k++) {
             vals.push(image[shape[1] * shape[2] * i + k + shape[2] * j] % 256)
           }
           var val = Math.max(...vals)
@@ -69,9 +69,9 @@ function makeCanvas (image, shape, normalTo, slice, p, mipDepth = 1) {
       break
     case 'Z':
       [low, high] = bounds(shape[0], slice, mipDepth)
-      for (var i = 0; i < shape[1] * shape[2]; i++) {
+      for (i = 0; i < shape[1] * shape[2]; i++) {
         var vals = []
-        for (var k = low; k < high; k++) {
+        for (k = low; k < high; k++) {
           vals.push(image[shape[1] * shape[2] * k + i] % 256)
         }
         var val = Math.max(...vals)
@@ -420,6 +420,7 @@ export default class VolumeView extends Component {
     const meshZ = new THREE.Mesh(planeZ, planeZMaterial)
     meshZ.position.set(0, 0, -ofZ)
     meshZ.name = 'sliceZ'
+    mash.visible = this.showZ
     scene.add(meshZ)
     planes.push(meshZ)
 
@@ -664,8 +665,6 @@ export default class VolumeView extends Component {
           }
           that.setState({nCount: that.state.nCount + 1})
         }
-        for (var i = 0; i < intersects.length; i++) {
-        }
       }
     }
 
@@ -676,7 +675,6 @@ export default class VolumeView extends Component {
       var ray = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize())
       var intersects = ray.intersectObjects(nodules)
       if (intersects.length > 0) {
-        // intersects[ 0 ].object.material.color.setHex( 0x0000ff )
         if (that.changeNodule === null) {
           handleEditNodule(intersects[ 0 ].object)
           that.changeNodule = intersects[ 0 ].object
