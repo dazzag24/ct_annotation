@@ -1,4 +1,5 @@
 import React from 'react'
+import { inject, observer } from 'mobx-react'
 import { Component } from 'react'
 
 function bounds (size, slice, depth) {
@@ -170,30 +171,23 @@ function handleEditNodule (nodule) {
 const noduleDefaultRadius = 5
 const noduleDefaultOpacity = 0.45
 
+@inject("store_3d")
+@observer
 export default class VolumeView extends Component {
   constructor (props) {
     super(props)
-    this.state = {
-      sliceZ: 128 - 1,
-      sliceX: 256 - 1,
-      sliceY: 256 - 1,
-      radius: 5,
-      alphaP: 0,
-      threshold: 200,
-      viewMode2D: false,
-      plane: 1,
-      nCount: this.props.nodules.length,
-      mipDepth: 1
-    }
-    this.showY = true
-    this.showZ = true
-    this.showX = true
-    this.showNodules = true
-    this.enableZoom = true
-    this.layout3 = false
-    this.changeNodule = null
-    this.setRadius = 5
-    this.setOpacity = 0.45
+    let store = this.props.store_3d.get(this.props.id)
+    this.state = store.state
+    this.showY = store.showY
+    this.showZ = store.showZ
+    this.showX = store.showX
+    this.showNodules = store.showNodules
+    this.enableZoom = store.enableZoom
+    this.layout3 = store.layout3
+    this.changeNodule = store.changeNodule
+    this.setRadius = store.setRadius
+    this.setOpacity = store.setOpacity
+
     this.start = this.start.bind(this)
     this.stop = this.stop.bind(this)
     this.animate = this.animate.bind(this)
@@ -417,8 +411,9 @@ export default class VolumeView extends Component {
       transparent: true
     })
     planeZMaterial.needsUpdate = true
+    planeZMaterial.visible = this.showZ
     const meshZ = new THREE.Mesh(planeZ, planeZMaterial)
-    meshZ.position.set(0, 0, -ofZ)
+    meshZ.position.set(0, 0, ofZ * (1 - 2 * this.state.sliceZ / dZ))
     meshZ.name = 'sliceZ'
     scene.add(meshZ)
     planes.push(meshZ)
@@ -433,8 +428,9 @@ export default class VolumeView extends Component {
       transparent: true
     })
     planeXMaterial.needsUpdate = true
+    planeXMaterial.visible = this.showX
     const meshX = new THREE.Mesh(planeX, planeXMaterial)
-    meshX.position.set(0, -ofX, 0)
+    meshX.position.set(0, ofX * (1 - 2 * this.state.sliceX / dX), 0)
     meshX.rotation.set(Math.PI / 2, 0, 0)
     meshX.name = 'sliceX'
     scene.add(meshX)
@@ -450,8 +446,9 @@ export default class VolumeView extends Component {
       transparent: true
     })
     planeYMaterial.needsUpdate = true
+    planeYMaterial.visible = this.showY
     const meshY = new THREE.Mesh(planeY, planeYMaterial)
-    meshY.position.set(ofY, 0, 0)
+    meshY.position.set(-ofY * (1 - 2 * this.state.sliceY / dY), 0, 0)
     meshY.rotation.set(Math.PI / 2, -Math.PI / 2, 0)
     meshY.name = 'sliceY'
     scene.add(meshY)
@@ -481,7 +478,8 @@ export default class VolumeView extends Component {
       noduleCenters.push([nd[2], nd[1], nd[0], nd[3]])
     }
 
-    var gui = new dat.GUI()
+    var gui = new dat.GUI({ autoPlace: false } )
+    gui.domElement.id = 'gui';
     gui.width = 280
     var folderGeneral = gui.addFolder('Режима просмотра')
     var folderSlice = gui.addFolder('Положение среза')
@@ -508,9 +506,9 @@ export default class VolumeView extends Component {
         if (that.state.plane === 3) {
           camera.position.set(2 - ofY, 0, 0)
         }
-        showZ.setValue(true)
-        showX.setValue(true)
-        showY.setValue(true)
+        showZ.setValue(this.state.showZ)
+        showX.setValue(this.state.showX)
+        showY.setValue(this.state.showY)
       } else {
         folder3D.open()
         folder2D.close()
@@ -762,10 +760,12 @@ export default class VolumeView extends Component {
     this.noduleCenters = noduleCenters
 
     this.mount.appendChild(this.renderer.domElement)
+    this.mount.appendChild(gui.domElement)
     this.start()
   }
 
   componentWillUnmount () {
+    this.props.store_3d.update(this.props.id, this)
     this.stop()
     this.mount.removeChild(this.renderer.domElement)
   }
@@ -793,7 +793,7 @@ export default class VolumeView extends Component {
   render () {
     const self = this
     return (
-      <div className='fullscreen'
+      <div 
         ref={(mount) => { this.mount = mount }} />
     )
   }

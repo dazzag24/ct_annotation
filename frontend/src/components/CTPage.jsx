@@ -4,6 +4,7 @@ import { inject, observer } from 'mobx-react'
 import ReactBootstrapSlider from 'react-bootstrap-slider'
 
 import VolumeView from './3dView.jsx'
+import CTItemPage from './2dView.jsx'
 import LoadingSpinner from './LoadingSpinner.jsx'
 
 @inject("ct_store")
@@ -12,16 +13,17 @@ export default class CTPage extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      sliderCurrentValue: 0,
-      sliderStep: 1,
-      sliderMax: 128 - 1,
-      sliderMin: 0,
-      sliderOnPlay: false
+      mode: true,
+      components: [null, null]
     }
   }
 
   sliderChangeValue (value) {
     this.setState({sliderCurrentValue: value.target.value})
+  }
+
+  changeMode() {
+    this.setState({mode: !this.state.mode})
   }
 
   render() {
@@ -60,12 +62,20 @@ export default class CTPage extends Component {
     //     />
     //   </div>
     // )
+
     return (
       <div>
-        <VolumeView image={item.image}
-          shape={item.shape}
-          spacing={[1.7, 1, 1]}
-          nodules={nodules}/>
+        <button onClick={this.changeMode.bind(this)}> {(this.state.mode) ? '3D' : '2D'} </button>
+        {(!this.state.mode)
+            ?
+            <CTItemPage id={'01'}/>
+            :
+            <VolumeView id={'01'}
+              image={item.image}
+              shape={item.shape}
+              spacing={[1.7, 1, 1]}
+              nodules={nodules}/>
+        }
       </div>
     )
     // return (

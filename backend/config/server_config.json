@@ -1,6 +1,6 @@
 {
     "ct_path": "C:\\repo\\_data\\CT\\*",
-    "model_path": "C:\\repo\\_data\\models\\UNet",
-    "logger_config_path": ".\\backend\\config\\logger_config.json",
+    "model_path": "C:\\repo\\_data\\models",
+    "logger_config_path": ".\\config\\logger_config.json",
     "only_selected": "True"
 }

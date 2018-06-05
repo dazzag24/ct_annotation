@@ -3,7 +3,7 @@ import { Component } from 'react'
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom'
 import { Provider } from 'mobx-react'
 
-import { ecg_store, ct_store } from '../stores/stores'
+import { ecg_store, ct_store, store_3d } from '../stores/stores'
 import CTPage from './CTPage.jsx'
 import CTItemPage from './CTItemPage.jsx'
 
@@ -14,7 +14,7 @@ export default class App extends Component {
 
   render() {
     return (
-    <Provider ecg_store={ecg_store} ct_store={ct_store}>
+    <Provider ecg_store={ecg_store} ct_store={ct_store} store_3d={store_3d}>
         <Router>
         <div>
             <Switch>

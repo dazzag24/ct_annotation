@@ -113,7 +113,8 @@ class CtController:
         item_ds = self.build_item_ds(data)
         batch = (item_ds >> self.ppl_render_scan).next_batch()
         image = gzip.compress(batch.images.astype(np.uint8))
-        item_data = dict(image=image, shape=batch.images.shape)
+        spacing = tuple([float(i) for i in batch.spacing[0]])
+        item_data = dict(image=image, shape=batch.images.shape, spacing=spacing)
         return dict(data={**item_data, **data}, meta=meta)
 
     def get_inference(self, data, meta):
