@@ -171,6 +171,8 @@ function handleEditNodule (nodule) {
 const noduleDefaultRadius = 5
 const noduleDefaultOpacity = 0.45
 
+@inject("ct_store")
+@inject("store_2d")
 @inject("store_3d")
 @observer
 export default class VolumeView extends Component {
@@ -191,6 +193,14 @@ export default class VolumeView extends Component {
     this.start = this.start.bind(this)
     this.stop = this.stop.bind(this)
     this.animate = this.animate.bind(this)
+  }
+
+  update2DSlices(sliceZ, sliceX, sliceY) {
+    let shape = this.props.ct_store.get(this.props.id).shape
+    sliceZ = shape[0] - sliceZ
+    sliceX = this.state.sliceX
+    sliceY = this.state.sliceY
+    this.props.store_2d.setSlices(this.props.id, [sliceZ, sliceX, sliceY])
   }
 
   componentWillUpdate (nextProps, nextState) {
@@ -350,6 +360,7 @@ export default class VolumeView extends Component {
         )
       }
     }
+    this.update2DSlices(this.state.sliceZ, this.state.sliceX, this.state.sliceY)
   }
 
   componentDidMount () {

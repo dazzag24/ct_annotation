@@ -9,7 +9,7 @@ const item_template = {
     name: null,
     image: null,
     shape: null,
-    spacing:null,
+    spacing: null,
     nodules_true: null, 
     nodules_predicted: null,
     waitingData: false,
@@ -93,7 +93,6 @@ export default class CT_Store {
     }
 
     getSpacing(id, projection) {
-        console.log(projection, typeof projection)
         const spacing = this.items.get(id).spacing
         const axis = this.getAxis(projection)
         return [spacing[axis[0]], spacing[axis[1]], spacing[axis[2]]]
@@ -269,7 +268,7 @@ export default class CT_Store {
                     bitmapImage[pos + 3] = 255
             }
         }
-        return new ImageData(bitmapImage, shape[2], shape[1])
+        return new ImageData(bitmapImage, width, height)
     }
 
     makeImage3d(image, shape, slice_no, color='grey', alpha=1){
