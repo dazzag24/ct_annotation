@@ -4,7 +4,7 @@ import { API_Events } from './const'
 
 const item_template = {
     state : {
-      sliceZ: 0,
+      sliceZ: 128,
       sliceX: 0,
       sliceY: 0,
       radius: 5,
@@ -25,6 +25,22 @@ const item_template = {
     changeNodule : null,
     setRadius : 5,
     setOpacity : 0.45,
+    scene : null,
+    camera : null,
+    renderer : null,
+    cropFrame : null,
+    crop : null,
+    frameLine : null,
+    meshZ : null,
+    meshX : null,
+    meshY : null,
+    planeZMaterial : null,
+    planeXMaterial : null,
+    planeYMaterial : null,
+    controls : null,
+    nodules : null,
+    planes : null,
+    noduleCenters : null,
 }
 
 export default class Store_3D {
@@ -34,6 +50,7 @@ export default class Store_3D {
 
     update(id, obj) {
         let store = {}
+        console.log(obj.camera)
 
         for (let key in item_template) {
                 store.state = obj.state
@@ -46,6 +63,23 @@ export default class Store_3D {
                 store.changeNodule = obj.changeNodule
                 store.setRadius = obj.setRadius
                 store.setOpacity = obj.setOpacity
+
+                store.scene = obj.scene
+                store.camera = obj.camera
+                store.renderer = obj.renderer
+                store.cropFrame = obj.cropFrame
+                store.crop = obj.crop
+                store.frameLine = obj.frameLine
+                store.meshZ = obj.meshZ
+                store.meshX = obj.meshX
+                store.meshY = obj.meshY
+                store.planeZMaterial = obj.planeZMaterial
+                store.planeXMaterial = obj.planeXMaterial
+                store.planeYMaterial = obj.planeYMaterial
+                store.controls = obj.controls
+                store.nodules = obj.nodules
+                store.planes = obj.planes
+                store.noduleCenters = obj.noduleCenters
         }
         this.items.set(id, store)
     }

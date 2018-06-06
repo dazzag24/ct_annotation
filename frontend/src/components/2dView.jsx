@@ -30,7 +30,6 @@ export default class CTItemPage extends Component {
     }
 
     onDepthChange(projection, depth) {
-        console.log(depth)
         let a = this.state.depth
         let images = this.state.images
         a[projection] = depth
