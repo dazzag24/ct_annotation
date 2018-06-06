@@ -28,7 +28,7 @@ function makeCanvas (image, shape, normalTo, slice, p, mipDepth = 1) {
       height = shape[1]
       break
     default:
-      throw 'Unknow value of normalTo'
+      throw 'Unknown value of normalTo'
   }
   canvas.width = width
   canvas.height = height
@@ -83,7 +83,7 @@ function makeCanvas (image, shape, normalTo, slice, p, mipDepth = 1) {
       }
       break
     default:
-      throw 'Unknow value of normalTo'
+      throw 'Unknown value of normalTo'
   }
   ctx.putImageData(imgData, 0, 0)
   return canvas
@@ -195,23 +195,26 @@ export default class VolumeView extends Component {
     this.animate = this.animate.bind(this)
   }
 
-  update2DSlices(sliceZ, sliceX, sliceY) {
+  update2DSlices() {
     let shape = this.props.ct_store.get(this.props.id).shape
-    sliceZ = shape[0] - sliceZ
-    sliceX = this.state.sliceX
-    sliceY = this.state.sliceY
-    this.props.store_2d.setSlices(this.props.id, [sliceZ, sliceX, sliceY])
+    let sliceZ = this.state.sliceZ
+    let sliceX = this.state.sliceX
+    let sliceY = this.state.sliceY
+    this.props.store_2d.setSlices(this.props.id, [shape[0] - sliceZ, sliceX, sliceY])
   }
 
   componentWillUpdate (nextProps, nextState) {
-    const factor = Math.max(...multArrays(this.props.shape, this.props.spacing))
-    const ofX = this.props.shape[2] * this.props.spacing[2] / (factor * 2)
-    const ofY = this.props.shape[1] * this.props.spacing[1] / (factor * 2)
-    const ofZ = this.props.shape[0] * this.props.spacing[0] / (factor * 2)
-    const dX = this.props.shape[2] - 1
-    const dY = this.props.shape[1] - 1
-    const dZ = this.props.shape[0] - 1
-    const unitSize = 2 * ofX / (this.props.shape[2] * this.props.spacing[2])
+    const shape = this.props.ct_store.get(this.props.id).shape
+    const spacing = this.props.ct_store.get(this.props.id).spacing
+
+    const factor = Math.max(...multArrays(this.props.ct_store.get(this.props.id).shape, this.props.ct_store.get(this.props.id).spacing))
+    const ofX = shape[2] * spacing[2] / (factor * 2)
+    const ofY = shape[1] * spacing[1] / (factor * 2)
+    const ofZ = shape[0] * spacing[0] / (factor * 2)
+    const dX = shape[2] - 1
+    const dY = shape[1] - 1
+    const dZ = shape[0] - 1
+    const unitSize = 2 * ofX / (shape[2] * spacing[2])
 
     if (nextState.viewMode2D) {
       this.controls.enableRotate = false
@@ -224,8 +227,8 @@ export default class VolumeView extends Component {
         [ofX, ofY, ofZ], [dX, dY, dZ])
       switch (nextState.plane) {
         case 1:
-          const canvasZ = makeCanvas(this.props.image,
-            this.props.shape, 'Z', nextState.sliceZ, 1, nextState.mipDepth)
+          const canvasZ = makeCanvas(this.props.ct_store.get(this.props.id).image,
+            this.props.ct_store.get(this.props.id).shape, 'Z', nextState.sliceZ, 1, nextState.mipDepth)
           const textureZ = new THREE.Texture(canvasZ)
           textureZ.needsUpdate = true
           this.planeZMaterial.map = textureZ
@@ -242,8 +245,8 @@ export default class VolumeView extends Component {
           }
           break
         case 2:
-          const canvasX = makeCanvas(this.props.image,
-            this.props.shape, 'X', nextState.sliceX, 1, nextState.mipDepth)
+          const canvasX = makeCanvas(this.props.ct_store.get(this.props.id).image,
+            this.props.ct_store.get(this.props.id).shape, 'X', nextState.sliceX, 1, nextState.mipDepth)
           const textureX = new THREE.Texture(canvasX)
           textureX.needsUpdate = true
           this.planeXMaterial.map = textureX
@@ -260,8 +263,8 @@ export default class VolumeView extends Component {
           }
           break
         case 3:
-          const canvasY = makeCanvas(this.props.image,
-            this.props.shape, 'Y', nextState.sliceY, 1, nextState.mipDepth)
+          const canvasY = makeCanvas(this.props.ct_store.get(this.props.id).image,
+            this.props.ct_store.get(this.props.id).shape, 'Y', nextState.sliceY, 1, nextState.mipDepth)
           const textureY = new THREE.Texture(canvasY)
           textureY.needsUpdate = true
           this.planeYMaterial.map = textureY
@@ -300,7 +303,7 @@ export default class VolumeView extends Component {
     if (nextState.sliceZ !== this.state.sliceZ ||
       nextState.alphaP !== this.state.alphaP ||
       this.state.viewMode2D) {
-      const canvasZ = makeCanvas(this.props.image, this.props.shape, 'Z', nextState.sliceZ, nextState.alphaP)
+      const canvasZ = makeCanvas(this.props.ct_store.get(this.props.id).image, this.props.ct_store.get(this.props.id).shape, 'Z', nextState.sliceZ, nextState.alphaP)
       const textureZ = new THREE.Texture(canvasZ)
       textureZ.needsUpdate = true
       this.planeZMaterial.map = textureZ
@@ -311,7 +314,7 @@ export default class VolumeView extends Component {
     if (nextState.sliceX !== this.state.sliceX ||
       nextState.alphaP !== this.state.alphaP ||
       this.state.viewMode2D) {
-      const canvasX = makeCanvas(this.props.image, this.props.shape, 'X', nextState.sliceX, nextState.alphaP)
+      const canvasX = makeCanvas(this.props.ct_store.get(this.props.id).image, this.props.ct_store.get(this.props.id).shape, 'X', nextState.sliceX, nextState.alphaP)
       const textureX = new THREE.Texture(canvasX)
       textureX.needsUpdate = true
       this.planeXMaterial.map = textureX
@@ -322,7 +325,7 @@ export default class VolumeView extends Component {
     if (nextState.sliceY !== this.state.sliceY ||
       nextState.alphaP !== this.state.alphaP ||
       this.state.viewMode2D) {
-      const canvasY = makeCanvas(this.props.image, this.props.shape, 'Y', nextState.sliceY, nextState.alphaP)
+      const canvasY = makeCanvas(this.props.ct_store.get(this.props.id).image, this.props.ct_store.get(this.props.id).shape, 'Y', nextState.sliceY, nextState.alphaP)
       const textureY = new THREE.Texture(canvasY)
       textureY.needsUpdate = true
       this.planeYMaterial.map = textureY
@@ -341,9 +344,9 @@ export default class VolumeView extends Component {
         nextState.sliceX !== this.state.sliceX) {
         this.cropFrame.visible = true
         this.crop.visible = true
-        const cropGeometry = makeCrop(this.props.image,
+        const cropGeometry = makeCrop(this.props.ct_store.get(this.props.id).image,
           nextState.sliceX, nextState.sliceY, nextState.sliceZ,
-          this.props.shape, this.props.spacing, nextState.radius, nextState.threshold
+          this.props.ct_store.get(this.props.id).shape, this.props.ct_store.get(this.props.id).spacing, nextState.radius, nextState.threshold
         )
         this.crop.geometry = cropGeometry
         const cubeGeometry = new THREE.BoxGeometry(
@@ -360,21 +363,23 @@ export default class VolumeView extends Component {
         )
       }
     }
-    this.update2DSlices(this.state.sliceZ, this.state.sliceX, this.state.sliceY)
+    this.update2DSlices()
   }
 
   componentDidMount () {
     const width = window.innerWidth
     const height = window.innerHeight
+    const shape = this.props.ct_store.get(this.props.id).shape
+    const spacing = this.props.ct_store.get(this.props.id).spacing
 
-    const factor = Math.max(...multArrays(this.props.shape, this.props.spacing))
-    const ofX = this.props.shape[2] * this.props.spacing[2] / (factor * 2)
-    const ofY = this.props.shape[1] * this.props.spacing[1] / (factor * 2)
-    const ofZ = this.props.shape[0] * this.props.spacing[0] / (factor * 2)
-    const dX = this.props.shape[2] - 1
-    const dY = this.props.shape[1] - 1
-    const dZ = this.props.shape[0] - 1
-    const unitSize = 2 * ofX / (this.props.shape[2] * this.props.spacing[2])
+    const factor = Math.max(...multArrays(shape, spacing))
+    const ofX = shape[2] * spacing[2] / (factor * 2)
+    const ofY = shape[1] * spacing[1] / (factor * 2)
+    const ofZ = shape[0] * spacing[0] / (factor * 2)
+    const dX = shape[2] - 1
+    const dY = shape[1] - 1
+    const dZ = shape[0] - 1
+    const unitSize = 2 * ofX / (shape[2] * spacing[2])
 
     var nodules = []
     var noduleCenters = []
@@ -389,9 +394,9 @@ export default class VolumeView extends Component {
     const frameLine = new THREE.LineSegments(frameEdges, new THREE.LineBasicMaterial({ color: 0xffffff }))
     scene.add(frameLine)
 
-    const cropGeometry = makeCrop(this.props.image,
+    const cropGeometry = makeCrop(this.props.ct_store.get(this.props.id).image,
       this.state.sliceX, this.state.sliceY, this.state.sliceZ,
-      this.props.shape, this.props.spacing, this.state.radius, this.state.threshold)
+      this.props.ct_store.get(this.props.id).shape, this.props.ct_store.get(this.props.id).spacing, this.state.radius, this.state.threshold)
     const cropMaterial = new THREE.PointsMaterial({
       size: 10,
       sizeAttenuation: false,
@@ -412,7 +417,7 @@ export default class VolumeView extends Component {
       ofZ * (1 - 2 * this.state.sliceZ / dZ))
     scene.add(cropFrame)
 
-    const canvasZ = makeCanvas(this.props.image, this.props.shape, 'Z', this.state.sliceZ, this.state.alphaP)
+    const canvasZ = makeCanvas(this.props.ct_store.get(this.props.id).image, shape, 'Z', this.state.sliceZ, this.state.alphaP)
     const textureZ = new THREE.Texture(canvasZ)
     textureZ.needsUpdate = true
     const planeZ = new THREE.PlaneGeometry(2 * ofX, 2 * ofY, 1, 1)
@@ -429,7 +434,7 @@ export default class VolumeView extends Component {
     scene.add(meshZ)
     planes.push(meshZ)
 
-    const canvasX = makeCanvas(this.props.image, this.props.shape, 'X', this.state.sliceX, this.state.alphaP)
+    const canvasX = makeCanvas(this.props.ct_store.get(this.props.id).image, shape, 'X', this.state.sliceX, this.state.alphaP)
     const textureX = new THREE.Texture(canvasX)
     textureX.needsUpdate = true
     const planeX = new THREE.PlaneGeometry(2 * ofY, 2 * ofZ, 1, 1)
@@ -447,7 +452,7 @@ export default class VolumeView extends Component {
     scene.add(meshX)
     planes.push(meshX)
 
-    const canvasY = makeCanvas(this.props.image, this.props.shape, 'Y', this.state.sliceY, this.state.alphaP)
+    const canvasY = makeCanvas(this.props.ct_store.get(this.props.id).image, shape, 'Y', this.state.sliceY, this.state.alphaP)
     const textureY = new THREE.Texture(canvasY)
     textureY.needsUpdate = true
     const planeY = new THREE.PlaneGeometry(2 * ofX, 2 * ofZ, 1, 1)
@@ -465,8 +470,9 @@ export default class VolumeView extends Component {
     scene.add(meshY)
     planes.push(meshY)
 
-    for (var i = 0; i < this.props.nodules.length; i++) {
-      var nd = this.props.nodules[i]
+    for (var i = 0; i < this.state.nodules.length; i++) {
+      var nd = this.state.nodules[i].slice()
+      nd[0] = this.props.ct_store.get(this.props.id).shape[0] - nd[0]
       var sphereGeometry = new THREE.SphereGeometry(noduleDefaultRadius * unitSize, 128, 128)
       var sphereMaterial = new THREE.MeshBasicMaterial({
         color: 0x009900,

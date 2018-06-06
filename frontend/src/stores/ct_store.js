@@ -271,44 +271,6 @@ export default class CT_Store {
         return new ImageData(bitmapImage, width, height)
     }
 
-    makeImage3d(image, shape, slice_no, color='grey', alpha=1){
-        const imageLen = shape[1] * shape[2]
-        const start = slice_no * imageLen
-        const end = (slice_no + 1) * imageLen
-        const slice = image.slice(start, end)
-        const bitmapImage = new Uint8ClampedArray(imageLen * 4)
-
-        let colorCoef
-        switch (color){
-            case 'grey'  : colorCoef = [1, 1, 1]; break;
-            case 'red'   : colorCoef = [1, 0, 0]; break;
-            case 'green' : colorCoef = [0, 1, 0]; break;
-            case 'blue'  : colorCoef = [0, 0, 1]; break;
-            default: colorCoef = color
-        }
-
-        for(let i=0; i < shape[1]; i++){
-            for(let j=0; j < shape[2]; j++){
-                const pos = i*shape[1]*4 + j*4
-                const from = i*shape[1] + j
-                bitmapImage[pos + 0] = slice[from] * colorCoef[0]
-                bitmapImage[pos + 1] = slice[from] * colorCoef[1]
-                bitmapImage[pos + 2] = slice[from] * colorCoef[2]
-                if(alpha < 1)
-                    bitmapImage[pos + 3] = (slice[from] > 0) ? Math.ceil(alpha * 255) : 0
-                else
-                    bitmapImage[pos + 3] = 255
-            }
-        }
-        return new ImageData(bitmapImage, shape[2], shape[1])
-    }
-                
-    getImageSlice3d(id, slice_no, projection=0, depth=3) {
-        const item = this.items.get(id)
-        return this.makeImage3d(item.image, item.shape, slice_no)
-    }
-
-
     getImageSlice2d(id, slice_no, projection=0, depth=3) {
         const item = this.items.get(id)
         return this.makeImage2d(id, item.image, item.shape, slice_no, projection, depth, 'grey', 1)

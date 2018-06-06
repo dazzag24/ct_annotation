@@ -66,15 +66,11 @@ export default class CTPage extends Component {
     return (
       <div>
         <button onClick={this.changeMode.bind(this)}> {(this.state.mode) ? '3D' : '2D'} </button>
-        {(!this.state.mode)
+        {(this.state.mode)
             ?
             <CTItemPage id={'01'}/>
             :
-            <VolumeView id={'01'}
-              image={item.image}
-              shape={item.shape}
-              spacing={[1.7, 1, 1]}
-              nodules={nodules}/>
+            <VolumeView id={'01'}/>
         }
       </div>
     )

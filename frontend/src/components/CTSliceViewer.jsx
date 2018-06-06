@@ -29,12 +29,7 @@ export default class CTSliceViewer extends Component {
 
     onSliderChange(value) {
         const slice = this.getSliceNo(value)
-
-        if(this.props.onSliceChange){
-            this.props.onSliceChange(slice, this.props.projection)
-        }
-
-        this.setState({slice: slice})
+        this.props.onSliceChange(slice, this.props.projection)
     }
 
     getLines(coordinates, width, height) {
@@ -222,6 +217,8 @@ export default class CTSliceViewer extends Component {
         const image = this.props.image
         const viewImage = this.drawImage(image, ct_item, this.props.projection)
         const sliderPos = this.getSliderPos(this.props.slice[this.props.projection])
+        const mip = this.props.depth[this.props.projection]
+        console.log('mip', mip)
         var slider_style = { height: viewImage.height }
         const coordinates = ct_item.coordinates
         const lines = this.getLines(coordinates, image.width, image.height)
@@ -272,6 +269,12 @@ export default class CTSliceViewer extends Component {
                             trackStyle={style}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}
                             onChange={this.onSliderChange.bind(this)} />
+                </div>
+                <div height={viewImage.height} style={{display: 'inline'}}>
+                <Slider className="slider" vertical={this.props.vertical}
+                            trackStyle={style}
+                            value={mip} min={1} max={10}
+                            onChange={this.props.onDepthChange.bind(this, this.props.projection)} />
                 </div>
                 </Col>
                 </Row>
