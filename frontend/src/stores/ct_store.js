@@ -37,7 +37,7 @@ export default class CT_Store {
 
     @action
     onGotList(data, meta){
-        console.log("GOT", data[5].id)
+        console.log('GOT', data.length)
         data.map((item) => this.items.set(item.id, Object.assign({}, item_template, item)))
         this.ready = true
     }

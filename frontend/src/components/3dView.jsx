@@ -1,5 +1,6 @@
 import React from 'react'
 import { Component } from 'react'
+import { Icon } from 'react-fa'
 
 function bounds (size, slice, depth) {
   if (size <= depth) {
@@ -420,7 +421,7 @@ export default class VolumeView extends Component {
     const meshZ = new THREE.Mesh(planeZ, planeZMaterial)
     meshZ.position.set(0, 0, -ofZ)
     meshZ.name = 'sliceZ'
-    mash.visible = this.showZ
+    meshZ.visible = this.showZ
     scene.add(meshZ)
     planes.push(meshZ)
 
@@ -791,8 +792,9 @@ export default class VolumeView extends Component {
   render () {
     const self = this
     return (
-      <div className='fullscreen'
-        ref={(mount) => { this.mount = mount }} />
+      <div>
+        <div className='fullscreen' ref={(mount) => { this.mount = mount }} />
+      </div>
     )
   }
 }
