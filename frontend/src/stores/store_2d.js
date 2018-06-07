@@ -7,6 +7,7 @@ const item_template = {
         slice: [0, 0, 0],
         depth: [1, 1, 1],
         nodulesOn: true,
+        coordinates: [[0, 0, null, null], [0, 0, null, null], [0, 0, null, null]],
         center: [
             [null, null],
             [null, null],

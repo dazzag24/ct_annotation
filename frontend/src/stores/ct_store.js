@@ -14,7 +14,6 @@ const item_template = {
     nodules_predicted: null,
     waitingData: false,
     waitingInference: false,
-    coordinates: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
     nodules: []
 }
 
@@ -63,9 +62,8 @@ export default class CT_Store {
     }
 
     @action
-    updateStore(id, coordinates, nodules, projection) {
+    updateStore(id, nodules) {
         let item = this.items.get(id)
-        item.coordinates[projection] = coordinates
         item.nodules = nodules
     }
 
@@ -98,10 +96,6 @@ export default class CT_Store {
         const spacing = this.items.get(id).spacing
         const axis = this.getAxis(projection)
         return [spacing[axis[0]], spacing[axis[1]], spacing[axis[2]]]
-    }
-
-    getCorner(id, projection) {
-        return this.items.get(id).coordinates[projection]
     }
 
     getShape(id, projection) {
@@ -167,60 +161,6 @@ export default class CT_Store {
                 axis = [1, 0, 2]; break
         }
         return axis
-    }
-
-    cropCoordinates(centerX, centerY, zoom, width, height) {
-        let x0 = 0
-        let y0 = 0
-
-        if (centerX == null) {
-            centerX = width / 2
-        }
-        if (centerY == null) {
-            centerY = height / 2
-        }
-
-        if (centerX < 0) {
-            centerX = 0
-        }
-
-        if (centerX > width) {
-            centerX = width
-        }
-
-        if (centerY < 0) {
-            centerY = 0
-        }
-
-        if (centerY > height) {
-            centerY = height
-        }
-
-        let crop_width = width * (1 / zoom)
-        let crop_height = height * (1 / zoom)
-
-        if (centerX <= crop_width / 2){
-            x0 = 0
-        }
-        else {
-            if (centerX >= width - crop_width / 2) {
-                x0 = width - crop_width
-            } else {
-                x0 = centerX - crop_width / 2
-            }
-        }
-
-        if (centerY <= crop_height / 2){
-            y0 = 0
-        }
-        else {
-            if (centerY >= height - crop_height / 2) {
-                y0 = height - crop_height
-            } else {
-                y0 = centerY - crop_height/ 2
-            }
-        }
-        return [Math.ceil(x0), Math.ceil(y0), Math.ceil(crop_width), Math.ceil(crop_height)]
     }
 
 

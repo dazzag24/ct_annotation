@@ -19,6 +19,22 @@ export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
         this.state = this.props.store_2d.get(this.props.id).state
+        let s0, s1, s2
+        s0 = this.props.ct_store.getShape(this.props.id, 0)
+        s1 = this.props.ct_store.getShape(this.props.id, 1)
+        s2 = this.props.ct_store.getShape(this.props.id, 2)
+
+        this.state.coordinates = [
+            [0, 0, s0[0], s0[1]],
+            [0, 0, s1[0], s1[1]],
+            [0, 0, s1[0], s1[1]]
+        ]
+
+        s0 = [s0[0] / 2, s0[1] / 2]
+        s1 = [s1[0] / 2, s1[1] / 2]
+        s2 = [s2[0] / 2, s2[1] / 2]
+
+        this.state.center = [s0, s1, s2]
     }
 
     onSliceChange(slice, projection) {
@@ -38,12 +54,16 @@ export default class CTItemPage extends Component {
     }
 
     onZoom(factor, projection) {
-        let center = this.state.center
+        let center = this.state.center[projection]
         let zoom = this.state.zoom
-
+        let id = this.props.id
+        let shape = this.props.ct_store.getShape(id, projection)
+        let coordinates = this.state.coordinates
+        let new_coordinates = this.cropCoordinates(center[0], center[1], zoom[projection], shape[0], shape[1])
+        coordinates[projection] = new_coordinates
         zoom[projection] = Math.min(256, Math.max(1, zoom[projection] * factor))
 
-        this.setState({center: center,  zoom: zoom})
+        this.setState({zoom: zoom, coordinates: coordinates})
     }
 
     onPointerDown(event, x, y, factors, projection) {
@@ -58,9 +78,13 @@ export default class CTItemPage extends Component {
         this.setState({imageClicked: true, start: [x, y]})
     }
 
+    getCorner(projection) {
+        return this.state.coordinates[projection]
+    }
+
     startNodule(event, x, y, factors, projection) {
         let id = this.props.id
-        let corner = this.props.ct_store.getCorner(id, projection)
+        let corner = this.getCorner(projection)
         let shape = this.props.ct_store.getShape(id, projection)
         let nodules = this.state.nodules
         let axis = this.props.ct_store.getReverseAxis(projection)
@@ -119,7 +143,7 @@ export default class CTItemPage extends Component {
     moving(event, x, y, factor, projection) {
         let center = this.state.center
         let id = this.props.id
-        let corner = this.props.ct_store.getCorner(id, projection)
+        let corner = this.getCorner(projection)
         let shape = this.props.ct_store.getShape(id, projection)
 
         if (center[projection][0] == null) {
@@ -186,7 +210,7 @@ export default class CTItemPage extends Component {
 
     getAbsoluteCoordinates(x, y, factor, projection) {
         let id = this.props.id
-        let corner = this.props.ct_store.getCorner(id, projection)
+        let corner = this.getCorner(projection)
 
         return [x / factor[0] + corner[0], y / factor[1] + corner[1]]
     }
@@ -323,7 +347,7 @@ export default class CTItemPage extends Component {
     moveNodule(event, index, x, y, factor, projection) {
         let nodules = this.state.nodules
         let id = this.props.id
-        let corner = this.props.ct_store.getCorner(id, projection)
+        let corner = this.getCorner(projection)
         let axis = this.props.ct_store.getReverseAxis(projection)
         let revAxis = this.props.ct_store.getAxis(projection)
         let shiftedNodule = [nodules[index][revAxis[0]] + (x - this.state.start[0]) / factor[0],
@@ -378,7 +402,7 @@ export default class CTItemPage extends Component {
         let center = this.state.center[projection]
         let zoom = this.state.zoom[projection]
 
-        let shift = this.props.ct_store.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
+        let shift = this.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
 
         return (
             <CTSliceViewer slice={this.state.slice} depth={this.state.depth} maxSlice={maxSlice - 1} vertical={true} reverse={true}
@@ -386,6 +410,7 @@ export default class CTItemPage extends Component {
                            spacing={spacing} zoom={this.state.zoom[projection]}
                            shape={shape} shift={shift} selection={this.state.selection}
                            lines={this.state.lines} id={item.id} drawCrops={this.state.drawCrops}
+                           coordinates={this.state.coordinates}
                            nodules={this.state.nodules}
                            drawSlices={this.state.drawSlices}
                            wheelZoom={this.state.wheelZoom}
@@ -536,16 +561,64 @@ export default class CTItemPage extends Component {
         )
     }
 
+    cropCoordinates(centerX, centerY, zoom, width, height) {
+        let x0 = 0
+        let y0 = 0
+
+        if (centerX < 0) {
+            centerX = 0
+        }
+
+        if (centerX > width) {
+            centerX = width
+        }
+
+        if (centerY < 0) {
+            centerY = 0
+        }
+
+        if (centerY > height) {
+            centerY = height
+        }
+
+        let crop_width = width * (1 / zoom)
+        let crop_height = height * (1 / zoom)
+
+        if (centerX <= crop_width / 2){
+            x0 = 0
+        }
+        else {
+            if (centerX >= width - crop_width / 2) {
+                x0 = width - crop_width
+            } else {
+                x0 = centerX - crop_width / 2
+            }
+        }
+
+        if (centerY <= crop_height / 2){
+            y0 = 0
+        }
+        else {
+            if (centerY >= height - crop_height / 2) {
+                y0 = height - crop_height
+            } else {
+                y0 = centerY - crop_height/ 2
+            }
+        }
+        return [Math.ceil(x0), Math.ceil(y0), Math.ceil(crop_width), Math.ceil(crop_height)]
+    }
+
     componentWillUpdate(nextProps, nextState) {
         const item = this.props.ct_store.get(this.props.id)
         if ((item !== undefined) && (item.shape !== null)) {
             for (let projection of [0, 1, 2]) {
                 let shape = this.props.ct_store.getShape(item.id, projection)
-                let center = this.state.center[projection]
-                let zoom = this.state.zoom[projection]
+                let center = nextState.center[projection]
+                let zoom = nextState.zoom[projection]
     
-                let shift = this.props.ct_store.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
-                this.props.ct_store.updateStore(item.id, shift, nextState.nodules, projection)
+                let shift = this.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
+                this.state.coordinates[projection] = this.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
+                this.props.ct_store.updateStore(item.id, nextState.nodules)
             }
         }
 
