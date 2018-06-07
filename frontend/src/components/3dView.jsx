@@ -190,23 +190,6 @@ export default class VolumeView extends Component {
     this.setRadius = store.setRadius
     this.setOpacity = store.setOpacity
 
-    this.scene = store.scene
-    this.camera = store.camera
-    this.renderer = store.renderer
-    this.cropFrame = store.cropFrame
-    this.crop = store.crop
-    this.frameLine = store.frameLine
-    this.meshZ = store.meshZ
-    this.meshX = store.meshX
-    this.meshY = store.meshY
-    this.planeZMaterial = store.planeZMaterial
-    this.planeXMaterial = store.planeXMaterial
-    this.planeYMaterial = store.planeYMaterial
-    this.controls = store.controls
-    this.nodules = store.nodules
-    this.planes = store.planes
-    this.noduleCenters = store.noduleCenters
-
     this.start = this.start.bind(this)
     this.stop = this.stop.bind(this)
     this.animate = this.animate.bind(this)
@@ -224,7 +207,7 @@ export default class VolumeView extends Component {
     const shape = this.props.ct_store.get(this.props.id).shape
     const spacing = this.props.ct_store.get(this.props.id).spacing
 
-    const factor = Math.max(...multArrays(shape, spacing))
+    const factor = Math.max(...multArrays(this.props.ct_store.get(this.props.id).shape, this.props.ct_store.get(this.props.id).spacing))
     const ofX = shape[2] * spacing[2] / (factor * 2)
     const ofY = shape[1] * spacing[1] / (factor * 2)
     const ofZ = shape[0] * spacing[0] / (factor * 2)
@@ -245,7 +228,7 @@ export default class VolumeView extends Component {
       switch (nextState.plane) {
         case 1:
           const canvasZ = makeCanvas(this.props.ct_store.get(this.props.id).image,
-            shape, 'Z', nextState.sliceZ, 1, nextState.mipDepth)
+            this.props.ct_store.get(this.props.id).shape, 'Z', nextState.sliceZ, 1, nextState.mipDepth)
           const textureZ = new THREE.Texture(canvasZ)
           textureZ.needsUpdate = true
           this.planeZMaterial.map = textureZ
@@ -381,7 +364,6 @@ export default class VolumeView extends Component {
       }
     }
     this.update2DSlices()
-    console.log('finish')
   }
 
   componentDidMount () {
@@ -403,18 +385,9 @@ export default class VolumeView extends Component {
     var noduleCenters = []
     var planes = []
 
-    let scene, camera, renderer
-
-    scene = new THREE.Scene()
-    renderer = new THREE.WebGLRenderer({ antialias: true })
-
-    if (this.camera == null)
-    {
-        camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000)
-        camera.position.set(-1, 1, 2)
-    } else {
-        camera = this.camera
-    }
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000)
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
 
     const frameGeometry = new THREE.BoxGeometry(2 * ofX, 2 * ofY, 2 * ofZ)
     const frameEdges = new THREE.EdgesGeometry(frameGeometry)
@@ -455,16 +428,9 @@ export default class VolumeView extends Component {
     })
     planeZMaterial.needsUpdate = true
     planeZMaterial.visible = this.showZ
-    let meshZ
-    if (this.meshZ === null)
-    {
-        meshZ = new THREE.Mesh(planeZ, planeZMaterial)
-        meshZ.position.set(0, 0, ofZ * (1 - 2 * this.state.sliceZ / dZ))
-        meshZ.name = 'sliceZ'
-    } else {
-        meshZ = this.meshZ
-    }
-    
+    const meshZ = new THREE.Mesh(planeZ, planeZMaterial)
+    meshZ.position.set(0, 0, ofZ * (1 - 2 * this.state.sliceZ / dZ))
+    meshZ.name = 'sliceZ'
     scene.add(meshZ)
     planes.push(meshZ)
 
@@ -479,21 +445,12 @@ export default class VolumeView extends Component {
     })
     planeXMaterial.needsUpdate = true
     planeXMaterial.visible = this.showX
-
-    let meshX
-    if (this.meshX === null)
-    {
-        meshX = new THREE.Mesh(planeX, planeXMaterial)
-        meshX.position.set(0, ofX * (1 - 2 * this.state.sliceX / dX), 0)
-        meshX.rotation.set(Math.PI / 2, 0, 0)
-        meshX.name = 'sliceX'
-    } else {
-        meshX = this.meshX
-    }
+    const meshX = new THREE.Mesh(planeX, planeXMaterial)
+    meshX.position.set(0, ofX * (1 - 2 * this.state.sliceX / dX), 0)
+    meshX.rotation.set(Math.PI / 2, 0, 0)
+    meshX.name = 'sliceX'
     scene.add(meshX)
     planes.push(meshX)
-
-
 
     const canvasY = makeCanvas(this.props.ct_store.get(this.props.id).image, shape, 'Y', this.state.sliceY, this.state.alphaP)
     const textureY = new THREE.Texture(canvasY)
@@ -506,17 +463,10 @@ export default class VolumeView extends Component {
     })
     planeYMaterial.needsUpdate = true
     planeYMaterial.visible = this.showY
-
-    let meshY
-    if (this.meshY === null)
-    {
-        meshY = new THREE.Mesh(planeY, planeYMaterial)
-        meshY.position.set(-ofY * (1 - 2 * this.state.sliceY / dY), 0, 0)
-        meshY.rotation.set(Math.PI / 2, -Math.PI / 2, 0)
-        meshY.name = 'sliceY'
-    } else {
-        meshY = this.meshY
-    }
+    const meshY = new THREE.Mesh(planeY, planeYMaterial)
+    meshY.position.set(-ofY * (1 - 2 * this.state.sliceY / dY), 0, 0)
+    meshY.rotation.set(Math.PI / 2, -Math.PI / 2, 0)
+    meshY.name = 'sliceY'
     scene.add(meshY)
     planes.push(meshY)
 
@@ -573,10 +523,9 @@ export default class VolumeView extends Component {
         if (that.state.plane === 3) {
           camera.position.set(2 - ofY, 0, 0)
         }
-
-        showZ.setValue(that.showZ)
-        showX.setValue(that.showX)
-        showY.setValue(that.showY)
+        showZ.setValue(this.state.showZ)
+        showX.setValue(this.state.showX)
+        showY.setValue(this.state.showY)
       } else {
         folder3D.open()
         folder2D.close()
@@ -801,6 +750,7 @@ export default class VolumeView extends Component {
       }
     }
 
+    camera.position.set(-1, 1, 2)
     const controls = new THREE.OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
     controls.dampingFactor = 1
