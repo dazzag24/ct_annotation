@@ -128,24 +128,13 @@ export default class CT_Store {
 
     getAxis(projection) {
         let axis
-        // switch (projection) {
-        //     case 0:
-        //         axis = [2, 1, 0]; break
-        //     case 1:
-        //         axis = [2, 0, 1]; break
-        //     case 2:
-        //         axis = [1, 0, 2]; break
-        // }
-        if (projection == 0) {
-            axis = [2, 1, 0]
-        } else {
-            if (projection == 1) {
-                axis = [2, 0, 1]
-            } else {
-                if (projection == 2) {
-                    axis = [1, 0, 2]
-                }
-            }
+        switch (projection) {
+            case 0:
+                axis = [2, 1, 0]; break
+            case 1:
+                axis = [2, 0, 1]; break
+            case 2:
+                axis = [1, 0, 2]; break
         }
         return axis
     }
