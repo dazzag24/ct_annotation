@@ -30,7 +30,6 @@ export default class CTItemPage extends Component {
     }
 
     onDepthChange(projection, depth) {
-        console.log(depth)
         let a = this.state.depth
         let images = this.state.images
         a[projection] = depth
@@ -359,6 +358,12 @@ export default class CTItemPage extends Component {
         this.setState({slice: [s1, s2, s3], images: [null, null, null], center: [c1,c2,c3]})
     }
 
+    deleteNodule(index) {
+        let nodules = this.state.nodules
+        nodules.splice(index, 1)
+        this.setState({nodules: nodules})
+    }
+
     renderImageViewer(item, projection) {
         projection = Number(projection)
         const resizeFactor = 2
@@ -405,22 +410,6 @@ export default class CTItemPage extends Component {
             <div style={{display: 'inline'}}>
             <Row><Col>
             <Row>
-            <Col width={1000}>
-                {(this.state.showList) ?
-                    <div>
-                    <h2> {"Nodules"} </h2>
-                    <ul className='nodulesList'>
-                        {this.state.nodules.map((nodule, index) => {
-                                return <li key={'nodule'+index} onClick={this.selectNodule.bind(this, index)}>
-                                    {this.noduleInfo(nodule)}
-                                </li>
-                            })}
-                    </ul>
-                    </div>
-                    :
-                    ''
-                }
-            </Col>
                 <Col>
                     {this.state.projections[0] ? this.renderImageViewer(item, 0) : ''}
                 </Col>
@@ -429,6 +418,29 @@ export default class CTItemPage extends Component {
                 </Col>
                 <Col>
                     {this.state.projections[2] ? this.renderImageViewer(item, 2) : ''}
+                </Col>
+                <Col width={1000}>
+                {(this.state.showList) ?
+                    <div>
+                    <h2> {"Nodules"} </h2>
+                    <ul className='nodulesList'>
+                        {(this.state.nodules.length == 0)
+                            ?
+                         "No nodules"
+                         :
+                         this.state.nodules.map((nodule, index) => {
+                                return <li key={'nodule'+index}>
+                                    {this.noduleInfo(nodule)}
+                                    <button onClick={this.selectNodule.bind(this, index)}> Move to </button>
+                                    <button onClick={this.deleteNodule.bind(this, index)}> Delete </button>
+                                </li>
+                            })
+                        }
+                    </ul>
+                    </div>
+                    :
+                    ''
+                }
                 </Col>
             </Row>
             </Col>
@@ -512,7 +524,7 @@ export default class CTItemPage extends Component {
                 </div>
 
                 <div className='toolbar'>
-                    <button type="button" className={buttonClass} onClick={this.onAddNodule.bind(this)}> {"Add nodule"} </button>
+                    <button type="button" className={buttonClass} onClick={this.onAddNodule.bind(this)} width={200}> {"Nodules mode"} </button>
                 </div>
             </div>
             {(item === undefined) ?
@@ -524,7 +536,7 @@ export default class CTItemPage extends Component {
         )
     }
 
-    componentWillUpdate() {
+    componentWillUpdate(nextProps, nextState) {
         const item = this.props.ct_store.get(this.props.id)
         if ((item !== undefined) && (item.shape !== null)) {
             for (let projection of [0, 1, 2]) {
@@ -533,7 +545,7 @@ export default class CTItemPage extends Component {
                 let zoom = this.state.zoom[projection]
     
                 let shift = this.props.ct_store.cropCoordinates(center[0], center[1], zoom, shape[0], shape[1])
-                this.props.ct_store.updateCoordinates(item.id, shift, projection)
+                this.props.ct_store.updateStore(item.id, shift, nextState.nodules, projection)
             }
         }
 

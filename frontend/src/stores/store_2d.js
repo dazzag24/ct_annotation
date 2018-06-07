@@ -5,7 +5,7 @@ import { API_Events } from './const'
 const item_template = {
     state : {
         slice: [0, 0, 0],
-        depth: [5, 5, 5],
+        depth: [1, 1, 1],
         nodulesOn: true,
         center: [
             [null, null],
@@ -25,7 +25,7 @@ const item_template = {
         radiusRatio: 0,
         nodules: [],
         projections: [true, true, true],
-        showList: false,
+        showList: true,
         noduleMode: false
     }
 }

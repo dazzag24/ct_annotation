@@ -218,7 +218,6 @@ export default class CTSliceViewer extends Component {
         const viewImage = this.drawImage(image, ct_item, this.props.projection)
         const sliderPos = this.getSliderPos(this.props.slice[this.props.projection])
         const mip = this.props.depth[this.props.projection]
-        console.log('mip', mip)
         var slider_style = { height: viewImage.height }
         const coordinates = ct_item.coordinates
         const lines = this.getLines(coordinates, image.width, image.height)

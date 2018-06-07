@@ -14,7 +14,8 @@ const item_template = {
     nodules_predicted: null,
     waitingData: false,
     waitingInference: false,
-    coordinates: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+    coordinates: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+    nodules: []
 }
 
 
@@ -62,9 +63,10 @@ export default class CT_Store {
     }
 
     @action
-    updateCoordinates(id, coordinates, projection) {
+    updateStore(id, coordinates, nodules, projection) {
         let item = this.items.get(id)
         item.coordinates[projection] = coordinates
+        item.nodules = nodules
     }
 
     getItemData(id) {
