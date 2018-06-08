@@ -20,7 +20,7 @@ const item_template = {
         images: [null, null, null],
         selection: [0, 0, 0, 0],
         drawCrops: false,
-        drawSlices: false,
+        drawSlices: true,
         wheelZoom: false,
         chooseRadius: false,
         radiusRatio: 0,

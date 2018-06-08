@@ -98,7 +98,7 @@ body {
 }
 
 .header {
-    background-color: gray;
+    background-color: white;
     border:2px solid black;
     padding: 0.2rem;
     margin-bottom: 0.5rem;
@@ -119,11 +119,26 @@ body {
 }
 
 .toolbar > button {
+    font-family: 'Roboto', sans-serif;
     margin-left: 0.1rem;
     width: 2rem;
     height: 1rem;
     font-size: 2vmin;
     padding: 0;
+    text-align: center;
+}
+
+.toolbar > .checkbox {
+    font-weight: 100;
+    font-family: 'Roboto', sans-serif;
+    color: black;
+    background-color: white;
+    display: inline;
+    margin-left: 0.1rem;
+    width: 2rem;
+    height: 1rem;
+    font-size: 2vmin;
+    padding-left: 0.1rem;
     text-align: center;
 }
 

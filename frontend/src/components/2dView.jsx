@@ -509,19 +509,26 @@ export default class CTItemPage extends Component {
 
     render() {
         const item = this.props.ct_store.get(this.props.id)
-        const buttonClass = "btn btn-light"
+        const buttonClass = ""
 
         return (
         <div className="page ct item">
             <div className="btn-toolbar header" role="toolbar">
                 <div className='toolbar'>
-                    <button type="button" className={buttonClass} onClick={this.onDrawCrops.bind(this)}> {"Crops"} </button>
-                    <button type="button" className={buttonClass} onClick={this.onDrawSlices.bind(this)}> {"Slices"} </button>
-                    <button type="button" className={buttonClass} onClick={this.onUnzoomAll.bind(this)}> {"Unzoom"} </button>
-                    <button type="button" className={buttonClass} onClick={this.onWheelFunction.bind(this)}> {"Wheel"} </button>
-                </div>
+                    <div className='checkbox'>
+                        <input type="checkbox" className={buttonClass} onClick={this.onDrawCrops.bind(this)}/> <label> Crops </label>
+                    </div>
+                    <div className='checkbox'>
+                        <input type="checkbox" className={buttonClass} onClick={this.onDrawSlices.bind(this)} defaultChecked={true}/> <label> Slices </label>
+                    </div>
+                    <div className='checkbox'>
+                        <input type="checkbox" className={buttonClass} onClick={this.onWheelFunction.bind(this)}/> <label> Wheel for zoom </label>
+                    </div>
 
-                <div className='toolbar'>
+                    <div className='checkbox'>
+                        <input type="checkbox" className={buttonClass} onClick={this.onAddNodule.bind(this)} width={200} /> <label> Edit nodules </label>
+                    </div>
+
                     <button type="button" className={buttonClass + ' dropdown-toggle'} data-toggle="dropdown">
                         Proj <span className="caret"></span>
                     </button>
@@ -538,19 +545,9 @@ export default class CTItemPage extends Component {
                         <i className="fa fa-check" style={(this.state.projections[2]) ? {} : {display: 'none'}}></i> Coronal
                     </a></li>
                     </ul>
-                </div>
-
-                <div className='toolbar'>
-                    <button type="button" className={buttonClass} onClick={this.onShowList.bind(this)}> {"Nodules"} </button>
-                </div>
-
-                <div className='toolbar'>
+                    <button type="button" className={buttonClass} onClick={this.onUnzoomAll.bind(this)}> {"Unzoom"} </button>
                     <button type="button" className={buttonClass} onClick={this.onClearNodules.bind(this)}> {"Clear"} </button>
-                </div>
-
-                <div className='toolbar'>
-                    <button type="button" className={buttonClass} onClick={this.onAddNodule.bind(this)} width={200}> {"Nodules mode"} </button>
-                </div>
+            </div>
             </div>
             {(item === undefined) ?
              this.renderPageLoading()
