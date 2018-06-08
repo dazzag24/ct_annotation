@@ -1,6 +1,7 @@
 import React from 'react'
 import { inject, observer } from 'mobx-react'
 import { Component } from 'react'
+import { Icon } from 'react-fa'
 
 function bounds (size, slice, depth) {
   if (size <= depth) {
@@ -810,8 +811,12 @@ export default class VolumeView extends Component {
   render () {
     const self = this
     return (
-      <div 
-        ref={(mount) => { this.mount = mount }} />
+      <div>
+        <div className='user'>
+          <Icon name='home' onClick={() => this.props.setPid(null)}></Icon>         
+        </div>
+        <div ref={(mount) => { this.mount = mount }} />
+      </div>
     )
   }
 }

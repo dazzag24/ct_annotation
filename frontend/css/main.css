@@ -13,7 +13,67 @@ body {
   color: #ffffff;
 }
 
-#gui { position: absolute; top: 2px; right: 2px }
+#gui { position: absolute; top: 1.5rem; right: 2px }
+
+.row {
+  text-align: center;
+}
+
+.dnd {
+  display: flex;
+  margin-left: 0.5rem;
+}
+
+.user {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.user .user-name{
+  font-size: 0.6rem;
+  margin-right: 0.3rem;
+}
+
+.login-box {
+  position: absolute;
+  background-color: #707070;
+  height: 3.3rem;
+  width: 8rem;
+  top: 1.8rem;
+  right: 0.5rem;
+  font-size: 0.6rem;
+  border-radius: 10px;
+}
+
+.login-box .change-account {
+  font-size: 0.4rem;
+  padding: 0;
+  margin-left: 0.5rem;
+  height: 1rem;
+  width: 4rem;
+}
+
+.login-box .exit-account {
+  font-size: 0.4rem;
+  padding: 0;
+  margin-left: 1rem;
+  height: 1rem;
+  width: 2rem;
+}
+
+.login-box .name {
+  font-weight: 400;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  margin-left: 0.5rem;
+  display: block;
+  width: 7rem;
+  white-space: nowrap;
+}
 
 .fullscreen {
   position: fixed;
@@ -21,6 +81,18 @@ body {
   left: 20;
   bottom: 0;
   right: 0;
+}
+
+.dnd-page {
+  display: flex;
+}
+
+.menu-header {
+  font-weight: 100;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 1.2rem;
 }
 
 .slider {
@@ -36,6 +108,82 @@ body {
   right: 0;
 }
 
+.edit-label {
+  width: 8.25rem;
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+}
+
+.edit-input {
+  width: 8.25rem;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 100;
+  border-color: transparent;
+  background-color: #A0A0A0;
+  font-weight: 400;
+  color: white;
+}
+
+.comment-label {
+  width: 9rem;
+  margin: 0;
+  padding: 0;
+  font-weight: 100;
+  font-size: 0.5rem;
+}
+
+.comment-input {
+  width: 8.5rem;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 100;
+  font-size: 0.5rem;
+  color: white;
+  border-color: transparent;
+  background-color: #707070;
+}
+
+.folder-name {
+  white-space: nowrap;
+  display: inline-block;
+  height: 1.3rem;
+  font-weight: 100;
+}
+
+.item-container {
+  display: flex;
+  font-weight: 100;
+}
+
+.item-name {
+  width: 8rem;
+}
+
+.item-icon {
+  flex: right;
+}
+
+.material-icons.new-folder-icon {
+  margin-top: -0.2rem;
+  margin-left: -0.2rem;
+  font-size: 1.5rem;
+}
+
+input {
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline-width: 0;
+  box-sizing: border-box;
+  margin-top: -1rem;
+  padding: 0;
+  line-height: 0.5rem;
+}
 
 .page {
 	padding-top: 0.5rem;
@@ -98,7 +246,7 @@ body {
 }
 
 .header {
-    background-color: white;
+    background-color: black;
     border:2px solid black;
     padding: 0.2rem;
     margin-bottom: 0.5rem;

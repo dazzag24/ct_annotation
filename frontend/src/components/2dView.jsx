@@ -513,6 +513,9 @@ export default class CTItemPage extends Component {
 
         return (
         <div className="page ct item">
+            <div className='user'>
+              <Icon name='home' onClick={() => this.props.setPid(null)}></Icon>         
+            </div>
             <div className="btn-toolbar header" role="toolbar">
                 <div className='toolbar'>
                     <div className='checkbox'>

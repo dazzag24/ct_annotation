@@ -1,11 +1,14 @@
 import React from 'react'
 import { Component } from 'react'
 import { inject, observer } from 'mobx-react'
+import { Icon } from 'react-fa'
+import { values } from 'mobx'
 import ReactBootstrapSlider from 'react-bootstrap-slider'
 
 import VolumeView from './3dView.jsx'
 import CTItemPage from './2dView.jsx'
 import LoadingSpinner from './LoadingSpinner.jsx'
+import Menu from './MenuPage.jsx'
 
 @inject("ct_store")
 @observer
@@ -14,8 +17,14 @@ export default class CTPage extends Component {
     super(props)
     this.state = {
       mode: true,
-      components: [null, null]
+      components: [null, null],
+      pid: null
     }
+    this.setPid = this.setPid.bind(this)
+  }
+
+  setPid(pid) {
+    this.setState({pid: pid})
   }
 
   sliderChangeValue (value) {
@@ -35,52 +44,37 @@ export default class CTPage extends Component {
     nodules.push([55, 136, 229, 7])
 
     if (this.props.ct_store.items === undefined) {
-      return <div>Loading</div>
+      return <LoadingSpinner text='Соединение с сервером' />
     }
-    const item = this.props.ct_store.get('01')
-    if (item === undefined) {
-      return <LoadingSpinner text='Загрузка снимка' />
-    }
-    if (item.image === null) {
-      return <LoadingSpinner text='Загрузка снимка' />
+
+    if (this.props.ct_store.items.size == 0) {
+      return <LoadingSpinner text='Соединение с сервером' />
     }
     
-    // this.props.ct_store.getInference('01')
-    // if (item.nodules_true === null) {
-    //   return <div>Making prediction</div>
-    // }
-    // return (
-    //   <div>
-    //     <VolumeView image={[...Array(256 * 256).keys()]}
-    //       slice={this.state.sliderCurrentValue}
-    //       key={this.state.sliderCurrentValue}/>
-    //     <ReactBootstrapSlider value={this.state.sliderCurrentValue}
-    //       step={this.state.sliderStep}
-    //       max={this.state.sliderMax}
-    //       min={this.state.sliderMin}
-    //       change={this.sliderChangeValue.bind(this)}
-    //     />
-    //   </div>
-    // )
-
-    return (
-      <div>
-        <button onClick={this.changeMode.bind(this)}> {(this.state.mode) ? '3D' : '2D'} </button>
-        {(this.state.mode)
+    if ( this.state.pid === null ) {
+      return (
+        <Menu setPid={this.setPid}/>
+      )
+    }
+    else {
+      const item = this.props.ct_store.get(this.state.pid)
+      if (item === undefined) {
+        return <LoadingSpinner text='Загрузка снимка' />
+      }
+      if (item.image === null) {
+        return <LoadingSpinner text='Загрузка снимка' />
+      }
+      return (
+        <div>
+          <button onClick={this.changeMode.bind(this)}> {(this.state.mode) ? '3D' : '2D'} </button>
+          {(this.state.mode)
             ?
-            <CTItemPage id={'01'}/>
+            <CTItemPage id={this.state.pid} setPid={this.setPid}/>
             :
-            <VolumeView id={'01'}/>
-        }
-      </div>
-    )
-    // return (
-    //   <div>
-    //     <VolumeView image={[...Array(256 * 256 * 128).keys()].map(Math.sqrt)}
-    //       shape={[128, 256, 256]}
-    //       spacing={[1.7, 1, 1]}
-    //       nodules={nodules} />
-    //   </div>
-    // )
+            <VolumeView id={this.state.pid} setPid={this.setPid}/>
+          }
+        </div>
+      )
+    }
   }
 }

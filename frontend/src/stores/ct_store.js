@@ -22,6 +22,11 @@ export default class CT_Store {
     server = null
     @observable ready = false
     @observable items = new Map()
+    folders = {
+      folderNames: [],
+      order: [],
+      comments: [],
+    }
 
     constructor(server) {
         this.server = server
@@ -39,9 +44,13 @@ export default class CT_Store {
 
     @action
     onGotList(data, meta){
-        console.log("GOT", data[5].id)
-        data.map((item) => this.items.set(item.id, Object.assign({}, item_template, item)))
-        this.ready = true
+      data.map((item) => this.items.set(item.id, Object.assign({}, item_template, item)))
+      this.ready = true
+      this.folders.order = [data.map((item, index) => item.id), []]
+      this.folders.folderNames = ['Новые', 'В работе']
+      let comments = {}
+      data.map(item => comments[item.id] = '')
+      this.folders.comments = comments
     }
 
     @action
@@ -65,6 +74,26 @@ export default class CT_Store {
     updateStore(id, nodules) {
         let item = this.items.get(id)
         item.nodules = nodules
+    }
+
+    updateList (folders, content, comments) {
+      let order = []
+      for (var i = 0; i < content.length; i++) {
+        let folder = content[i]
+        let group = []
+        for (var j = 0; j < folder.length; j++) {
+            group.push(folder[j].pid)
+        }
+         order.push(group)
+      }
+      let data = {
+        folderNames: folders,
+        order: order, 
+        comments: comments
+      }
+      console.log('UPDATE_PATIENT_LIST', data)
+      this.folders = data
+      this.server.send(API_Events.UPDATE_PATIENT_LIST, data)
     }
 
     getItemData(id) {
