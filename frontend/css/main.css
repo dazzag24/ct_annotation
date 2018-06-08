@@ -167,6 +167,10 @@ body {
   flex: right;
 }
 
+.item-icon:hover {
+  color: lightgreen;
+}
+
 .material-icons.new-folder-icon {
   margin-top: -0.2rem;
   margin-left: -0.2rem;
