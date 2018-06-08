@@ -130,7 +130,7 @@ export default class Menu extends Component {
         <div className='menu-header'>Мои списки исследований</div>
         <div className='user'>
           <span className='user-name'></span>
-          <Icon name='user-circle' onClick={this.handleUser}></Icon>         
+          <Icon name='user-circle' className='user-icon' onClick={this.handleUser}></Icon>         
         </div>
         {this.state.showLogin ? this.loginBox() : null}
         <div className='dnd'>

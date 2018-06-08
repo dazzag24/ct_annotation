@@ -169,12 +169,25 @@ body {
 
 .item-icon:hover {
   color: lightgreen;
+  transform: scale(1.2);
 }
 
 .material-icons.new-folder-icon {
   margin-top: -0.2rem;
   margin-left: -0.2rem;
   font-size: 1.5rem;
+}
+
+.material-icons.new-folder-icon:hover {
+  transform: scale(1.2);
+}
+
+.trash:hover {
+  transform: scale(1.2);
+}
+
+.user-icon:hover {
+  transform: scale(1.2);
 }
 
 input {

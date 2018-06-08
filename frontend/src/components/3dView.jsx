@@ -813,7 +813,7 @@ export default class VolumeView extends Component {
     return (
       <div>
         <div className='user'>
-          <Icon name='home' onClick={() => this.props.setPid(null)}></Icon>         
+          <Icon name='home' className='user-icon' onClick={() => this.props.setPid(null)}></Icon>         
         </div>
         <div ref={(mount) => { this.mount = mount }} />
       </div>
