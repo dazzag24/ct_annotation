@@ -502,37 +502,37 @@ export default class VolumeView extends Component {
     var folderGeneral = gui.addFolder('Режима просмотра')
     var folderSlice = gui.addFolder('Положение среза')
     var folder3D = gui.addFolder('Настройки 3D')
-    var folder2D = gui.addFolder('Настройки 2D')
-    var folderEdit = gui.addFolder('Редактирование разметки')
+    // var folder2D = gui.addFolder('Настройки 2D')
+    // var folderEdit = gui.addFolder('Редактирование разметки')
     folder3D.open()
     folderGeneral.open()
     folderSlice.open()
-    folderEdit.open()
+    // folderEdit.open()
 
-    var viewMode = folderGeneral.add(this.state, 'viewMode2D').name('2D')
-    viewMode.onChange(function (value) {
-      that.setState({ viewMode2D: value })
-      if (value) {
-        folder3D.close()
-        folder2D.open()
-        if (that.state.plane === 1) {
-          camera.position.set(0, 0, 2 - ofZ)
-        }
-        if (that.state.plane === 2) {
-          camera.position.set(0, 2 - ofX, 0)
-        }
-        if (that.state.plane === 3) {
-          camera.position.set(2 - ofY, 0, 0)
-        }
-        showZ.setValue(this.state.showZ)
-        showX.setValue(this.state.showX)
-        showY.setValue(this.state.showY)
-      } else {
-        folder3D.open()
-        folder2D.close()
-        zoom.setValue(true)
-      }
-    })
+    // var viewMode = folderGeneral.add(this.state, 'viewMode2D').name('2D')
+    // viewMode.onChange(function (value) {
+    //   that.setState({ viewMode2D: value })
+    //   if (value) {
+    //     folder3D.close()
+    //     folder2D.open()
+    //     if (that.state.plane === 1) {
+    //       camera.position.set(0, 0, 2 - ofZ)
+    //     }
+    //     if (that.state.plane === 2) {
+    //       camera.position.set(0, 2 - ofX, 0)
+    //     }
+    //     if (that.state.plane === 3) {
+    //       camera.position.set(2 - ofY, 0, 0)
+    //     }
+    //     showZ.setValue(this.state.showZ)
+    //     showX.setValue(this.state.showX)
+    //     showY.setValue(this.state.showY)
+    //   } else {
+    //     folder3D.open()
+    //     folder2D.close()
+    //     zoom.setValue(true)
+    //   }
+    // })
     var showNodules = folderGeneral.add(this, 'showNodules').name('Разметка')
     showNodules.onChange(function (value) {
       for (var i = 0; i < nodules.length; i++) {
@@ -564,19 +564,19 @@ export default class VolumeView extends Component {
     alphaP.onChange(function (value) {
       that.setState({alphaP: value})
     })
-    var plane = folder2D.add(this.state, 'plane').min(1).max(3).step(1).name('Проекция')
-    plane.onChange(function (value) {
-      if (value === 1) {
-        camera.position.set(0, 0, 2 - ofZ)
-      }
-      if (value === 2) {
-        camera.position.set(0, 2 - ofX, 0)
-      }
-      if (value === 3) {
-        camera.position.set(2 - ofY, 0, 0)
-      }
-      that.setState({plane: value})
-    })
+    // var plane = folder2D.add(this.state, 'plane').min(1).max(3).step(1).name('Проекция')
+    // plane.onChange(function (value) {
+    //   if (value === 1) {
+    //     camera.position.set(0, 0, 2 - ofZ)
+    //   }
+    //   if (value === 2) {
+    //     camera.position.set(0, 2 - ofX, 0)
+    //   }
+    //   if (value === 3) {
+    //     camera.position.set(2 - ofY, 0, 0)
+    //   }
+    //   that.setState({plane: value})
+    // })
     var showZ = folder3D.add(this, 'showZ').name('Срез Z')
     showZ.onChange(function (value) {
       planeZMaterial.visible = value
@@ -589,31 +589,31 @@ export default class VolumeView extends Component {
     showY.onChange(function (value) {
       planeYMaterial.visible = value
     })
-    var mipDepth = folder2D.add(this.state, 'mipDepth').min(1).max(32).step(1).name('Глубина')
-    mipDepth.onChange(function (value) {
-      that.setState({mipDepth: value})
-    })
-    var zoom = folder2D.add(this, 'enableZoom').name('Масштабирование')
-    zoom.onChange(function (value) {
-      controls.enableZoom = value
-    })
-    var setRadius = folderEdit.add(this, 'setRadius').min(1).max(32).step(1).name('Радиус')
-    setRadius.onChange(function (value) {
-      if (that.changeNodule) {
-        var scale = value / noduleDefaultRadius
-        that.changeNodule.scale.x = scale
-        that.changeNodule.scale.y = scale
-        that.changeNodule.scale.z = scale
-        var num = parseInt(that.changeNodule.name.replace(/[^0-9]/g, ''))
-        noduleCenters[num][3] = value
-      }
-    })
-    var setOpacity = folderEdit.add(this, 'setOpacity').min(0).max(1).step(0.05).name('Непрозрачность')
-    setOpacity.onChange(function (value) {
-      if (that.changeNodule) {
-        that.changeNodule.material.opacity = value
-      }
-    })
+    // var mipDepth = folder2D.add(this.state, 'mipDepth').min(1).max(32).step(1).name('Глубина')
+    // mipDepth.onChange(function (value) {
+    //   that.setState({mipDepth: value})
+    // })
+    // var zoom = folder2D.add(this, 'enableZoom').name('Масштабирование')
+    // zoom.onChange(function (value) {
+    //   controls.enableZoom = value
+    // })
+    // var setRadius = folderEdit.add(this, 'setRadius').min(1).max(32).step(1).name('Радиус')
+    // setRadius.onChange(function (value) {
+    //   if (that.changeNodule) {
+    //     var scale = value / noduleDefaultRadius
+    //     that.changeNodule.scale.x = scale
+    //     that.changeNodule.scale.y = scale
+    //     that.changeNodule.scale.z = scale
+    //     var num = parseInt(that.changeNodule.name.replace(/[^0-9]/g, ''))
+    //     noduleCenters[num][3] = value
+    //   }
+    // })
+    // var setOpacity = folderEdit.add(this, 'setOpacity').min(0).max(1).step(0.05).name('Непрозрачность')
+    // setOpacity.onChange(function (value) {
+    //   if (that.changeNodule) {
+    //     that.changeNodule.material.opacity = value
+    //   }
+    // })
 
     function onMouseSingleClick (event) {
       if (that.state.viewMode2D && event.button === 0) {
@@ -724,8 +724,8 @@ export default class VolumeView extends Component {
 
     renderer.setClearColor('#000000')
     renderer.setSize(width, height)
-    document.addEventListener('mousedown', onMouseSingleClick, false)
-    document.addEventListener('dblclick', onMouseDoubleClick, false)
+    // document.addEventListener('mousedown', onMouseSingleClick, false)
+    // document.addEventListener('dblclick', onMouseDoubleClick, false)
     document.addEventListener('wheel', onWheel, false)
 
     window.addEventListener('resize', onWindowResize, false)

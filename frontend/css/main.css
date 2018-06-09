@@ -340,13 +340,9 @@ input:focus {
     width: 600px;
 }
 
-.nodulesList > li {
-    cursor: pointer;
-    font-size: 2vmin;
-}
-
-.nodulesList > li > label {
+.noduleCoord {
     width: 400px;
+    font-size: 2vmin;
     display: inline;
     overflow-x: hidden;
 }

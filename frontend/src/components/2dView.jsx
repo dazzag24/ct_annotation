@@ -1,6 +1,6 @@
 import React from 'react'
 import { Component } from 'react'
-import { Grid, Row, Col, Button, ListGroup, ListGroupItem } from 'react-bootstrap'
+import { Container, Grid, Row, Col, Button, ListGroup, ListGroupItem } from 'react-bootstrap'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css';
 import Toggle from 'react-toggle'
@@ -449,26 +449,30 @@ export default class CTItemPage extends Component {
                 {(this.state.showList) ?
                     <div>
                     <h2> {"Nodules"} </h2>
-                    <ul className='nodulesList'>
+                    <Grid className='nodulesList'>
                         {(this.state.nodules.length == 0)
                             ?
-                         "No nodules"
+                         <Row> "No nodules" </Row>
                          :
                          this.state.nodules.map((nodule, index) => {
-                                return <li key={'nodule'+index}>
-                                    <label>
-                                        {this.noduleInfo(nodule)}
-                                    </label>
+                                return <Row key={'nodule'+index}>
+                                    <Col>
+                                        <label className='noduleCoord'>
+                                            {this.noduleInfo(nodule)}
+                                        </label>
+                                    </Col>
+                                    <Col>
                                     <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}>
                                         <Icon name='location-arrow' className='user-icon'></Icon>
                                     </button>
                                     <button className='btn btn-primary toolbarButton' onClick={this.deleteNodule.bind(this, index)}>
                                         <Icon name='trash' className='user-icon'></Icon>
                                     </button>
-                                </li>
+                                    </Col>
+                                    </Row>
                             })
                         }
-                    </ul>
+                    </Grid>
                     </div>
                     :
                     ''
