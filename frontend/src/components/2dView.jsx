@@ -459,8 +459,12 @@ export default class CTItemPage extends Component {
                                     <label>
                                         {this.noduleInfo(nodule)}
                                     </label>
-                                    <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}> Move to </button>
-                                    <button className='btn btn-primary toolbarButton' onClick={this.deleteNodule.bind(this, index)}> Delete </button>
+                                    <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}>
+                                        <Icon name='location-arrow' className='user-icon'></Icon>
+                                    </button>
+                                    <button className='btn btn-primary toolbarButton' onClick={this.deleteNodule.bind(this, index)}>
+                                        <Icon name='trash' className='user-icon'></Icon>
+                                    </button>
                                 </li>
                             })
                         }
@@ -522,34 +526,41 @@ export default class CTItemPage extends Component {
             <div className="btn-toolbar header" role="toolbar">
                 <div className='toolbar'>
                     <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.onDrawCrops.bind(this)} >
-                        <button className="btn btn-primary toolbarButton">
-                            <input type="checkbox" name="options" autoComplete="off"/> {'Crops'}
+                        <button className="btn btn-primary toolbarButton" title="Show crop region">
+                            <input type="checkbox" name="options" autoComplete="off"/>
+                            <Icon name='crop' className='user-icon'></Icon>
                         </button>
                     </div>
 
                     <div className="btn-group btn-group-toggle" data-toggle="buttons">
-                        <button className="btn btn-primary toolbarButton" onClick={this.onDrawSlices.bind(this)} >
-                            <input type="checkbox" name="options" autoComplete="off"/> Slices
+                        <button className="btn btn-primary toolbarButton"  title="Show slices" onClick={this.onDrawSlices.bind(this)} >
+                            <input type="checkbox" name="options" autoComplete="off"/>
+                            <Icon name='sliders' className='user-icon'></Icon>
                         </button>
                     </div>
 
-                    <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.onAddNodule.bind(this)}>
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Edit nodules" onClick={this.onAddNodule.bind(this)}>
                         <button className="btn btn-primary toolbarButton">
-                            <input type="checkbox" name="options" autoComplete="off"/> Edit
+                            <Icon name='circle' className='user-icon'></Icon>
                         </button>
                     </div>
 
-                    <div className="btn-group btn-group-toggle" data-toggle="buttons">
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Wheel function">
                       <button className="btn btn-primary active toolbarButton" onClick={this.onWheelFunction.bind(this)} >
-                        <input type="radio" name="options" id="option1" autoComplete="off" defaultChecked={true}/> Slices
+                        <input type="radio" name="options" id="option1" autoComplete="off" defaultChecked={true}/>
+                        <Icon name='arrows-v' className='user-icon'></Icon>
+                        <Icon name='sliders' className='user-icon'></Icon>
                       </button>
                       <button className="btn btn-primary toolbarButton" onClick={this.onWheelFunction.bind(this)} >
-                        <input type="radio" name="options" id="option2" autoComplete="off"/> Zoom
+                        <input type="radio" name="options" id="option2" autoComplete="off"/>
+                        <Icon name='arrows-v' className='user-icon'></Icon>
+                        <Icon name='search' className='user-icon'></Icon>
                       </button>
                     </div>
 
-                    <button type="button" className='toolbarButton btn btn-primary dropdown-toggle' data-toggle="dropdown">
-                        Proj <span className="caret"></span>
+                    <button type="button" className='toolbarButton btn btn-primary dropdown-toggle' data-toggle="dropdown" title="Projections">
+                        <Icon name='columns' className='user-icon'></Icon>
+                        <span className="caret"></span>
                     </button>
                     <ul className="dropdown-menu" role="menu">
                       <li><a className="dropdown-item" onClick={this.onProjectionSelector.bind(this, 0)}>
@@ -564,8 +575,12 @@ export default class CTItemPage extends Component {
                         <i className="fa fa-check" style={(this.state.projections[2]) ? {} : {display: 'none'}}></i> Coronal
                     </a></li>
                     </ul>
-                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onUnzoomAll.bind(this)}> {"Unzoom"} </button>
-                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onClearNodules.bind(this)}> {"Clear"} </button>
+                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onUnzoomAll.bind(this)} title="Unzoom all projections"> 
+                        <Icon name='expand' className='user-icon'></Icon>
+                    </button>
+                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onClearNodules.bind(this)} title="Remove all nodules">
+                        <Icon name='trash' className='user-icon'></Icon>
+                    </button>
                 </div>
             </div>
             {(item === undefined) ?

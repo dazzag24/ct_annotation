@@ -238,6 +238,21 @@ export default class CTSliceViewer extends Component {
 
         return (
             <div className="slice-viewer">
+                <Row>
+                <Col>
+                <div className='controls'>
+                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomPlus.bind(this)} title="Zoom in">
+                        <Icon name='search-plus' className='user-icon'></Icon>
+                    </button>
+                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomMinus.bind(this)}  title="Zoom out">
+                        <Icon name='search-minus' className='user-icon'></Icon>
+                    </button>
+                    <button className='btn btn-secondary button toolbarButton' onClick={this.onUnzoom.bind(this)}  title="Unzoom">
+                        <Icon name='expand' className='user-icon'></Icon>
+                    </button>
+                </div>
+                </Col>
+                </Row>
                 <Row><Col>
                 <div className="image" id={'image'+this.props.projection}
                      style={{display: 'inline'}}
@@ -264,26 +279,17 @@ export default class CTSliceViewer extends Component {
                 </div>
                 </Col>
                 <Col>
-                <div height={viewImage.height} style={{display: 'inline'}}>
+                <div height={viewImage.height} style={{display: 'inline'}} title="Slice">
                     <Slider className="slider" vertical={this.props.vertical}
                             trackStyle={style}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}
                             onChange={this.onSliderChange.bind(this)} />
                 </div>
-                <div height={viewImage.height} style={{display: 'inline'}}>
+                <div height={viewImage.height} style={{display: 'inline'}} title="MIP">
                 <Slider className="slider" vertical={this.props.vertical}
                             trackStyle={style}
                             value={mip} min={1} max={10}
                             onChange={this.props.onDepthChange.bind(this, this.props.projection)} />
-                </div>
-                </Col>
-                </Row>
-                <Row>
-                <Col>
-                <div className='controls'>
-                    <button className='btn btn-primary zoom-button toolbarButton' onClick={this.onZoomPlus.bind(this)}> + </button>
-                    <button className='btn btn-primary zoom-button toolbarButton' onClick={this.onZoomMinus.bind(this)}> - </button>
-                    <button className='btn btn-primary button toolbarButton' onClick={this.onUnzoom.bind(this)}> {"Unzoom"} </button>
                 </div>
                 </Col>
                 </Row>

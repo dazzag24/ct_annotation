@@ -66,7 +66,7 @@ export default class CTPage extends Component {
       }
       return (
         <div>
-          <button onClick={this.changeMode.bind(this)}> {(this.state.mode) ? '3D' : '2D'} </button>
+          <button className='btn btn-primary toolbarButton' onClick={this.changeMode.bind(this)}> {(this.state.mode) ? '3D' : '2D'} </button>
           {(this.state.mode)
             ?
             <CTItemPage id={this.state.pid} setPid={this.setPid}/>
