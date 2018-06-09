@@ -293,6 +293,20 @@ input:focus {
     text-align: center;
 }
 
+.toolbar > div {
+    margin-left: 0.1rem;
+}
+
+.toolbarButton {
+    font-family: 'Roboto', sans-serif;
+    margin-left: 0.3rem;
+    width: 2rem;
+    height: 1rem;
+    font-size: 2vmin;
+    padding: 0;
+    text-align: center;
+}
+
 .toolbar > .checkbox {
     font-weight: 100;
     font-family: 'Roboto', sans-serif;
@@ -320,9 +334,20 @@ input:focus {
     cursor: pointer;
 }
 
+.nodulesList {
+    text-align: left;
+    width: 600px;
+}
+
 .nodulesList > li {
     cursor: pointer;
     font-size: 2vmin;
+}
+
+.nodulesList > li > label {
+    width: 400px;
+    display: inline;
+    overflow-x: hidden;
 }
 
 .page.item .slice-viewer .slider {

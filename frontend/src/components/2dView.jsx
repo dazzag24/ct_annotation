@@ -249,7 +249,7 @@ export default class CTItemPage extends Component {
     }
 
     onWheelFunction() {
-        this.setState({wheelZoom: !this.state.wheelZoom})
+        this.setState({wheelZoom: !document.getElementById('option1').checked})
         
     }
 
@@ -456,9 +456,11 @@ export default class CTItemPage extends Component {
                          :
                          this.state.nodules.map((nodule, index) => {
                                 return <li key={'nodule'+index}>
-                                    {this.noduleInfo(nodule)}
-                                    <button onClick={this.selectNodule.bind(this, index)}> Move to </button>
-                                    <button onClick={this.deleteNodule.bind(this, index)}> Delete </button>
+                                    <label>
+                                        {this.noduleInfo(nodule)}
+                                    </label>
+                                    <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}> Move to </button>
+                                    <button className='btn btn-primary toolbarButton' onClick={this.deleteNodule.bind(this, index)}> Delete </button>
                                 </li>
                             })
                         }
@@ -519,21 +521,34 @@ export default class CTItemPage extends Component {
             </div>
             <div className="btn-toolbar header" role="toolbar">
                 <div className='toolbar'>
-                    <div className='checkbox'>
-                        <input type="checkbox" className={buttonClass} onClick={this.onDrawCrops.bind(this)}/> <label> Crops </label>
-                    </div>
-                    <div className='checkbox'>
-                        <input type="checkbox" className={buttonClass} onClick={this.onDrawSlices.bind(this)} defaultChecked={true}/> <label> Slices </label>
-                    </div>
-                    <div className='checkbox'>
-                        <input type="checkbox" className={buttonClass} onClick={this.onWheelFunction.bind(this)}/> <label> Wheel for zoom </label>
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.onDrawCrops.bind(this)} >
+                        <button className="btn btn-primary toolbarButton">
+                            <input type="checkbox" name="options" autoComplete="off"/> {'Crops'}
+                        </button>
                     </div>
 
-                    <div className='checkbox'>
-                        <input type="checkbox" className={buttonClass} onClick={this.onAddNodule.bind(this)} width={200} /> <label> Edit nodules </label>
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons">
+                        <button className="btn btn-primary toolbarButton" onClick={this.onDrawSlices.bind(this)} >
+                            <input type="checkbox" name="options" autoComplete="off"/> Slices
+                        </button>
                     </div>
 
-                    <button type="button" className={buttonClass + ' dropdown-toggle'} data-toggle="dropdown">
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.onAddNodule.bind(this)}>
+                        <button className="btn btn-primary toolbarButton">
+                            <input type="checkbox" name="options" autoComplete="off"/> Edit
+                        </button>
+                    </div>
+
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons">
+                      <button className="btn btn-primary active toolbarButton" onClick={this.onWheelFunction.bind(this)} >
+                        <input type="radio" name="options" id="option1" autoComplete="off" defaultChecked={true}/> Slices
+                      </button>
+                      <button className="btn btn-primary toolbarButton" onClick={this.onWheelFunction.bind(this)} >
+                        <input type="radio" name="options" id="option2" autoComplete="off"/> Zoom
+                      </button>
+                    </div>
+
+                    <button type="button" className='toolbarButton btn btn-primary dropdown-toggle' data-toggle="dropdown">
                         Proj <span className="caret"></span>
                     </button>
                     <ul className="dropdown-menu" role="menu">
@@ -549,9 +564,9 @@ export default class CTItemPage extends Component {
                         <i className="fa fa-check" style={(this.state.projections[2]) ? {} : {display: 'none'}}></i> Coronal
                     </a></li>
                     </ul>
-                    <button type="button" className={buttonClass} onClick={this.onUnzoomAll.bind(this)}> {"Unzoom"} </button>
-                    <button type="button" className={buttonClass} onClick={this.onClearNodules.bind(this)}> {"Clear"} </button>
-            </div>
+                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onUnzoomAll.bind(this)}> {"Unzoom"} </button>
+                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onClearNodules.bind(this)}> {"Clear"} </button>
+                </div>
             </div>
             {(item === undefined) ?
              this.renderPageLoading()
