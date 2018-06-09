@@ -18,11 +18,12 @@ import CTSliceViewer from './CTSliceViewer.jsx'
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = this.props.store_2d.get(this.props.id).state
+        this.state = props.store_2d.get(props.id).state
+        console.log(props.id, this.state.slice)
         let s0, s1, s2
-        s0 = this.props.ct_store.getShape(this.props.id, 0)
-        s1 = this.props.ct_store.getShape(this.props.id, 1)
-        s2 = this.props.ct_store.getShape(this.props.id, 2)
+        s0 = props.ct_store.getShape(props.id, 0)
+        s1 = props.ct_store.getShape(props.id, 1)
+        s2 = props.ct_store.getShape(props.id, 2)
 
         this.state.coordinates = [
             [0, 0, s0[0], s0[1]],

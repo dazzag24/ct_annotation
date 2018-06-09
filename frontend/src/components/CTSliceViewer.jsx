@@ -221,7 +221,6 @@ export default class CTSliceViewer extends Component {
         var slider_style = { height: viewImage.height }
         const coordinates = this.props.coordinates
 
-        console.log(coordinates)
         const lines = this.getLines(coordinates, image.width, image.height)
 
         const shape = this.props.shape

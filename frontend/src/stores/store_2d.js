@@ -46,7 +46,7 @@ export default class Store_2D {
     }
 
     init(id) {
-      this.items.set(id, item_template)
+      this.items.set(id, JSON.parse(JSON.stringify(item_template)))
     }
 
     get(id) {
@@ -61,7 +61,6 @@ export default class Store_2D {
 
     setSlices(id, slices, nodules) {
         let item = this.items.get(id)
-        console.log(item, id)
         if (item === undefined) {
             this.init(id)
         }
