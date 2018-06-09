@@ -167,6 +167,10 @@ body {
   flex: right;
 }
 
+.resize-button:hover {
+    transform: scale(1.2);
+}
+
 .item-icon:hover {
   color: lightgreen;
   transform: scale(1.2);

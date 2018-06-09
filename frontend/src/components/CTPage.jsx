@@ -38,11 +38,6 @@ export default class CTPage extends Component {
   render() {
     const self = this
 
-    const nodules = []
-    nodules.push([20, 98, 26, 7])
-    nodules.push([44, 122, 247, 6])
-    nodules.push([55, 136, 229, 7])
-
     if (this.props.ct_store.items === undefined) {
       return <LoadingSpinner text='Соединение с сервером' />
     }
@@ -66,7 +61,13 @@ export default class CTPage extends Component {
       }
       return (
         <div>
-          <button className='btn btn-primary toolbarButton' onClick={this.changeMode.bind(this)}> {(this.state.mode) ? '3D' : '2D'} </button>
+          <button className='btn btn-primary toolbarButton' onClick={this.changeMode.bind(this)}> {
+            (this.state.mode)
+            ?
+            <label className='user-icon'> 3D </label>
+            :
+            <label className='user-icon'> 2D </label>
+        } </button>
           {(this.state.mode)
             ?
             <CTItemPage id={this.state.pid} setPid={this.setPid}/>

@@ -552,13 +552,17 @@ export default class CTItemPage extends Component {
                     <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Wheel function">
                       <button className="btn btn-primary active toolbarButton" onClick={this.onWheelFunction.bind(this)} >
                         <input type="radio" name="options" id="option1" autoComplete="off" defaultChecked={true}/>
-                        <Icon name='arrows-v' className='user-icon'></Icon>
-                        <Icon name='sliders' className='user-icon'></Icon>
+                        <div className='resize-button'>
+                            <Icon name='arrows-v'></Icon>
+                            <Icon name='sliders'></Icon>
+                        </div>
                       </button>
                       <button className="btn btn-primary toolbarButton" onClick={this.onWheelFunction.bind(this)} >
                         <input type="radio" name="options" id="option2" autoComplete="off"/>
-                        <Icon name='arrows-v' className='user-icon'></Icon>
-                        <Icon name='search' className='user-icon'></Icon>
+                        <div className='resize-button'>
+                            <Icon name='arrows-v'></Icon>
+                            <Icon name='search'></Icon>
+                        </div>
                       </button>
                     </div>
 
