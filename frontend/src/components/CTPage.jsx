@@ -61,18 +61,11 @@ export default class CTPage extends Component {
       }
       return (
         <div>
-          <button className='btn btn-primary toolbarButton' onClick={this.changeMode.bind(this)}> {
-            (this.state.mode)
-            ?
-            <label className='user-icon'> 3D </label>
-            :
-            <label className='user-icon'> 2D </label>
-        } </button>
           {(this.state.mode)
             ?
-            <CTItemPage id={this.state.pid} setPid={this.setPid}/>
+            <CTItemPage id={this.state.pid} setPid={this.setPid} changeMode={this.changeMode.bind(this)}/>
             :
-            <VolumeView id={this.state.pid} setPid={this.setPid}/>
+            <VolumeView id={this.state.pid} setPid={this.setPid} changeMode={this.changeMode.bind(this)}/>
           }
         </div>
       )

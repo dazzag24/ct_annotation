@@ -463,10 +463,14 @@ export default class CTItemPage extends Component {
                                     </Col>
                                     <Col>
                                     <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}>
-                                        <Icon name='location-arrow' className='user-icon'></Icon>
+                                        <div className='user-icon'>
+                                            <Icon name='location-arrow'></Icon>
+                                        </div>
                                     </button>
                                     <button className='btn btn-primary toolbarButton' onClick={this.deleteNodule.bind(this, index)}>
-                                        <Icon name='trash' className='user-icon'></Icon>
+                                        <div className='user-icon'>
+                                            <Icon name='trash'></Icon>
+                                        </div>
                                     </button>
                                     </Col>
                                     </Row>
@@ -529,23 +533,40 @@ export default class CTItemPage extends Component {
             </div>
             <div className="btn-toolbar header" role="toolbar">
                 <div className='toolbar'>
+
+
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.props.changeMode.bind(this)}>
+                        <button className="btn btn-primary toolbarButton" title="Enable 3D viewer">
+                            <input type="checkbox" name="options" autoComplete="off"/>
+                            <div className='user-icon'>
+                                3D
+                            </div>
+                        </button>
+                    </div>
+
                     <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.onDrawCrops.bind(this)} >
                         <button className="btn btn-primary toolbarButton" title="Show crop region">
                             <input type="checkbox" name="options" autoComplete="off"/>
-                            <Icon name='crop' className='user-icon'></Icon>
+                            <div className='user-icon'>
+                                <Icon name='crop'></Icon>
+                            </div>
                         </button>
                     </div>
 
                     <div className="btn-group btn-group-toggle" data-toggle="buttons">
                         <button className="btn btn-primary toolbarButton"  title="Show slices" onClick={this.onDrawSlices.bind(this)} >
                             <input type="checkbox" name="options" autoComplete="off"/>
-                            <Icon name='sliders' className='user-icon'></Icon>
+                            <div className='user-icon'>
+                                <Icon name='sliders'></Icon>
+                            </div>
                         </button>
                     </div>
 
                     <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Edit nodules" onClick={this.onAddNodule.bind(this)}>
                         <button className="btn btn-primary toolbarButton">
-                            <Icon name='circle' className='user-icon'></Icon>
+                            <div className='user-icon'>
+                                <Icon name='circle'></Icon>
+                            </div>
                         </button>
                     </div>
 
@@ -584,10 +605,14 @@ export default class CTItemPage extends Component {
                     </a></li>
                     </ul>
                     <button type="button" className='toolbarButton btn btn-primary' onClick={this.onUnzoomAll.bind(this)} title="Unzoom all projections"> 
-                        <Icon name='expand' className='user-icon'></Icon>
+                        <div className='user-icon'>
+                            <Icon name='expand'></Icon>
+                        </div>
                     </button>
                     <button type="button" className='toolbarButton btn btn-primary' onClick={this.onClearNodules.bind(this)} title="Remove all nodules">
-                        <Icon name='trash' className='user-icon'></Icon>
+                        <div className='user-icon'>
+                            <Icon name='trash'></Icon>
+                        </div>
                     </button>
                 </div>
             </div>

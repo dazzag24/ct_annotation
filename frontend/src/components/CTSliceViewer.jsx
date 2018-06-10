@@ -242,13 +242,19 @@ export default class CTSliceViewer extends Component {
                 <Col>
                 <div className='controls'>
                     <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomPlus.bind(this)} title="Zoom in">
-                        <Icon name='search-plus' className='user-icon'></Icon>
+                        <div className='user-icon'>
+                            <Icon name='search-plus'></Icon>
+                        </div>
                     </button>
                     <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomMinus.bind(this)}  title="Zoom out">
-                        <Icon name='search-minus' className='user-icon'></Icon>
+                        <div className='user-icon'>
+                            <Icon name='search-minus'></Icon>
+                        </div>
                     </button>
                     <button className='btn btn-secondary button toolbarButton' onClick={this.onUnzoom.bind(this)}  title="Unzoom">
-                        <Icon name='expand' className='user-icon'></Icon>
+                        <div className='user-icon'>
+                            <Icon name='expand'></Icon>
+                        </div>
                     </button>
                 </div>
                 </Col>

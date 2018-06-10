@@ -812,6 +812,14 @@ export default class VolumeView extends Component {
     const self = this
     return (
       <div>
+        <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.props.changeMode.bind(this)}>
+            <button className="btn btn-primary toolbarButton" title="Enable 2D viewer">
+                <input type="checkbox" name="options" autoComplete="off"/>
+                <div className='user-icon'>
+                    2D
+                </div>
+            </button>
+        </div>
         <div className='user'>
           <Icon name='home' className='user-icon' onClick={() => this.props.setPid(null)}></Icon>         
         </div>
