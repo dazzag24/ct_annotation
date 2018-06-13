@@ -17,13 +17,15 @@ const CT_Requests = keyMirror({
   CT_GET_LIST: null,
   CT_GET_ITEM_DATA: null,
   CT_GET_INFERENCE: null,
-  UPDATE_PATIENT_LIST: null
+  UPDATE_PATIENT_LIST: null,
+  GET_AUTH_STATUS: null
 })
 
 const CT_Responses = keyMirror({
   CT_GOT_LIST: null,
   CT_GOT_ITEM_DATA: null,
-  CT_GOT_INFERENCE: null
+  CT_GOT_INFERENCE: null,
+  GOT_AUTH_STATUS: null
 })
 
 const CT_API = { CT_Responses, CT_Requests }

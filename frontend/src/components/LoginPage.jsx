@@ -11,8 +11,9 @@ export default class LoginPage extends Component {
         // some more sophisticated processing should be here
         var lstore = this.props.lstore
         console.log(lstore)
-        lstore.updateAuthStatus(info)
+        lstore.updateAuthStatusBack(info)
     }
+
     render() {
         var lstore = this.props.lstore
         console.log('in Login')

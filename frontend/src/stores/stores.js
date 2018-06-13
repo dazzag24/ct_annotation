@@ -9,6 +9,6 @@ server.init()
 const ct_store = new CT_Store(server)
 const store_3d = new Store_3D()
 const store_2d = new Store_2D()
-const lstore = new LoginStore()
+const lstore = new LoginStore(server)
 
 export { server, ct_store, store_3d, store_2d, lstore }

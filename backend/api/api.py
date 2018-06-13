@@ -26,3 +26,6 @@ class CtNamespace(BaseNamespace):
 
     def on_CT_GET_INFERENCE(self, data, meta):
         self._safe_call(self.controller.get_inference, data, meta, "CT_GET_INFERENCE", "CT_GOT_INFERENCE")
+
+    def on_GET_AUTH_STATUS(self, data, meta):
+        self._safe_call(self.controller.get_auth_status, data, meta, "GET_AUTH_STATUS", "GOT_AUTH_STATUS")

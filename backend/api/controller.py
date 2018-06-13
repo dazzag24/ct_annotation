@@ -28,6 +28,12 @@ RENDER_SPACING = np.array(SHAPE) / np.array(RENDER_SHAPE) * np.array(SPACING)
 # xip parameters
 XIP_PARAMS = dict(mode='max', depth=6, stride=2, channels=3)
 
+AUTH_PAIRS = {
+    "GOMBO_1": '123',
+    "GOMBO_2": '456',
+    "GOMBO_3": '789'
+}
+
 def get_pixel_coords(nodules, factor=1):
     """ Get nodules info in pixel coords from nodules recarray.
     """
@@ -134,4 +140,12 @@ class CtController:
         # update and fetch data dict
         print('Finished predicting')
         res = dict(data={**item_data, **data}, meta=meta)
+        return res
+
+    def get_auth_status(self, data, meta):
+        # check login-password pair
+        print("checking pair...")
+        status = AUTH_PAIRS.get(data.get('login'), None) == data.get('password')
+        res = dict(data={**data, 'status': status}, meta=meta)
+        print("check done", status)
         return res
