@@ -241,17 +241,17 @@ export default class CTSliceViewer extends Component {
                 <Row>
                 <Col>
                 <div className='controls'>
-                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomPlus.bind(this)} title="Zoom in">
+                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomPlus.bind(this)} title="Увеличить">
                         <div className='user-icon'>
                             <Icon name='search-plus'></Icon>
                         </div>
                     </button>
-                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomMinus.bind(this)}  title="Zoom out">
+                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomMinus.bind(this)}  title="Уменьшить">
                         <div className='user-icon'>
                             <Icon name='search-minus'></Icon>
                         </div>
                     </button>
-                    <button className='btn btn-secondary button toolbarButton' onClick={this.onUnzoom.bind(this)}  title="Unzoom">
+                    <button className='btn btn-secondary button toolbarButton' onClick={this.onUnzoom.bind(this)}  title="Убрать приближение">
                         <div className='user-icon'>
                             <Icon name='expand'></Icon>
                         </div>
@@ -285,7 +285,7 @@ export default class CTSliceViewer extends Component {
                 </div>
                 </Col>
                 <Col>
-                <div height={viewImage.height} style={{display: 'inline'}} title="Slice">
+                <div height={viewImage.height} style={{display: 'inline'}} title="Срез">
                     <Slider className="slider" vertical={this.props.vertical}
                             trackStyle={style}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}

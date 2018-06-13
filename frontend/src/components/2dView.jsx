@@ -25,17 +25,18 @@ export default class CTItemPage extends Component {
         s1 = props.ct_store.getShape(props.id, 1)
         s2 = props.ct_store.getShape(props.id, 2)
 
-        this.state.coordinates = [
-            [0, 0, s0[0], s0[1]],
-            [0, 0, s1[0], s1[1]],
-            [0, 0, s1[0], s1[1]]
-        ]
+        if (this.state.coordinates === null) {
+            this.state.coordinates = [
+                [0, 0, s0[0], s0[1]],
+                [0, 0, s1[0], s1[1]],
+                [0, 0, s1[0], s1[1]]
+            ]
 
-        s0 = [s0[0] / 2, s0[1] / 2]
-        s1 = [s1[0] / 2, s1[1] / 2]
-        s2 = [s2[0] / 2, s2[1] / 2]
-
-        this.state.center = [s0, s1, s2]
+            s0 = [s0[0] / 2, s0[1] / 2]
+            s1 = [s1[0] / 2, s1[1] / 2]
+            s2 = [s2[0] / 2, s2[1] / 2]
+            this.state.center = [s0, s1, s2]
+        } 
     }
 
     onSliceChange(slice, projection) {
@@ -248,8 +249,13 @@ export default class CTItemPage extends Component {
         this.setState({drawSlices: !this.state.drawSlices})
     }
 
-    onWheelFunction() {
-        this.setState({wheelZoom: !document.getElementById('option1').checked})
+    onWheelZoom() {
+        this.setState({wheelZoom: true})
+        
+    }
+
+    onWheelSlice() {
+        this.setState({wheelZoom: false})
         
     }
 
@@ -257,7 +263,7 @@ export default class CTItemPage extends Component {
         if (!this.state.confirm) {
             this.setState({noduleMode: !this.state.noduleMode})
         } else {
-            alert('Nodules have been confirmed')
+            alert('Нодулы уже были подтверждены!')
         }
     }
 
@@ -275,13 +281,13 @@ export default class CTItemPage extends Component {
         if (!this.state.confirm) {
             this.setState({nodules: []})
         } else {
-            alert('Nodules have been confirmed')
+            alert('Нодулы уже были подтверждены!')
         }
     }
 
     onConfirmNodules() {
         let nodules = []
-        alert('Nodules will be confirmed')
+        alert('Нодулы подтверждены')
         for (let nodule of this.state.nodules) {
             nodule[4] = 1
             nodules = [...nodules, nodule]
@@ -466,25 +472,28 @@ export default class CTItemPage extends Component {
                 <Col width={1000}>
                 {(this.state.showList) ?
                     <div className='nodulesList'>
-                    <h2> {"Nodules"} </h2>
+                    <h2> Отмеченные нодулы </h2>
                         {(this.state.nodules.length == 0)
                             ?
-                         <Row> No nodules </Row>
+                         <Row> Отсутствуют </Row>
                          :
                          this.state.nodules.map((nodule, index) => {
                                 return <Row key={'nodule'+index}>
                                     <Col>
-                                        <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}>
+                                        <Button className='btn btn-primary toolbarButton'
+                                                title='Перейти к нодуле'
+                                                onClick={this.selectNodule.bind(this, index)}>
                                             <div className='user-icon'>
                                                 <Icon name='location-arrow'></Icon>
                                             </div>
-                                        </button>
-                                        <button className='btn btn-danger toolbarButton' disabled={this.state.confirm} 
+                                        </Button>
+                                        <Button className='btn btn-danger toolbarButton' disabled={this.state.confirm}
+                                                title='Удалить нодулу'
                                                 onClick={this.deleteNodule.bind(this, index)}>
                                             <div className='user-icon'>
                                                 <Icon name='trash'></Icon>
                                             </div>
-                                        </button>
+                                        </Button>
                                     </Col>
                                     <Col>
                                         <label className='noduleCoord'>
@@ -511,6 +520,10 @@ export default class CTItemPage extends Component {
                       nodule[1].toFixed(0),
                       nodule[2].toFixed(0),
                       nodule[3].toFixed(0)].join('px, ') + ' mm]'
+    }
+
+    radioChange() {
+        //
     }
 
     renderImageLoading() {
@@ -543,6 +556,8 @@ export default class CTItemPage extends Component {
         const item = this.props.ct_store.get(this.props.id)
         const buttonClass = ""
 
+        console.log(this.state.wheelZoom)
+
         return (
         <div className="page ct item">
             <div className='user'>
@@ -553,61 +568,65 @@ export default class CTItemPage extends Component {
 
 
                     <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.props.changeMode.bind(this)}>
-                        <button className="btn btn-primary toolbarButton" title="Enable 3D viewer">
+                        <Button className="btn btn-primary toolbarButton" title="Перейти в режим 3D">
                             <input type="checkbox" name="options" autoComplete="off"/>
                             <div className='user-icon'>
                                 3D
                             </div>
-                        </button>
+                        </Button>
                     </div>
 
                     <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.onDrawCrops.bind(this)} >
-                        <button className="btn btn-primary toolbarButton" title="Show crop region">
+                        <Button className="btn btn-primary toolbarButton" active={this.state.drawCrops} title="Отображать выделенные области других срезов">
                             <input type="checkbox" name="options" autoComplete="off"/>
                             <div className='user-icon'>
                                 <Icon name='crop'></Icon>
                             </div>
-                        </button>
+                        </Button>
                     </div>
 
                     <div className="btn-group btn-group-toggle" data-toggle="buttons">
-                        <button className="btn btn-primary toolbarButton"  title="Show slices" onClick={this.onDrawSlices.bind(this)} >
+                        <Button className="btn btn-primary toolbarButton" active={this.state.drawSlices} title="Показывать слайсы других срезов" onClick={this.onDrawSlices.bind(this)} >
                             <input type="checkbox" name="options" autoComplete="off"/>
                             <div className='user-icon'>
                                 <Icon name='sliders'></Icon>
                             </div>
-                        </button>
+                        </Button>
                     </div>
 
-                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Edit nodules">
-                        <button className="btn btn-primary toolbarButton" disabled={this.state.confirm} onClick={this.onAddNodule.bind(this)}>
+
+                    <div className="btn-group btn-group-toggle" active={this.state.confirm.toString()} data-toggle="buttons" title="Редактировать нодулы">
+                        <Button className="btn btn-primary toolbarButton" active={this.state.noduleMode} onClick={this.onAddNodule.bind(this)}>
+                            <input type="checkbox" name="options" autoComplete="off"/>
                             <div className='user-icon'>
                                 <Icon name='circle'></Icon>
                             </div>
-                        </button>
+                        </Button>
                     </div>
 
-                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Wheel function">
-                      <button className="btn btn-primary active toolbarButton" onClick={this.onWheelFunction.bind(this)} >
-                        <input type="radio" name="options" id="option1" autoComplete="off" defaultChecked={true}/>
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons">
+                      <Button className="btn btn-primary toolbarButton" id="option1" active={!this.state.wheelZoom} title="Колёсико прокручивает срезы"
+                              onClick={this.onWheelSlice.bind(this)} >
+                        <input type="checkbox" name="options" autoComplete="off"/>
                         <div className='resize-button'>
                             <Icon name='arrows-v'></Icon>
                             <Icon name='sliders'></Icon>
                         </div>
-                      </button>
-                      <button className="btn btn-primary toolbarButton" onClick={this.onWheelFunction.bind(this)} >
-                        <input type="radio" name="options" id="option2" autoComplete="off"/>
+                      </Button>
+                      <Button className="btn btn-primary toolbarButton" id="option2" active={this.state.wheelZoom} title="Колёсико управляет масштабом"
+                              onClick={this.onWheelZoom.bind(this)} >
+                        <input type="checkbox" name="options" autoComplete="off"/>
                         <div className='resize-button'>
                             <Icon name='arrows-v'></Icon>
                             <Icon name='search'></Icon>
                         </div>
-                      </button>
+                      </Button>
                     </div>
 
-                    <button type="button" className='toolbarButton btn btn-primary dropdown-toggle' data-toggle="dropdown" title="Projections">
+                    <Button type="button" className='toolbarButton btn btn-primary dropdown-toggle' data-toggle="dropdown" title="Проекции">
                         <Icon name='columns' className='user-icon'></Icon>
                         <span className="caret"></span>
-                    </button>
+                    </Button>
                     <ul className="dropdown-menu" role="menu">
                       <li><a className="dropdown-item" onClick={this.onProjectionSelector.bind(this, 0)}>
                         <i className="fa fa-check" style={(this.state.projections[0]) ? {} : {display: 'none'}}></i> Axial
@@ -621,23 +640,23 @@ export default class CTItemPage extends Component {
                         <i className="fa fa-check" style={(this.state.projections[2]) ? {} : {display: 'none'}}></i> Coronal
                     </a></li>
                     </ul>
-                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onUnzoomAll.bind(this)} title="Unzoom all projections"> 
+                    <Button type="button" className='toolbarButton btn btn-primary' onClick={this.onUnzoomAll.bind(this)} title="Убрать все приближения"> 
                         <div className='user-icon'>
                             <Icon name='expand'></Icon>
                         </div>
-                    </button>
-                    <button type="button" className='toolbarButton btn btn-success' disabled={this.state.confirm}
-                            onClick={this.onConfirmNodules.bind(this)} title="Confirm nodules">
+                    </Button>
+                    <Button type="button" className='toolbarButton btn btn-success' disabled={this.state.confirm}
+                            onClick={this.onConfirmNodules.bind(this)} title="Подтвердить нодулы">
                         <div className='user-icon'>
                             <Icon name='check'></Icon>
                         </div>
-                    </button>
-                    <button type="button" className='toolbarButton btn btn-danger' disabled={this.state.confirm}
-                            onClick={this.onClearNodules.bind(this)} title="Remove all nodules">
+                    </Button>
+                    <Button type="button" className='toolbarButton btn btn-danger' disabled={this.state.confirm}
+                            onClick={this.onClearNodules.bind(this)} title="Удалить все нодулы">
                         <div className='user-icon'>
                             <Icon name='trash'></Icon>
                         </div>
-                    </button>
+                    </Button>
                 </div>
             </div>
             {(item === undefined) ?

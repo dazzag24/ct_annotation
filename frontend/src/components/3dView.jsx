@@ -769,7 +769,7 @@ export default class VolumeView extends Component {
     controls.screenSpacePanning = false
     controls.minDistance = -5
     controls.maxDistance = 10
-    controls.enablePan = false
+    controls.enablePan = true
 
     this.scene = scene
     this.camera = camera
@@ -826,7 +826,7 @@ export default class VolumeView extends Component {
         <div className="btn-toolbar header" role="toolbar">
             <div className='toolbar'>
                 <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.props.changeMode.bind(this)}>
-                    <button className="btn btn-primary toolbarButton" title="Enable 2D viewer">
+                    <button className="btn btn-primary toolbarButton" title="Перейти в режим 2D">
                         <input type="checkbox" name="options" autoComplete="off"/>
                         <div className='user-icon'>
                             2D
