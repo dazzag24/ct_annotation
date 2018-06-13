@@ -595,8 +595,8 @@ export default class CTItemPage extends Component {
                     </div>
 
 
-                    <div className="btn-group btn-group-toggle" active={this.state.confirm.toString()} data-toggle="buttons" title="Редактировать нодулы">
-                        <Button className="btn btn-primary toolbarButton" active={this.state.noduleMode} onClick={this.onAddNodule.bind(this)}>
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Редактировать нодулы">
+                        <Button className="btn btn-primary toolbarButton" active={this.state.noduleMode} disabled={this.state.confirm} onClick={this.onAddNodule.bind(this)}>
                             <input type="checkbox" name="options" autoComplete="off"/>
                             <div className='user-icon'>
                                 <Icon name='circle'></Icon>
