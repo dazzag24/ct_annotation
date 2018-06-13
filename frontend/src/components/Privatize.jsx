@@ -16,6 +16,7 @@ export default class Privatize extends Component {
                 <Page/>
             )
         } else {
+            lstore.referTo = window.location.pathname
             return (
                 <Redirect to='/login'/>
             )

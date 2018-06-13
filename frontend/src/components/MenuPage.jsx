@@ -3,6 +3,7 @@ import { Component } from 'react'
 import { Button } from 'react-bootstrap'
 import { Icon } from 'react-fa'
 import { inject, observer } from 'mobx-react'
+import { Redirect } from 'react-router-dom'
 import { values } from 'mobx'
 
 import Dnd from './DragDrop.jsx'
@@ -37,6 +38,7 @@ function makeContent( order, setPid ) {
   return content
 }
 
+@inject("lstore")
 @inject("ct_store")
 @observer
 export default class Menu extends Component {
@@ -114,12 +116,16 @@ export default class Menu extends Component {
   }
 
   loginBox() {
+      let signout = () => {
+          this.props.lstore.isAuthenticated = false
+          return (<Redirect to='/login'/>)
+      }
     return (
       <div className='login-box'>
         <span className='name'>Васильев И.Н.</span>
         <br />
         <Button className='change-account'>Сменить аккаунт</Button>
-        <Button className='exit-account'>Выйти</Button>
+        <Button className='exit-account' onClick={signout} >Выйти</Button>
       </div>
     )
   }
@@ -130,7 +136,7 @@ export default class Menu extends Component {
         <div className='menu-header'>Мои списки исследований</div>
         <div className='user'>
           <span className='user-name'></span>
-          <Icon name='user-circle' className='user-icon' onClick={this.handleUser}></Icon>         
+          <Icon name='user-circle' className='user-icon' onClick={this.handleUser}></Icon>
         </div>
         {this.state.showLogin ? this.loginBox() : null}
         <div className='dnd'>

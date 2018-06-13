@@ -22,7 +22,7 @@ export default class App extends Component {
         <div>
             <Switch>
                 <Route path='/login' component={LoginPage}/>
-                <Route path="/" render={
+                <Route exact path="/" render={
                     () => <Privatize component={CTPage}/>
                 }/>
                 <Route path="/:id" render={
