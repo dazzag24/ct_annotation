@@ -25,9 +25,10 @@ const item_template = {
         chooseRadius: false,
         radiusRatio: 0,
         nodules: [],
-        projections: [true, true, true],
+        projections: [true, false, false],
         showList: true,
-        noduleMode: false
+        noduleMode: false,
+        confirm: false
     }
 }
 

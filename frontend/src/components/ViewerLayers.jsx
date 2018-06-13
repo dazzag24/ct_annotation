@@ -2,7 +2,7 @@ import React from 'react'
 import { Component } from 'react'
 import { Layer, Stage, Image, Circle, Line, Rect, Text } from 'react-konva'
 
-export default class ImageWithOpacity extends Component {
+export default class ViewerLayers extends Component {
     render () {
         let w1 = this.props.x2
         let w2 = this.props.width2
@@ -91,13 +91,18 @@ export default class ImageWithOpacity extends Component {
                         </Layer>
 
                         {this.props.nodules.map((nodule, index) => {
-                            let opacity, radius
+                            let opacity, radius, noduleColor
                             if (Math.abs(slice[2] - nodule[2]) < nodule[4]) {
                                 opacity = 0.6
                                 radius = Math.sqrt(nodule[4] * nodule[4] - (slice[2] - nodule[2]) * (slice[2] - nodule[2]))
                                 radius = radius * nodule[3] / nodule[4]
                             } else {
                                 opacity = 0
+                            }
+                            if (nodule[5] == 1) {
+                                noduleColor = 'green'
+                            } else {
+                                noduleColor = 'red'
                             }
                             return <Layer key={'layer'+index}><Circle
                                 onMouseDown={this.props.onNodulePointerDown.bind(this, index)}
@@ -108,7 +113,7 @@ export default class ImageWithOpacity extends Component {
                                 radius={radius}
                                 shadowBlur={5}
                                 opacity={opacity}
-                                fill={"green"}
+                                fill={noduleColor}
                               />
                               </Layer>
                         })}

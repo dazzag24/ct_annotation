@@ -91,7 +91,7 @@ export default class CTItemPage extends Component {
         let axis = this.props.ct_store.getReverseAxis(projection)
 
         let base_coord = [x / factors[0] + corner[0], y / factors[1] + corner[1], this.state.slice[projection]]
-        let coord = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 0]
+        let coord = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 0, 0]
 
         this.setState({imageClicked: true,
                        chooseRadius: true,
@@ -234,7 +234,7 @@ export default class CTItemPage extends Component {
         
         let axis = this.props.ct_store.getReverseAxis(projection)
 
-        nodule = [coord[axis[0]], coord[axis[1]], coord[axis[2]], radius]
+        nodule = [coord[axis[0]], coord[axis[1]], coord[axis[2]], radius, 0]
         nodules[index] = nodule
         this.setState({nodules: nodules})
 
@@ -254,7 +254,11 @@ export default class CTItemPage extends Component {
     }
 
     onAddNodule() {
-        this.setState({noduleMode: !this.state.noduleMode})
+        if (!this.state.confirm) {
+            this.setState({noduleMode: !this.state.noduleMode})
+        } else {
+            alert('Nodules have been confirmed')
+        }
     }
 
     onUnzoom(projection) {
@@ -268,7 +272,21 @@ export default class CTItemPage extends Component {
     }
 
     onClearNodules() {
-        this.setState({nodules: []})
+        if (!this.state.confirm) {
+            this.setState({nodules: []})
+        } else {
+            alert('Nodules have been confirmed')
+        }
+    }
+
+    onConfirmNodules() {
+        let nodules = []
+        alert('Nodules will be confirmed')
+        for (let nodule of this.state.nodules) {
+            nodule[4] = 1
+            nodules = [...nodules, nodule]
+        }
+        this.setState({nodules: nodules, confirm: true, noduleMode: false})
     }
 
     onShowList() {
@@ -354,7 +372,7 @@ export default class CTItemPage extends Component {
         let shiftedNodule = [nodules[index][revAxis[0]] + (x - this.state.start[0]) / factor[0],
                              nodules[index][revAxis[1]] + (y - this.state.start[1]) / factor[1],
                              nodules[index][revAxis[2]]]
-        nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3]]
+        nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3], nodules[index][4]]
         this.setState({nodules: nodules, start: [x, y]})
     }
 
@@ -447,36 +465,35 @@ export default class CTItemPage extends Component {
                 </Col>
                 <Col width={1000}>
                 {(this.state.showList) ?
-                    <div>
+                    <div className='nodulesList'>
                     <h2> {"Nodules"} </h2>
-                    <Grid className='nodulesList'>
                         {(this.state.nodules.length == 0)
                             ?
-                         <Row> "No nodules" </Row>
+                         <Row> No nodules </Row>
                          :
                          this.state.nodules.map((nodule, index) => {
                                 return <Row key={'nodule'+index}>
+                                    <Col>
+                                        <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}>
+                                            <div className='user-icon'>
+                                                <Icon name='location-arrow'></Icon>
+                                            </div>
+                                        </button>
+                                        <button className='btn btn-danger toolbarButton' disabled={this.state.confirm} 
+                                                onClick={this.deleteNodule.bind(this, index)}>
+                                            <div className='user-icon'>
+                                                <Icon name='trash'></Icon>
+                                            </div>
+                                        </button>
+                                    </Col>
                                     <Col>
                                         <label className='noduleCoord'>
                                             {this.noduleInfo(nodule)}
                                         </label>
                                     </Col>
-                                    <Col>
-                                    <button className='btn btn-primary toolbarButton' onClick={this.selectNodule.bind(this, index)}>
-                                        <div className='user-icon'>
-                                            <Icon name='location-arrow'></Icon>
-                                        </div>
-                                    </button>
-                                    <button className='btn btn-primary toolbarButton' onClick={this.deleteNodule.bind(this, index)}>
-                                        <div className='user-icon'>
-                                            <Icon name='trash'></Icon>
-                                        </div>
-                                    </button>
-                                    </Col>
                                     </Row>
                             })
                         }
-                    </Grid>
                     </div>
                     :
                     ''
@@ -562,8 +579,8 @@ export default class CTItemPage extends Component {
                         </button>
                     </div>
 
-                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Edit nodules" onClick={this.onAddNodule.bind(this)}>
-                        <button className="btn btn-primary toolbarButton">
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Edit nodules">
+                        <button className="btn btn-primary toolbarButton" disabled={this.state.confirm} onClick={this.onAddNodule.bind(this)}>
                             <div className='user-icon'>
                                 <Icon name='circle'></Icon>
                             </div>
@@ -609,7 +626,14 @@ export default class CTItemPage extends Component {
                             <Icon name='expand'></Icon>
                         </div>
                     </button>
-                    <button type="button" className='toolbarButton btn btn-primary' onClick={this.onClearNodules.bind(this)} title="Remove all nodules">
+                    <button type="button" className='toolbarButton btn btn-success' disabled={this.state.confirm}
+                            onClick={this.onConfirmNodules.bind(this)} title="Confirm nodules">
+                        <div className='user-icon'>
+                            <Icon name='check'></Icon>
+                        </div>
+                    </button>
+                    <button type="button" className='toolbarButton btn btn-danger' disabled={this.state.confirm}
+                            onClick={this.onClearNodules.bind(this)} title="Remove all nodules">
                         <div className='user-icon'>
                             <Icon name='trash'></Icon>
                         </div>
@@ -690,6 +714,7 @@ export default class CTItemPage extends Component {
         let sliceZ = this.state.slice[0]
         let sliceX = this.state.slice[1]
         let sliceY = this.state.slice[2]
+        console.log('nodiles', this.state.nodules)
         this.props.store_3d.setSlices(this.props.id, [shape[0] - sliceZ, sliceY, sliceX], this.state.nodules)
     }
 
