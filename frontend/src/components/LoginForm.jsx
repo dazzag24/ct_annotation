@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { FormControl, Button } from 'react-bootstrap';
+import '../../css/login.css'
+
 
 export default class LoginForm extends Component {
     state = {
@@ -18,20 +21,20 @@ export default class LoginForm extends Component {
 
     render() {
         return (
-        <form>
-            <input
+        <form className="login-form">
+            <FormControl
                 name='login'
                 placeholder='Login'
                 onChange={this.onChange}
             />
             <br></br>
-            <input
+            <FormControl
                 name='password'
                 placeholder='Password'
                 onChange={this.onChange}
             />
             <br></br>
-            <button onClick={this.onSubmit}>Submit</button>
+            <Button onClick={this.onSubmit}>Submit</Button>
         </form>
     );
     }

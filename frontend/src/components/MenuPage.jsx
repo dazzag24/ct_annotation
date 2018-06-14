@@ -117,7 +117,7 @@ export default class Menu extends Component {
 
   loginBox() {
       let signout = () => {
-          this.props.lstore.isAuthenticated = false
+          this.props.lstore.isAuthenticated = null
           return (<Redirect to='/login'/>)
       }
     return (

@@ -9,16 +9,7 @@ export default class LoginStore {
 
     constructor(server) {
         this.server = server
-        autorun(() => this.onConnect())
         this.server.subscribe(API_Events.GOT_AUTH_STATUS, this.onGotStatus.bind(this))
-    }
-
-    updateAuthStatus(info) {
-        var {login: login, password: password} = info
-        if ((login === 'Alex') & (password === '123')) {
-            console.log('setting to authenticated...')
-            this.isAuthenticated = true
-        }
     }
 
     checkAuthStatus() {

@@ -100,7 +100,7 @@ body {
 }
 
 .loading {
-  font-size: 1rem;	
+  font-size: 1rem;
   text-align: center;
   position: absolute;
   top: 50%;
@@ -198,7 +198,7 @@ input {
   box-sizing: border-box;
 }
 
-input:focus {
+_input:focus {
   outline-width: 0;
   box-sizing: border-box;
   margin-top: -1rem;
