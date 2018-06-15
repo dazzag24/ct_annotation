@@ -28,11 +28,12 @@ RENDER_SPACING = np.array(SHAPE) / np.array(RENDER_SHAPE) * np.array(SPACING)
 # xip parameters
 XIP_PARAMS = dict(mode='max', depth=6, stride=2, channels=3)
 
-AUTH_PAIRS = {
-    "GOMBO_1": '123',
-    "GOMBO_2": '456',
-    "GOMBO_3": '789'
-}
+def get_auth_pairs(path):
+    """ Get dict of {login: password} pairs for doctors' authorization.
+    """
+    file = open(path)
+    splitted = [line.strip('\n').split(' ') for line in file]
+    return {' '.join(pair[:-1]): pair[-1] for pair in splitted}
 
 def get_pixel_coords(nodules, factor=1):
     """ Get nodules info in pixel coords from nodules recarray.
@@ -55,7 +56,7 @@ def get_selected_lunaixs():
             "1.3.6.1.4.1.14519.5.2.1.6279.6001.197063290812663596858124411210"]
 
 class CtController:
-    def __init__(self, ct_path, model_path, only_selected):
+    def __init__(self, ct_path, model_path, auth_path, only_selected):
         # associate controller with a dataset of ct-scans
         if isinstance(ct_path, str):
             ct_path = (ct_path, )
@@ -75,6 +76,9 @@ class CtController:
         # set names for scans
         key_len = len(str(len(paths)))
         self.ct_dict = {str(i + 1).zfill(key_len): f for i, f in enumerate(paths)}
+
+        # read login-password pairs
+        self.auth_pairs = get_auth_pairs(auth_path)
 
         # set up scan-rendering pipeline
         BATCH_SIZE = 1
@@ -145,7 +149,7 @@ class CtController:
     def get_auth_status(self, data, meta):
         # check login-password pair
         print("checking pair...")
-        status = AUTH_PAIRS.get(data.get('login'), None) == data.get('password')
+        status = self.auth_pairs.get(data.get('login'), None) == data.get('password')
         res = dict(data={**data, 'status': status}, meta=meta)
         print("check done", status)
         return res

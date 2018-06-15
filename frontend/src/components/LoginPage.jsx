@@ -29,17 +29,21 @@ export default class LoginPage extends Component {
             return (
                 <div>
                     <br></br>
-                    <LoginForm onSubmit={this.onLoginSubmit.bind(this)}/>
-                    <br></br>
-                    <Alert bsStyle='warning' className="error-message">
+                    <Alert bsStyle='danger' className="error-message">
                         Wrong user/password!
                     </Alert>
+                    <br></br>
+                    <LoginForm onSubmit={this.onLoginSubmit.bind(this)}/>
+                    <br></br>
                 </div>
             )
         }
         else {
             return (
                 <div>
+                    <br></br>
+                    <Alert bsStyle='fake' className="error-message">
+                    </Alert>
                     <br></br>
                     <LoginForm onSubmit={this.onLoginSubmit.bind(this)}/>
                 </div>

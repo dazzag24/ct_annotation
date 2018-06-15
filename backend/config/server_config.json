@@ -1,6 +1,7 @@
 {
-    "ct_path": "C:\\repo\\_data\\CT\\*",
-    "model_path": "C:\\repo\\_data\\models\\UNet",
-    "logger_config_path": ".\\backend\\config\\logger_config.json",
+    "ct_path": "D:\\Work\\_demo_data\\scans_sample\\*",
+    "model_path": "D:\\Work\\_demo_data\\unet\\e_6_3c_unet\\models\\logloss",
+    "logger_config_path": ".\\config\\logger_config.json",
+    "auth_path": "D:\\Work\\_demo_data\\auth_pairs.txt",
     "only_selected": "True"
 }
