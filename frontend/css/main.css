@@ -341,13 +341,14 @@ _input:focus {
 
 .nodulesList {
     text-align: left;
-    width: 600px;
+    margin-left: 0.1rem;
 }
 
 .noduleCoord {
     width: 400px;
     font-size: 2vmin;
     display: inline;
+    margin-left: 0.1rem;
     overflow-x: hidden;
 }
 

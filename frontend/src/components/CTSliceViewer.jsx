@@ -8,7 +8,7 @@ import Toggle from 'react-toggle'
 import { Icon } from 'react-fa'
 import { Layer, Stage, Image, Ellipse, Line, Rect } from 'react-konva'
 import { inject, observer } from 'mobx-react'
-import ImageWithOpacity from './opacity.jsx'
+import ViewerLayers from './ViewerLayers.jsx'
 
 
 @inject("ct_store")
@@ -201,7 +201,7 @@ export default class CTSliceViewer extends Component {
         let axis = this.props.ct_store.getAxis(this.props.projection)
 
         for (let nodule of this.props.nodules) {
-            coordinates = [nodule[axis[0]], nodule[axis[1]], nodule[axis[2]], nodule[3], nodule[3]]
+            coordinates = [nodule[axis[0]], nodule[axis[1]], nodule[axis[2]], nodule[3], nodule[3], nodule[4]]
             coordinates[0] = (coordinates[0] - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
             coordinates[1] = (coordinates[1] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
             coordinates[2] = coordinates[2]
@@ -241,17 +241,17 @@ export default class CTSliceViewer extends Component {
                 <Row>
                 <Col>
                 <div className='controls'>
-                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomPlus.bind(this)} title="Zoom in">
+                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomPlus.bind(this)} title="Увеличить">
                         <div className='user-icon'>
                             <Icon name='search-plus'></Icon>
                         </div>
                     </button>
-                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomMinus.bind(this)}  title="Zoom out">
+                    <button className='btn btn-secondary zoom-button toolbarButton' onClick={this.onZoomMinus.bind(this)}  title="Уменьшить">
                         <div className='user-icon'>
                             <Icon name='search-minus'></Icon>
                         </div>
                     </button>
-                    <button className='btn btn-secondary button toolbarButton' onClick={this.onUnzoom.bind(this)}  title="Unzoom">
+                    <button className='btn btn-secondary button toolbarButton' onClick={this.onUnzoom.bind(this)}  title="Убрать приближение">
                         <div className='user-icon'>
                             <Icon name='expand'></Icon>
                         </div>
@@ -267,7 +267,7 @@ export default class CTSliceViewer extends Component {
                      onMouseUp={this.onPointerUp.bind(this)}
                      onMouseMove={this.onPointerMove.bind(this)}
                      onMouseLeave={this.props.onPointerLeave.bind(this)}>
-                     <ImageWithOpacity width={viewImage.width} height={viewImage.height} image={viewImage}
+                     <ViewerLayers width={viewImage.width} height={viewImage.height} image={viewImage}
                             y1={y1} height1={height1}
                             x2={x2} width2={width2}
                             color={color}
@@ -285,7 +285,7 @@ export default class CTSliceViewer extends Component {
                 </div>
                 </Col>
                 <Col>
-                <div height={viewImage.height} style={{display: 'inline'}} title="Slice">
+                <div height={viewImage.height} style={{display: 'inline'}} title="Срез">
                     <Slider className="slider" vertical={this.props.vertical}
                             trackStyle={style}
                             value={sliderPos} min={this.props.minSlice} max={this.props.maxSlice}

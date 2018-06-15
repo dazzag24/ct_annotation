@@ -7,7 +7,7 @@ const item_template = {
         slice: [0, 0, 0],
         depth: [1, 1, 1],
         nodulesOn: true,
-        coordinates: [[0, 0, null, null], [0, 0, null, null], [0, 0, null, null]],
+        coordinates: null,
         center: [
             [null, null],
             [null, null],
@@ -25,9 +25,10 @@ const item_template = {
         chooseRadius: false,
         radiusRatio: 0,
         nodules: [],
-        projections: [true, true, true],
+        projections: [true, false, false],
         showList: true,
-        noduleMode: false
+        noduleMode: false,
+        confirm: false
     }
 }
 

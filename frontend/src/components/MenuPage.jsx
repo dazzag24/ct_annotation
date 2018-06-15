@@ -25,13 +25,11 @@ function makeItem( name, pid, setPid ) {
 
 function makeContent( order, setPid ) {
   let content = []
-  let name = 0
   for (var i = 0; i < order.length; i++) {
     let group = []
     for (var j = 0; j < order[i].length; j++) {
       let item = order[i][j]
-      group.push(makeItem(name, order[i][j], setPid))
-      name += 1
+      group.push(makeItem(order[i][j], order[i][j], setPid))
     }
     content.push(group)
   }

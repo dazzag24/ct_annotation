@@ -475,8 +475,14 @@ export default class VolumeView extends Component {
       var nd = this.state.nodules[i].slice()
       nd[0] = this.props.ct_store.get(this.props.id).shape[0] - nd[0]
       var sphereGeometry = new THREE.SphereGeometry(noduleDefaultRadius * unitSize, 128, 128)
+      let color
+      if (nd[4] == 0) {
+        color = 0x990000
+      } else {
+        color = 0x009900
+      }
       var sphereMaterial = new THREE.MeshBasicMaterial({
-        color: 0x009900,
+        color: color,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: noduleDefaultOpacity
@@ -490,7 +496,12 @@ export default class VolumeView extends Component {
         nd[3] / noduleDefaultRadius,
         nd[3] / noduleDefaultRadius,
         nd[3] / noduleDefaultRadius)
-      sphere.name = 'nodeGreen' + i.toString()
+      if (nd[4] == 0) {
+        sphere.name = 'nodeRed' + i.toString()
+      } else {
+        sphere.name = 'nodeGreen' + i.toString()
+      }
+      console.log(sphere.name)
       scene.add(sphere)
       nodules.push(sphere)
       noduleCenters.push([nd[2], nd[1], nd[0], nd[3]])
@@ -758,7 +769,7 @@ export default class VolumeView extends Component {
     controls.screenSpacePanning = false
     controls.minDistance = -5
     controls.maxDistance = 10
-    controls.enablePan = false
+    controls.enablePan = true
 
     this.scene = scene
     this.camera = camera
@@ -812,13 +823,17 @@ export default class VolumeView extends Component {
     const self = this
     return (
       <div>
-        <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.props.changeMode.bind(this)}>
-            <button className="btn btn-primary toolbarButton" title="Enable 2D viewer">
-                <input type="checkbox" name="options" autoComplete="off"/>
-                <div className='user-icon'>
-                    2D
+        <div className="btn-toolbar header" role="toolbar">
+            <div className='toolbar'>
+                <div className="btn-group btn-group-toggle" data-toggle="buttons" onClick={this.props.changeMode.bind(this)}>
+                    <button className="btn btn-primary toolbarButton" title="Перейти в режим 2D">
+                        <input type="checkbox" name="options" autoComplete="off"/>
+                        <div className='user-icon'>
+                            2D
+                        </div>
+                    </button>
                 </div>
-            </button>
+            </div>
         </div>
         <div className='user'>
           <Icon name='home' className='user-icon' onClick={() => this.props.setPid(null)}></Icon>         
