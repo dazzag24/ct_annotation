@@ -6,6 +6,7 @@ export default class LoginStore {
     server = null
     @observable isAuthenticated = null
     @observable referTo = null
+    login = null
 
     constructor(server) {
         this.server = server
@@ -25,6 +26,11 @@ export default class LoginStore {
     onGotStatus(data, meta) {
         console.log(data)
         let status = data.status
+        if (status) {
+            var {login: login, ...rest} = data
+            this.login = login
+            console.log(this.login)
+        }
         this.isAuthenticated = status
     }
 

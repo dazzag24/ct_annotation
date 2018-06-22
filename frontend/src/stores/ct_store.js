@@ -10,7 +10,7 @@ const item_template = {
     image: null,
     shape: null,
     spacing: null,
-    nodules_true: null, 
+    nodules_true: null,
     nodules_predicted: null,
     waitingData: false,
     waitingInference: false,
@@ -30,7 +30,7 @@ export default class CT_Store {
 
     constructor(server) {
         this.server = server
-        autorun(() => this.onConnect())
+        //autorun(() => this.onConnect())
         this.server.subscribe(API_Events.CT_GOT_LIST, this.onGotList.bind(this))
         this.server.subscribe(API_Events.CT_GOT_ITEM_DATA, this.onGotItemData.bind(this))
         this.server.subscribe(API_Events.CT_GOT_INFERENCE, this.onGotInference.bind(this))
@@ -88,12 +88,22 @@ export default class CT_Store {
       }
       let data = {
         folderNames: folders,
-        order: order, 
+        order: order,
         comments: comments
       }
       console.log('UPDATE_PATIENT_LIST', data)
       this.folders = data
       this.server.send(API_Events.UPDATE_PATIENT_LIST, data)
+    }
+
+    getItems(login) {
+        if (this.items === undefined || this.items.size === 0) {
+            console.log('sending get list!')
+            this.server.send(API_Events.CT_GET_LIST, login)
+            return undefined
+        } else {
+            return this.items
+        }
     }
 
     getItemData(id) {
@@ -130,7 +140,7 @@ export default class CT_Store {
     getShape(id, projection) {
         const shape = this.items.get(id).shape
         const axis = this.getAxis(projection)
-        return [shape[axis[0]], shape[axis[1]], shape[axis[2]]]       
+        return [shape[axis[0]], shape[axis[1]], shape[axis[2]]]
     }
 
     getPixel(image, shape, coord, axes, depth=1) {
@@ -189,7 +199,7 @@ export default class CT_Store {
             case 1 : axes = [1, 2, 0, 1]; width = shape[1]; height = shape[0]; break;
             case 2 : axes = [1, 0, 2, 2]; width = shape[2]; height = shape[0]; break;
         }
-        const bitmapImage = new Uint8ClampedArray(height * width * 4)  
+        const bitmapImage = new Uint8ClampedArray(height * width * 4)
 
         let colorCoef
         switch (color){

@@ -11,6 +11,7 @@ import LoadingSpinner from './LoadingSpinner.jsx'
 import Menu from './MenuPage.jsx'
 
 @inject("ct_store")
+@inject("lstore")
 @observer
 export default class CTPage extends Component {
   constructor (props) {
@@ -37,15 +38,16 @@ export default class CTPage extends Component {
 
   render() {
     const self = this
-
-    if (this.props.ct_store.items === undefined) {
+    console.log({login: this.props.lstore.login})
+    let items = this.props.ct_store.getItems({login: this.props.lstore.login})
+    if (items === undefined) {
       return <LoadingSpinner text='Соединение с сервером' />
     }
 
-    if (this.props.ct_store.items.size == 0) {
+    if (items.size == 0) {
       return <LoadingSpinner text='Соединение с сервером' />
     }
-    
+
     if ( this.state.pid === null ) {
       return (
         <Menu setPid={this.setPid}/>

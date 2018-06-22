@@ -117,6 +117,8 @@ class CtController:
 
     def get_list(self, data, meta):
         ct_list = [dict(name='Patient ' + key, id=key) for key in sorted(self.ct_dict)]
+        print('data in get_list in controller: ', data)
+        # subset ct_list here using login from data
         return dict(data=ct_list, meta=meta)
 
     def get_item_data(self, data, meta):
