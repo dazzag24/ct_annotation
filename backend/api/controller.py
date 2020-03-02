@@ -6,14 +6,12 @@ from time import time
 import numpy as np
 import pandas as pd
 import glob
-import tensorflow as tf
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(1, os.path.join(CURRENT_PATH, "lung_cancer"))
+sys.path.insert(1, os.path.join(CURRENT_PATH, "radio"))
 from radio import CTImagesMaskedBatch as CTIMB
-from radio.dataset import FilesIndex, Pipeline, Dataset, V, B, F
-from radio.dataset.models.tf import TFModel
+from radio.batchflow import FilesIndex, Pipeline, Dataset, V, B, F
 
 
 # item demonstration
@@ -79,26 +77,6 @@ class CtController:
                                 .run(batch_size=BATCH_SIZE, shuffle=False, drop_last=False, n_epochs=1, lazy=True))
 
         # inference pipeline
-        config = dict(load=dict(path=model_path),
-                      build=False,
-                      session=dict(config=tf.ConfigProto(allow_soft_placement=True,
-                                                         gpu_options=tf.GPUOptions(visible_device_list='0'))))
-
-        self.ppl_predict_scan = (Pipeline()
-                                 .init_model('static', TFModel, 'xipnet', config)
-                                 .load(fmt='blosc') # if scans in blosc alraedy have same spacings
-                                 #.unify_spacing(shape=SHAPE, spacing=SPACING, padding=0) # assume the scans are normalized
-                                 .init_variables(['predictions', 'nodules_true', 'nodules_predicted'])
-                                 .fetch_nodules_from_mask()
-                                 .update_variable('nodules_true', B('nodules'))
-                                 .predict_model('xipnet', save_to=V('predictions'),
-                                                feed_dict=dict(images=F(CTIMB.xip_component,
-                                                                        component='images', **XIP_PARAMS)))
-                                 .call(CTIMB.unxip_predictions, predictions=V('predictions'), squeeze=True, **XIP_PARAMS,
-                                       component='masks')
-                                 .fetch_nodules_from_mask()
-                                 .update_variable('nodules_predicted', B('nodules'))
-                                 .run(batch_size=BATCH_SIZE, shuffle=False, drop_last=False, n_epochs=1, lazy=True))
 
     def build_item_ds(self, data):
         item_id = data.get('id')
@@ -113,7 +91,8 @@ class CtController:
         item_ds = self.build_item_ds(data)
         batch = (item_ds >> self.ppl_render_scan).next_batch()
         image = gzip.compress(batch.images.astype(np.uint8))
-        item_data = dict(image=image, shape=batch.images.shape)
+        spacing = tuple([float(i) for i in batch.spacing[0]])
+        item_data = dict(image=image, shape=batch.images.shape, spacing=spacing)
         return dict(data={**item_data, **data}, meta=meta)
 
     def get_inference(self, data, meta):

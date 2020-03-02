@@ -59,7 +59,7 @@ def main():
     namespace = create_namespace(server_config)
 
     app = Flask(__name__)
-    socketio = SocketIO(app)
+    socketio = SocketIO(app, cors_allowed_origins='*')
     socketio.on_namespace(namespace)
 
     logger.info("Server launched")

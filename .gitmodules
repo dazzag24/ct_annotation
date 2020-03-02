@@ -1,3 +1,6 @@
-[submodule "backend/api/lung_cancer"]
-	path = backend/api/lung_cancer
-	url = https://github.com/analysiscenter/lung_cancer.git
+[submodule "frontend/react-cropper"]
+	path = frontend/react-cropper
+	url = https://github.com/roadmanfong/react-cropper.git
+[submodule "backend/api/radio"]
+	path = backend/api/radio
+	url = https://github.com/analysiscenter/radio
