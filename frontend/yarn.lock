@@ -2320,7 +2320,7 @@ electron-download@^3.0.1:
     debug "^2.2.0"
     fs-extra "^0.30.0"
     home-path "^1.0.1"
-    minimist "^1.2.0"
+    minimist "^1.2.2"
     nugget "^2.0.0"
     path-exists "^2.1.0"
     rc "^1.1.2"
@@ -3250,7 +3250,7 @@ hawk@~6.0.2:
   resolved "https://registry.yarnpkg.com/hawk/-/hawk-6.0.2.tgz#af4d914eb065f9b5ce4d9d11c1cb2126eecc3038"
   dependencies:
     boom "4.x.x"
-    cryptiles "3.x.x"
+    cryptiles "4.1.2"
     hoek "4.x.x"
     sntp "2.x.x"
 
@@ -6854,7 +6854,7 @@ svgo@^0.7.0:
     coa "~1.0.1"
     colors "~1.1.2"
     csso "~2.3.1"
-    js-yaml "~3.7.0"
+    js-yaml "~3.13.1"
     mkdirp "~0.5.1"
     sax "~1.2.1"
     whet.extend "~0.9.9"
@@ -7050,7 +7050,7 @@ uglifyjs-webpack-plugin@^1.2.4:
     cacache "^10.0.4"
     find-cache-dir "^1.0.0"
     schema-utils "^0.4.5"
-    serialize-javascript "^1.4.0"
+    serialize-javascript "^2.1.1"
     source-map "^0.6.1"
     uglify-es "^3.3.4"
     webpack-sources "^1.1.0"
@@ -7077,7 +7077,7 @@ union-value@^1.0.0:
     arr-union "^3.1.0"
     get-value "^2.0.6"
     is-extendable "^0.1.1"
-    set-value "^0.4.3"
+    set-value "^2.0.1"
 
 uniq@^1.0.1:
   version "1.0.1"
