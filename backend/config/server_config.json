@@ -1,6 +1,6 @@
 {
-    "ct_path": "/home/alexey/projects/react/ct_annotation/data/*",
-    "model_path": "/home/alexey/projects/react/ct_annotation/models//UNet",
+    "ct_path": "./data/*",
+    "model_path": "./models/UNet",
     "logger_config_path": "./backend/config/logger_config.json",
     "only_selected": "True"
 }

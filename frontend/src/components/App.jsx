@@ -5,7 +5,6 @@ import { Provider } from 'mobx-react'
 
 import { ecg_store, ct_store, store_3d, store_2d } from '../stores/stores'
 import CTPage from './CTPage.jsx'
-import CTItemPage from './CTItemPage.jsx'
 
 
 export default class App extends Component {
@@ -19,7 +18,6 @@ export default class App extends Component {
         <div>
             <Switch>
                 <Route exact path="/" component={CTPage} />
-                <Route path="/:id" component={CTItemPage} />
             </Switch>
         </div>
         </Router>

@@ -28,7 +28,8 @@ const item_template = {
         projections: [true, false, false],
         showList: true,
         noduleMode: false,
-        confirm: false
+        confirm: false,
+        curves: []
     }
 }
 

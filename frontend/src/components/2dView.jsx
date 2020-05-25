@@ -18,8 +18,10 @@ import CTSliceViewer from './CTSliceViewer.jsx'
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = props.store_2d.get(props.id).state
-        console.log(props.id, this.state.slice)
+        this.state = {
+            ...props.store_2d.get(props.id).state,
+            instrumentMode: 'navigation',
+        }
         let s0, s1, s2
         s0 = props.ct_store.getShape(props.id, 0)
         s1 = props.ct_store.getShape(props.id, 1)
@@ -36,7 +38,8 @@ export default class CTItemPage extends Component {
             s1 = [s1[0] / 2, s1[1] / 2]
             s2 = [s2[0] / 2, s2[1] / 2]
             this.state.center = [s0, s1, s2]
-        } 
+        }
+        this.currentCurve = null
     }
 
     onSliceChange(slice, projection) {
@@ -69,8 +72,10 @@ export default class CTItemPage extends Component {
     }
 
     onPointerDown(event, x, y, factors, projection) {
-        if (this.state.noduleMode) {
+        if (this.state.instrumentMode == 'nodule') {
             this.startNodule(event, x, y, factors, projection)
+        } else if (this.state.instrumentMode == 'brush') {
+            this.startCurve(event, x, y, factors, projection)
         } else {
             this.startMoving(event, x, y, projection)
         }
@@ -103,8 +108,12 @@ export default class CTItemPage extends Component {
 
     onPointerUp(event, x, y, projection) {
         if (this.state.imageClicked) {
-            let nodules = this.removeZeroNodule()
-            this.setState({nodules: nodules, imageClicked: false, chooseRadius: false, noduleClicked: [null, -1], noduleIndex: null})
+            if (this.state.instrumentMode == 'brush') {
+                this.stopCurve(event, projection)
+            } else {
+                let nodules = this.removeZeroNodule()
+                this.setState({nodules: nodules, imageClicked: false, chooseRadius: false, noduleClicked: [null, -1], noduleIndex: null})
+            }
         }
     }
 
@@ -130,11 +139,13 @@ export default class CTItemPage extends Component {
         let right = shape[0] * factor[0] / this.state.zoom[projection]
 
         if (this.state.imageClicked) {
-            {(this.state.noduleMode)
-            ?
-            this.selectRadius(event, x, y, factor, projection)
-            :
-            this.moving(event, x, y, factor, projection)}
+            if (this.state.instrumentMode == 'nodule') {
+                this.selectRadius(event, x, y, factor, projection)
+            } else if (this.state.instrumentMode == 'brush') {
+                this.drawCurve(event, x, y, factor, projection)
+            } else {
+                this.moving(event, x, y, factor, projection)
+            }
         }
         let index = this.state.noduleIndex
         if (this.state.noduleClicked[0] != null) {
@@ -261,10 +272,14 @@ export default class CTItemPage extends Component {
 
     onAddNodule() {
         if (!this.state.confirm) {
-            this.setState({noduleMode: !this.state.noduleMode})
+            this.setState({instrumentMode: this.state.instrumentMode == 'nodule' ? 'navigation' : 'nodule'})
         } else {
             alert('Нодулы уже были подтверждены!')
         }
+    }
+
+    onActivateBrush() {
+        this.setState({instrumentMode: this.state.instrumentMode == 'brush' ? 'navigation' : 'brush'})
     }
 
     onUnzoom(projection) {
@@ -300,11 +315,12 @@ export default class CTItemPage extends Component {
     }
 
     onNodulePointerDown(event, index, x, y, factor, projection) {
-        {(this.state.noduleMode)
-         ?
-         this.startMoveNodule(event, index, x, y, factor, projection)
-         :
-         this.onPointerDown(event, x, y, factor, projection)
+        if (this.state.instrumentMode == 'nodule') {
+            this.startMoveNodule(event, index, x, y, factor, projection)
+        } else if (this.state.instrumentMode == 'navigation') {
+            this.onPointerDown(event, x, y, factor, projection)
+        } else {
+            this.startCurve(event, x, y, factor, projection)
         }
     }
 
@@ -327,24 +343,38 @@ export default class CTItemPage extends Component {
     }
 
 
+    startCurve(event, index, x, y, factor, projection) {
+        this.setState({imageClicked: true})
+        console.log('startCurve')
+        this.currentCurve = new Array()
+    }
 
     onNodulePointerUp(event, index, x, y, factor, projection) {
-        {(this.state.noduleMode)
-         ?
-         this.setState({noduleClicked: [null, -1], imageClicked: false, radiusRatio: 0, noduleIndex: null})
-         :
-         this.onPointerUp(event, x, y, factor, projection)
+        if (this.state.instrumentMode == 'nodule') {
+            this.setState({noduleClicked: [null, -1], imageClicked: false, radiusRatio: 0, noduleIndex: null})
+        } else if (this.state.instrumentMode == 'navigation') {
+            this.onPointerUp(event, x, y, factor, projection)
+        } else {
+            this.stopCurve(event, projection)
         }
     }
 
+    stopCurve(event, projection) {
+        let curves = this.state.curves
+        curves.splice(curves.length, 0, this.currentCurve)
+        this.setState({imageClicked: false, curves: curves})
+        this.currentCurve = null
+        console.log('Stop curve')
+    }
+
     onNodulePointerMove(event, index, x, y, factor, projection) {
-        if ((this.state.noduleMode) && (this.state.noduleClicked[1] == index)) {
+        if ((this.state.instrumentMode == 'nodule') && (this.state.noduleClicked[1] == index)) {
             switch (this.state.noduleClicked[0]) {
                 case 0: this.moveNodule(event, index, x, y, factor, projection)
                 case 2: this.changeRadius(event, index, x, y, factor, projection)
             }
         } else {
-            this.onPointerMove(event, x, y, factor, projection)
+            this.drawCurve(event, x, y, factor, projection)
         }
     }
 
@@ -380,6 +410,10 @@ export default class CTItemPage extends Component {
                              nodules[index][revAxis[2]]]
         nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3], nodules[index][4]]
         this.setState({nodules: nodules, start: [x, y]})
+    }
+
+    drawCurve(event, x, y, factor, projection) {
+        this.currentCurve.splice(this.currentCurve.length, 0, [x, y])
     }
 
     onNoduleContextMenu(event, index, x, y, factor, projection) {
@@ -437,6 +471,7 @@ export default class CTItemPage extends Component {
                            lines={this.state.lines} id={item.id} drawCrops={this.state.drawCrops}
                            coordinates={this.state.coordinates}
                            nodules={this.state.nodules}
+                           curves={this.state.curves}
                            drawSlices={this.state.drawSlices}
                            wheelZoom={this.state.wheelZoom}
                            onSliceChange={this.onSliceChange.bind(this)} 
@@ -556,8 +591,6 @@ export default class CTItemPage extends Component {
         const item = this.props.ct_store.get(this.props.id)
         const buttonClass = ""
 
-        console.log(this.state.wheelZoom)
-
         return (
         <div className="page ct item">
             <div className='user'>
@@ -596,10 +629,19 @@ export default class CTItemPage extends Component {
 
 
                     <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Редактировать нодулы">
-                        <Button className="btn btn-primary toolbarButton" active={this.state.noduleMode} disabled={this.state.confirm} onClick={this.onAddNodule.bind(this)}>
+                        <Button className="btn btn-primary toolbarButton" active={this.state.instrumentMode == 'nodule'} disabled={this.state.confirm} onClick={this.onAddNodule.bind(this)}>
                             <input type="checkbox" name="options" autoComplete="off"/>
                             <div className='user-icon'>
                                 <Icon name='circle'></Icon>
+                            </div>
+                        </Button>
+                    </div>
+
+                    <div className="btn-group btn-group-toggle" data-toggle="buttons" title="Рисовать линии">
+                        <Button className="btn btn-primary toolbarButton" active={this.state.instrumentMode == 'brush'} disabled={this.state.confirm} onClick={this.onActivateBrush.bind(this)}>
+                            <input type="checkbox" name="options" autoComplete="off"/>
+                            <div className='user-icon'>
+                                <Icon name='brush'></Icon>
                             </div>
                         </Button>
                     </div>
@@ -733,7 +775,6 @@ export default class CTItemPage extends Component {
         let sliceZ = this.state.slice[0]
         let sliceX = this.state.slice[1]
         let sliceY = this.state.slice[2]
-        console.log('nodiles', this.state.nodules)
         this.props.store_3d.setSlices(this.props.id, [shape[0] - sliceZ, sliceY, sliceX], this.state.nodules)
     }
 

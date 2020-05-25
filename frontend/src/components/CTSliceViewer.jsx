@@ -10,6 +10,11 @@ import { Layer, Stage, Image, Ellipse, Line, Rect } from 'react-konva'
 import { inject, observer } from 'mobx-react'
 import ViewerLayers from './ViewerLayers.jsx'
 
+function scaleCoordinates(coordinates, shift, factor, spacing, zoom) {
+    let x = (coordinates[0] - shift[0]) * factor * spacing[0] * zoom
+    let y = (coordinates[1] - shift[1]) * factor * spacing[1] * zoom
+    return [x, y]
+}
 
 @inject("ct_store")
 @observer
@@ -202,14 +207,23 @@ export default class CTSliceViewer extends Component {
 
         for (let nodule of this.props.nodules) {
             coordinates = [nodule[axis[0]], nodule[axis[1]], nodule[axis[2]], nodule[3], nodule[3], nodule[4]]
-            coordinates[0] = (coordinates[0] - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
-            coordinates[1] = (coordinates[1] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
+            let newCoord = scaleCoordinates(coordinates, this.props.shift, this.props.factor, this.props.spacing, this.props.zoom)
+            coordinates[0] = newCoord[0]
+            coordinates[1] = newCoord[1]
+            // coordinates[0] = (coordinates[0] - this.props.shift[0]) * this.props.factor * this.props.spacing[0] * this.props.zoom
+            // coordinates[1] = (coordinates[1] - this.props.shift[1]) * this.props.factor * this.props.spacing[1] * this.props.zoom
             coordinates[2] = coordinates[2]
             coordinates[3] = coordinates[3] * this.props.factor * this.props.zoom
             coordinates[4] = coordinates[4]  / this.props.spacing[2]
             nodules = [...nodules, coordinates]
         }
         return nodules
+    }
+
+    getCurves() {
+        let curves = this.props.curves
+        curves.map(curve => curve.map((coordinates, _) => scaleCoordinates(coordinates, this.props.shift, this.props.factor, this.props.spacing, this.props.zoom)))
+        return curves
     }
 
     render(item) {
@@ -277,6 +291,7 @@ export default class CTSliceViewer extends Component {
                             drawSlices={this.props.drawSlices}
                             projection={this.props.projection}
                             nodules={this.getNodules()}
+                            curves={this.getCurves()}
                             onNodulePointerDown={this.onNodulePointerDown.bind(this)}
                             onNodulePointerUp={this.onNodulePointerUp.bind(this)}
                             onNodulePointerMove={this.onNodulePointerMove.bind(this)}
