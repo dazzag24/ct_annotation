@@ -39,7 +39,6 @@ export default class CTItemPage extends Component {
             s2 = [s2[0] / 2, s2[1] / 2]
             this.state.center = [s0, s1, s2]
         }
-        this.currentCurve = null
     }
 
     onSliceChange(slice, projection) {
@@ -343,10 +342,14 @@ export default class CTItemPage extends Component {
     }
 
 
-    startCurve(event, index, x, y, factor, projection) {
+    startCurve(event, x, y, factor, projection) {
         this.setState({imageClicked: true})
         console.log('startCurve')
-        this.currentCurve = new Array()
+        let corner = this.getCorner(projection)
+        this.setState({curves: [...this.state.curves,
+            [[x / factor[0] + corner[0], y / factor[1] + corner[1]],
+             [x / factor[0] + corner[0], y / factor[1] + corner[1]]]
+        ]})
     }
 
     onNodulePointerUp(event, index, x, y, factor, projection) {
@@ -360,10 +363,9 @@ export default class CTItemPage extends Component {
     }
 
     stopCurve(event, projection) {
-        let curves = this.state.curves
-        curves.splice(curves.length, 0, this.currentCurve)
-        this.setState({imageClicked: false, curves: curves})
-        this.currentCurve = null
+        // let curves = this.state.curves
+        // curves.splice(curves.length, 0, this.currentCurve)
+        this.setState({imageClicked: false})//, curves: curves})
         console.log('Stop curve')
     }
 
@@ -413,7 +415,10 @@ export default class CTItemPage extends Component {
     }
 
     drawCurve(event, x, y, factor, projection) {
-        this.currentCurve.splice(this.currentCurve.length, 0, [x, y])
+        let curves = this.state.curves
+        let corner = this.getCorner(projection)
+        curves[curves.length-1] = [...curves[curves.length-1], [x / factor[0] + corner[0], y / factor[1] + corner[1]]]
+        this.setState({curves: curves})
     }
 
     onNoduleContextMenu(event, index, x, y, factor, projection) {

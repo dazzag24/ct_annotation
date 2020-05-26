@@ -119,14 +119,14 @@ export default class ViewerLayers extends Component {
                   })}
 
                   {this.props.curves.map((curve, index) => {
-                    return <Layer key={'layer'+index}><Line>
+                    return <Layer key={'layer'+index}><Line
                       points={curve.flat()}
-                      stroke={'yellredow'}
+                      stroke={'red'}
                       strokeWidth={2}
-                    </Line>
+                    />
                     </Layer>
-                  })
-                  }
+                  })}
+
                   <Layer><Line
                       points={[scaleX, scaleY,
                                 scaleX+length, scaleY]}

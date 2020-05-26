@@ -222,7 +222,7 @@ export default class CTSliceViewer extends Component {
 
     getCurves() {
         let curves = this.props.curves
-        curves.map(curve => curve.map((coordinates, _) => scaleCoordinates(coordinates, this.props.shift, this.props.factor, this.props.spacing, this.props.zoom)))
+        curves = curves.map(curve => curve.map((coordinates, _) => scaleCoordinates(coordinates, this.props.shift, this.props.factor, this.props.spacing, this.props.zoom)))
         return curves
     }
 
