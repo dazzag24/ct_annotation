@@ -18,26 +18,40 @@ import CTSliceViewer from './CTSliceViewer.jsx'
 export default class CTItemPage extends Component {
     constructor(props) {
         super(props)
-        this.state = {
-            ...props.store_2d.get(props.id).state,
-            instrumentMode: 'navigation',
-        }
-        let s0, s1, s2
-        s0 = props.ct_store.getShape(props.id, 0)
-        s1 = props.ct_store.getShape(props.id, 1)
-        s2 = props.ct_store.getShape(props.id, 2)
+        let s0 = props.ct_store.getShape(props.id, 0)
+        let s1 = props.ct_store.getShape(props.id, 1)
+        let s2 = props.ct_store.getShape(props.id, 2)
 
-        if (this.state.coordinates === null) {
-            this.state.coordinates = [
+        this.state = {
+            slice: [0, 0, 0],
+            depth: [1, 1, 1],
+            nodulesOn: true,
+            coordinates: [
                 [0, 0, s0[0], s0[1]],
                 [0, 0, s1[0], s1[1]],
                 [0, 0, s1[0], s1[1]]
-            ]
-
-            s0 = [s0[0] / 2, s0[1] / 2]
-            s1 = [s1[0] / 2, s1[1] / 2]
-            s2 = [s2[0] / 2, s2[1] / 2]
-            this.state.center = [s0, s1, s2]
+            ],
+            center: [
+                [s0[0] / 2, s0[1] / 2],
+                [s1[0] / 2, s1[1] / 2],
+                [s2[0] / 2, s2[1] / 2]
+            ],
+            zoom: [1, 1, 1],
+            imageClicked: false,
+            noduleClicked: [null, -1],
+            start: null,
+            images: [null, null, null],
+            selection: [0, 0, 0, 0],
+            drawCrops: false,
+            drawSlices: true,
+            wheelZoom: false,
+            chooseRadius: false,
+            radiusRatio: 0,
+            projections: [true, false, false],
+            showList: true,
+            noduleMode: false,
+            confirm: false,
+            instrumentMode: 'navigation'
         }
     }
 
@@ -92,17 +106,13 @@ export default class CTItemPage extends Component {
         let id = this.props.id
         let corner = this.getCorner(projection)
         let shape = this.props.ct_store.getShape(id, projection)
-        let nodules = this.state.nodules
         let axis = this.props.ct_store.getReverseAxis(projection)
 
         let base_coord = [x / factors[0] + corner[0], y / factors[1] + corner[1], this.state.slice[projection]]
-        let coord = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 0, 0]
+        let nodule = [base_coord[axis[0]], base_coord[axis[1]], base_coord[axis[2]], 0, 0]
 
-        this.setState({imageClicked: true,
-                       chooseRadius: true,
-                       nodules: [...this.state.nodules, coord],
-                       start: [x, y]
-                   })
+        this.setState({imageClicked: true, chooseRadius: true, start: [x, y]})
+        this.props.store_2d.addNodule(id, nodule)
     }
 
     onPointerUp(event, x, y, projection) {
@@ -110,21 +120,10 @@ export default class CTItemPage extends Component {
             if (this.state.instrumentMode == 'brush') {
                 this.stopCurve(event, projection)
             } else {
-                let nodules = this.removeZeroNodule()
-                this.setState({nodules: nodules, imageClicked: false, chooseRadius: false, noduleClicked: [null, -1], noduleIndex: null})
+                this.setState({imageClicked: false, chooseRadius: false, noduleClicked: [null, -1], noduleIndex: null})
+                this.props.store_2d.removeZeroNodule(this.props.id)
             }
         }
-    }
-
-    removeZeroNodule() {
-        let nodules = this.state.nodules
-        if (nodules.length > 0){
-            let nodule = nodules[nodules.length-1]
-            if (nodule[3] == 0) {
-                nodules.splice(nodules.length-1, 1)
-            }
-             }
-        return nodules
     }
 
     onPointerLeave(event, x, y, projection) {
@@ -208,8 +207,7 @@ export default class CTItemPage extends Component {
 
     getRadius(index, x, y, factor, projection) {
         let id = this.props.id
-        let nodules = this.state.nodules
-        let nodule = this.state.nodules[index]
+        let nodule = this.props.store_2d.get(id).nodules[index]
         let axis = this.props.ct_store.getAxis(projection)
         let spacing = this.props.ct_store.getSpacing(id, projection)
 
@@ -228,7 +226,7 @@ export default class CTItemPage extends Component {
     }
 
     selectRadius(event, x, y, factor, projection) {
-        let nodules = this.state.nodules
+        let nodules = this.props.store_2d.get(this.props.id).nodules
         let index = nodules.length - 1
         let nodule = nodules[index]
         let radius = this.getRadius(index, x, y, factor, projection)
@@ -247,7 +245,7 @@ export default class CTItemPage extends Component {
 
         nodule = [coord[axis[0]], coord[axis[1]], coord[axis[2]], radius, 0]
         nodules[index] = nodule
-        this.setState({nodules: nodules})
+        this.props.store_2d.updateNodules(this.props.id, nodules)
 
     }
 
@@ -292,21 +290,21 @@ export default class CTItemPage extends Component {
     }
 
     onClearNodules() {
-        if (!this.state.confirm) {
-            this.setState({nodules: []})
-        } else {
-            alert('Нодулы уже были подтверждены!')
-        }
+        // if (!this.state.confirm) {
+        //     this.setState({nodules: []})
+        // } else {
+        //     alert('Нодулы уже были подтверждены!')
+        // }
     }
 
     onConfirmNodules() {
-        let nodules = []
-        alert('Нодулы подтверждены')
-        for (let nodule of this.state.nodules) {
-            nodule[4] = 1
-            nodules = [...nodules, nodule]
-        }
-        this.setState({nodules: nodules, confirm: true, noduleMode: false})
+        // let nodules = []
+        // alert('Нодулы подтверждены')
+        // for (let nodule of this.state.nodules) {
+        //     nodule[4] = 1
+        //     nodules = [...nodules, nodule]
+        // }
+        // this.setState({nodules: nodules, confirm: true, noduleMode: false})
     }
 
     onShowList() {
@@ -329,12 +327,12 @@ export default class CTItemPage extends Component {
         let id = this.props.id
         let axis = this.props.ct_store.getAxis(projection)
         let spacing = this.props.ct_store.getSpacing(id, projection)
-        
-        let noduleRadius = this.state.nodules[index][3]
-        let shiftInSlices = (this.state.slice[projection] - this.state.nodules[index][axis[2]]) * spacing[2]
-        
+        let nodules = this.props.store_2d.get(id).nodules
+        let noduleRadius = nodules[index][3]
+        let shiftInSlices = (this.state.slice[projection] - nodules[index][axis[2]]) * spacing[2]
+
         let radius = Math.sqrt(noduleRadius * noduleRadius - shiftInSlices * shiftInSlices)
-        
+
         this.setState({noduleClicked: [event.button, index],
                        radiusRatio: selectedRadius / radius,
                        noduleIndex: index,
@@ -346,10 +344,10 @@ export default class CTItemPage extends Component {
         this.setState({imageClicked: true})
         console.log('startCurve')
         let corner = this.getCorner(projection)
-        this.setState({curves: [...this.state.curves,
-            [[x / factor[0] + corner[0], y / factor[1] + corner[1]],
-             [x / factor[0] + corner[0], y / factor[1] + corner[1]]]
-        ]})
+        this.props.store_2d.addCurve(this.props.id, [
+            [x / factor[0] + corner[0], y / factor[1] + corner[1]],
+            [x / factor[0] + corner[0], y / factor[1] + corner[1]]
+        ])
     }
 
     onNodulePointerUp(event, index, x, y, factor, projection) {
@@ -375,7 +373,7 @@ export default class CTItemPage extends Component {
                 case 0: this.moveNodule(event, index, x, y, factor, projection)
                 case 2: this.changeRadius(event, index, x, y, factor, projection)
             }
-        } else {
+        } else if (this.state.instrumentMode == 'brush') {
             this.drawCurve(event, x, y, factor, projection)
         }
     }
@@ -392,18 +390,18 @@ export default class CTItemPage extends Component {
         let axis = this.props.ct_store.getAxis(projection)
         let spacing = this.props.ct_store.getSpacing(id, projection)
         
-        let nodules = this.state.nodules
+        let nodules = this.props.store_2d.get(id).nodules
         let sliceRadius = selectedRadius / this.state.radiusRatio
         let shiftInSlices = (this.state.slice[projection] - nodules[index][axis[2]]) * spacing[2]
 
         nodules[index][3] = Math.sqrt(sliceRadius * sliceRadius + shiftInSlices * shiftInSlices) 
 
-        this.setState({nodules: nodules})
+        this.props.store_2d.updateNodules(id, nodules)
     }
 
     moveNodule(event, index, x, y, factor, projection) {
-        let nodules = this.state.nodules
         let id = this.props.id
+        let nodules = this.props.store_2d.get(id).nodules
         let corner = this.getCorner(projection)
         let axis = this.props.ct_store.getReverseAxis(projection)
         let revAxis = this.props.ct_store.getAxis(projection)
@@ -411,14 +409,15 @@ export default class CTItemPage extends Component {
                              nodules[index][revAxis[1]] + (y - this.state.start[1]) / factor[1],
                              nodules[index][revAxis[2]]]
         nodules[index] = [shiftedNodule[axis[0]], shiftedNodule[axis[1]], shiftedNodule[axis[2]], nodules[index][3], nodules[index][4]]
-        this.setState({nodules: nodules, start: [x, y]})
+        this.setState({start: [x, y]})
+        this.props.store_2d.updateNodules(id, nodules)
     }
 
     drawCurve(event, x, y, factor, projection) {
-        let curves = this.state.curves
+        let curves = this.props.store_2d.get(this.props.id).curves
         let corner = this.getCorner(projection)
         curves[curves.length-1] = [...curves[curves.length-1], [x / factor[0] + corner[0], y / factor[1] + corner[1]]]
-        this.setState({curves: curves})
+        this.props.store_2d.updateCurves(this.props.id, curves)
     }
 
     onNoduleContextMenu(event, index, x, y, factor, projection) {
@@ -432,8 +431,8 @@ export default class CTItemPage extends Component {
     }
 
     selectNodule(index) {
-        let nodules = this.state.nodules
         let id = this.props.id
+        let nodules = this.props.store_2d.get(id).nodules
         let spacing = this.props.ct_store.get(id).spacing
         let shape = this.props.ct_store.get(id).shape
         let s1 = Math.ceil(nodules[index][0])
@@ -447,9 +446,10 @@ export default class CTItemPage extends Component {
     }
 
     deleteNodule(index) {
-        let nodules = this.state.nodules
+        let id = this.props.id
+        let nodules = this.props.store_2d.get(id).nodules
         nodules.splice(index, 1)
-        this.setState({nodules: nodules})
+        this.props.store_2d.updateNodules(id, nodules)
     }
 
     renderImageViewer(item, projection) {
@@ -475,8 +475,8 @@ export default class CTItemPage extends Component {
                            shape={shape} shift={shift} selection={this.state.selection}
                            lines={this.state.lines} id={item.id} drawCrops={this.state.drawCrops}
                            coordinates={this.state.coordinates}
-                           nodules={this.state.nodules}
-                           curves={this.state.curves}
+                           nodules={this.props.store_2d.get(item.id).nodules}
+                           curves={this.props.store_2d.get(item.id).curves}
                            drawSlices={this.state.drawSlices}
                            wheelZoom={this.state.wheelZoom}
                            onSliceChange={this.onSliceChange.bind(this)} 
@@ -496,6 +496,8 @@ export default class CTItemPage extends Component {
     }
 
     renderAllImageViewers(item) {
+        let id = this.props.id
+        let nodules = this.props.store_2d.get(id).nodules
         return (
             <div style={{display: 'inline'}}>
             <Row><Col>
@@ -513,11 +515,11 @@ export default class CTItemPage extends Component {
                 {(this.state.showList) ?
                     <div className='nodulesList'>
                     <h2> Отмеченные нодулы </h2>
-                        {(this.state.nodules.length == 0)
+                        {(nodules.length == 0)
                             ?
                          <Row> Отсутствуют </Row>
                          :
-                         this.state.nodules.map((nodule, index) => {
+                         nodules.map((nodule, index) => {
                                 return <Row key={'nodule'+index}>
                                     <Col>
                                         <Button className='btn btn-primary toolbarButton'
@@ -593,6 +595,7 @@ export default class CTItemPage extends Component {
     }
 
     render() {
+        let id = this.props.id
         const item = this.props.ct_store.get(this.props.id)
         const buttonClass = ""
 
@@ -780,7 +783,7 @@ export default class CTItemPage extends Component {
         let sliceZ = this.state.slice[0]
         let sliceX = this.state.slice[1]
         let sliceY = this.state.slice[2]
-        this.props.store_3d.setSlices(this.props.id, [shape[0] - sliceZ, sliceY, sliceX], this.state.nodules)
+        this.props.store_3d.setSlices(this.props.id, [shape[0] - sliceZ, sliceY, sliceX], this.props.store_2d.get(this.props.id).nodules)
     }
 
     componentWillUnmount () {

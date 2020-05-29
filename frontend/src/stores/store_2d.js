@@ -3,52 +3,58 @@ import { observable, autorun, computed, action, extendObservable } from 'mobx'
 import { API_Events } from './const'
 
 const item_template = {
-    state : {
-        slice: [0, 0, 0],
-        depth: [1, 1, 1],
-        nodulesOn: true,
-        coordinates: null,
-        center: [
-            [null, null],
-            [null, null],
-            [null, null]
-        ],
-        zoom: [1, 1, 1],
-        imageClicked: false,
-        noduleClicked: [null, -1],
-        start: null,
-        images: [null, null, null],
-        selection: [0, 0, 0, 0],
-        drawCrops: false,
-        drawSlices: true,
-        wheelZoom: false,
-        chooseRadius: false,
-        radiusRatio: 0,
         nodules: [],
-        projections: [true, false, false],
-        showList: true,
-        noduleMode: false,
-        confirm: false,
         curves: []
-    }
 }
 
 export default class Store_2D {
     server = null
     @observable ready = false
-    items = new Map()
+    @observable items = new Map()
 
     update(id, obj) {
-        let store = {}
+        this.items.set(id, obj)
+    }
 
-        for (let key in item_template) {
-                store.state = obj.state
-        }
-        this.items.set(id, store)
+    @action
+    updateNodules(id, nodules) {
+        let item = this.items.get(id)
+        item.nodules = nodules
+    }
+
+    @action
+    updateCurves(id, curves) {
+        let item = this.items.get(id)
+        item.curves = curves
+    }
+
+    @action
+    addNodule(id, nodule) {
+        let item = this.items.get(id)
+        item.nodules = [...item.nodules, nodule]
+    }
+
+    @action
+    addCurve(id, curve) {
+        let item = this.items.get(id)
+        item.curves = [...item.curves, curve]
+    }
+
+    @action
+    removeZeroNodule(id) {
+        let item = this.items.get(id)
+        let nodules = item.nodules
+        if (nodules.length > 0){
+            let nodule = nodules[nodules.length-1]
+            if (nodule[3] == 0) {
+                nodules.splice(nodules.length-1, 1)
+            }
+             }
+        item.nodules = nodules
     }
 
     init(id) {
-      this.items.set(id, JSON.parse(JSON.stringify(item_template)))
+        this.items.set(id, JSON.parse(JSON.stringify(item_template)))
     }
 
     get(id) {
@@ -61,17 +67,17 @@ export default class Store_2D {
         }
     }
 
-    setSlices(id, slices, nodules) {
-        let item = this.items.get(id)
-        if (item === undefined) {
-            this.init(id)
-        }
-        item = this.items.get(id)
-        item.state.slice = [slices[0], slices[1], slices[2]]
-        item.state.images = [null, null, null]
+    // setSlices(id, slices, nodules) {
+    //     let item = this.items.get(id)
+    //     if (item === undefined) {
+    //         this.init(id)
+    //     }
+    //     item = this.items.get(id)
+    //     item.state.slice = [slices[0], slices[1], slices[2]]
+    //     item.state.images = [null, null, null]
 
-        // item.state.nodules = nodules
-        this.items.set(id, item)
-    }
+    //     // item.state.nodules = nodules
+    //     this.items.set(id, item)
+    // }
 }
 
