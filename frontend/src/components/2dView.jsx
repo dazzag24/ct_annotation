@@ -24,8 +24,7 @@ export default class CTItemPage extends Component {
 
         this.state = {
             slice: [0, 0, 0],
-            depth: [1, 1, 1],
-            nodulesOn: true,
+            depth: [1, 1, 1], // MIP depth
             coordinates: [
                 [0, 0, s0[0], s0[1]],
                 [0, 0, s1[0], s1[1]],
@@ -39,9 +38,8 @@ export default class CTItemPage extends Component {
             zoom: [1, 1, 1],
             imageClicked: false,
             noduleClicked: [null, -1],
-            start: null,
+            start: null, // start position of nodule
             images: [null, null, null],
-            selection: [0, 0, 0, 0],
             drawCrops: false,
             drawSlices: true,
             wheelZoom: false,
@@ -49,8 +47,6 @@ export default class CTItemPage extends Component {
             radiusRatio: 0,
             projections: [true, false, false],
             showList: true,
-            noduleMode: false,
-            confirm: false,
             instrumentMode: 'navigation'
         }
     }
@@ -472,7 +468,7 @@ export default class CTItemPage extends Component {
             <CTSliceViewer slice={this.state.slice} depth={this.state.depth} maxSlice={maxSlice - 1} vertical={true} reverse={true}
                            factor={resizeFactor} image={this.state.images[projection]} projection={projection}
                            spacing={spacing} zoom={this.state.zoom[projection]}
-                           shape={shape} shift={shift} selection={this.state.selection}
+                           shape={shape} shift={shift}
                            lines={this.state.lines} id={item.id} drawCrops={this.state.drawCrops}
                            coordinates={this.state.coordinates}
                            nodules={this.props.store_2d.get(item.id).nodules}

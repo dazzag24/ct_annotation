@@ -11,7 +11,7 @@ const item_template = {
       alphaP: 0,
       threshold: 200,
       viewMode2D: false,
-      plane: 1,
+      plane: 1, 
       nCount: 0,
       mipDepth: 1,
       nodules: []
